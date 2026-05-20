@@ -98,9 +98,69 @@ For each screen in the plan:
 | `video` | `url` (optional `poster`) |
 | `quiz-text` | `question` (Markdown), `choices` (≥2 `{id,text}`, unique ids), `correctAnswer` (one of the ids), `text` (Markdown — context/setup copy beside the quiz; REQUIRED when using this format. For pure quiz screens use `question` instead) |
 | `question` | `question` (Markdown), `choices` (≥2 `{id,text}`, unique ids), `correctAnswer` (one of the ids) — pure quiz, no surrounding copy |
-| `form` / `email-form` | `fields` (≥1 `{id,label,type,required?,placeholder?}`); optional `submitLabel`, `successMessage`. `type` ∈ `text \| email \| url \| tel \| number \| textarea \| checkbox` |
-| `form-text` | `content` (Markdown — headline + body before the form), `fields` (as above; checkbox fields may add `checkboxLabel` and `links: [{url,text}]`), `submitLabel`, `successContent` (Markdown — thank-you screen). Use this format for lead capture in campaigns/waitlists — it's the canonical shape in real templates. |
+| `form` / `email-form` | `fields` (≥1; per-field schema below); optional `submitLabel`, `successMessage`. |
+| `form-text` | `content` (Markdown — headline + body before the form), `fields` (per-field schema below), `submitLabel`, `successContent` (Markdown — thank-you screen). Use this format for lead capture in campaigns/waitlists — it's the canonical shape in real templates. |
 | `layout` | `ratio` (e.g. `"50:50"`). Responsive mode only. |
+
+#### Form field schema (used by `form`, `email-form`, `form-text`)
+
+Each field is an object. **`type` must be exactly one of**: `text`, `email`, `number`, `tel`, `textarea`, `select`, `checkbox`. (Note: there is no `url` type — use `text` and validate downstream if needed.)
+
+| Field key | Required | Applies to | Notes |
+|---|---|---|---|
+| `id` | yes | all | Stable kebab-case ID, unique within the form. |
+| `label` | yes | all | Visible label above the input. For `checkbox` fields, leave as empty string `""` and use `checkboxLabel` instead — the renderer hides `label` on checkboxes. |
+| `type` | yes | all | One of the seven listed above. |
+| `required` | yes | all | Boolean. |
+| `placeholder` | no | text / email / number / tel / textarea / select | Greyed hint inside the input. |
+| `rows` | no | textarea | Visible rows, defaults to 3. |
+| `options` | yes if `type:select` | select | Array of `{label, value}` — both strings. |
+| `checkboxLabel` | yes if `type:checkbox` | checkbox | **Plain text only — never Markdown.** The renderer treats this as literal text and will not parse `[text](url)` syntax. For links, use the `links` array below. |
+| `links` | no | checkbox | Array of `{text, url}` objects. The renderer appends each as a real `<a>` tag right after the checkbox label, joined with " and " when there are multiple. Use this for privacy-policy / terms / unsubscribe links. |
+
+#### Checkbox encoding — right vs wrong
+
+The renderer concatenates `checkboxLabel` + each `links[].text` (as a real link) + `' *'` if `required`. So you only need to write the **non-link** text in `checkboxLabel`; the link text comes from the `links` array.
+
+❌ **Wrong — Markdown link inside `checkboxLabel`, link also duplicated:**
+```json
+{
+  "id": "consent",
+  "type": "checkbox",
+  "label": "",
+  "required": true,
+  "checkboxLabel": "I want to hear about the opening and the 1¢ donor promo. I can unsubscribe any time. See our [Privacy Policy](https://example.com/privacy).",
+  "links": [{"text": "Privacy Policy", "url": "https://example.com/privacy"}]
+}
+```
+Renders as broken text + duplicate "Privacy Policy" link (your reported bug).
+
+✅ **Right — plain text in `checkboxLabel`, the link in `links`:**
+```json
+{
+  "id": "consent",
+  "type": "checkbox",
+  "label": "",
+  "required": true,
+  "checkboxLabel": "I want to hear about the opening and the 1¢ donor promo. I can unsubscribe any time. See our",
+  "links": [{"text": "Privacy Policy", "url": "https://example.com/privacy"}]
+}
+```
+Renders as: `[ ] I want to hear about the opening and the 1¢ donor promo. I can unsubscribe any time. See our Privacy Policy *` — where "Privacy Policy" is a real underlined link to the URL.
+
+Two links example (terms + privacy):
+```json
+"links": [
+  {"text": "Terms",          "url": "https://example.com/terms"},
+  {"text": "Privacy Policy", "url": "https://example.com/privacy"}
+]
+```
+Renders as: `… See our Terms and Privacy Policy *`.
+
+**Hard rules:**
+- `checkboxLabel` is never Markdown. No `[text](url)`, no `**bold**`, no escapes — plain string.
+- Every hyperlink in a checkbox label MUST go in the `links` array. Do not include link text in `checkboxLabel`; the renderer appends it from `links`.
+- End `checkboxLabel` with a trailing space or natural connector word ("See our", "I agree to the", "By submitting you accept the") — the renderer inserts a single space before each link.
 
 ### 5. Write the file
 
