@@ -25,6 +25,44 @@ these in their opening message — don't ask again.
    is vague, propose a sensible default based on audience and confirm.
 4. **Materials** — optional URLs or files to draw from. Skip if none.
 
+### 1b. Brand research (when the product is for a specific company)
+
+**Trigger:** the brief mentions a specific company by name (e.g. "Phantom academy", "Wallet onboarding", "Base campaign"). Skip this step entirely for generic / non-branded products.
+
+When triggered, do this research **before writing brief.json** — the brand block carries through to theme, content, and image generation:
+
+1. **Identify the company's primary sources** — official site, brand book, docs, design-system or storybook URL. Materials field of the brief is the obvious starting point.
+2. **Extract real values from those sources** using `WebFetch` (or `WebSearch` if no URL was given). Look for:
+   - **Brand colors as HEX** — find them in CSS variables on the site (`--color-primary`), Tailwind config, brand-book PDFs, or design-system pages. **Never invent hex codes.** If you can't find a value, omit the key — the validator allows missing colors.
+   - **Logo URL** — the absolute URL to the canonical logo SVG / PNG (prefer SVG; transparent background).
+   - **Fonts** — what they use for body / headings (from CSS, font stack, or brand book).
+   - **Voice** — 1 sentence summarizing how they speak (technical / playful / formal / etc.).
+3. **Cross-check what the user provided.** If the user already supplied colors or a logo URL, trust those over what you scraped. Their material is canonical.
+
+Capture into `brief.brand`:
+
+```json
+"brand": {
+  "company": "Phantom",
+  "website": "https://phantom.app",
+  "docsUrl": "https://docs.phantom.com",
+  "colors": {
+    "primary":    "#AB9FF2",
+    "secondary":  "#5F4FE3",
+    "background": "#0B0B0F",
+    "accent":     "#FFFFFF",
+    "text":       "#FFFFFF"
+  },
+  "logo":  "https://phantom.app/img/phantom-logo-purple.svg",
+  "fonts": ["Inter"],
+  "voice": "Confident, builder-focused, plain-spoken. Minimal jargon."
+}
+```
+
+All color values must be 6- or 8-char hex (e.g. `#AB9FF2` or `#AB9FF2FF`). The validator will reject anything else.
+
+If brand research fails (no usable sources, site behind auth, etc.), set only `company` and proceed — downstream stages fall back gracefully when colors / logo are absent. Tell the user one line about what you found and didn't find.
+
 ### 2. Infer lengthHint without asking
 
 Infer `lengthHint` from the intent:
@@ -39,7 +77,7 @@ Only ask the user if the intent is genuinely ambiguous.
 
 ### 3. Write the file
 
-Write `tmp/luly-agent/brief.json` with exactly these fields and types, no extras:
+Write `tmp/luly-agent/brief.json` with these fields. The `brand` block is optional — include only when the product is for a specific company (see step 1b):
 
 ```json
 {
@@ -47,7 +85,16 @@ Write `tmp/luly-agent/brief.json` with exactly these fields and types, no extras
   "audience":   "string, non-empty",
   "tone":       "string, non-empty",
   "lengthHint": "quick | standard | long",
-  "materials":  ["string", "..."]
+  "materials":  ["string", "..."],
+  "brand": {
+    "company":  "string, non-empty (required if brand present)",
+    "website":  "string, optional",
+    "docsUrl":  "string, optional",
+    "colors":   { "primary": "#HEX", "secondary": "#HEX", "background": "#HEX", ... },
+    "logo":     "absolute URL, optional",
+    "fonts":    ["string", "..."],
+    "voice":    "string, optional"
+  }
 }
 ```
 

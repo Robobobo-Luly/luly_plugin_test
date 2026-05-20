@@ -28,7 +28,11 @@ For every onboarding screen in `plan.parsed.json.onboarding`:
 - Pick the single best block format given the synopsis. For onboarding, `image-richtext` is the most common choice (a hero image + welcome copy). Use `richtext` if there's no natural image.
 - Write `content` and `question` fields as **plain Markdown**. Same rules as `/luly-fill-lesson`.
 - Image URLs: use the canonical project placeholder `/assets/placeholder-image.svg` (real, renders cleanly). For each image-bearing block, set `caption` to a one-sentence description of the illustration — it shows under the image in the CMS AND serves as the prompt for a future image-gen step.
-- **Caption format** (same as `/luly-fill-lesson`): `"<subject>, <brief-derived style direction>, 1:1 aspect ratio"`. The style direction (3–6 mood words) is derived from the brief's tone — e.g. `"warm pastel cartoon style"` for friendly briefs, `"dark vector with neon accents"` for crypto / tech briefs, `"minimal flat illustration, muted palette"` for corporate briefs. Keep style consistent across all onboarding screens. Always append `1:1 aspect ratio`.
+- **Caption format** (same as `/luly-fill-lesson`):
+  - With brand: `"<subject>, <style direction derived from brand voice>, using brand palette <#HEX primary>, <#HEX secondary> on <#HEX background>, 1:1 aspect ratio"`.
+  - Without brand: `"<subject>, <style direction from brief tone>, 1:1 aspect ratio"`.
+
+  When `brief.brand.colors` is present, **append literal HEX values** (e.g. `#AB9FF2`) to anchor the image-gen output to the real brand palette. Style direction examples: `"warm pastel cartoon style"` for friendly briefs, `"dark vector with neon accents"` for crypto / tech briefs, `"minimal flat illustration, muted palette"` for corporate briefs. Keep style consistent across all onboarding screens.
 
 Keep each screen short — onboarding shouldn't have walls of text. One headline + a sentence or two.
 

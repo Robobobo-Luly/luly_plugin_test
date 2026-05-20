@@ -153,19 +153,80 @@ function lessonScreenControls(): Control[] {
   ];
 }
 
-function onboardingScreenControls(): Control[] {
-  // Canonical academy onboarding pattern (verified against Product_Academy_Template.json):
-  // single CTA → goto: hub. This works for the last onboarding screen too, since
-  // hub is the next sibling and 'hub' is the explicit destination.
-  return [{
-    id: 'ctrl.onboarding.continue',
-    label: 'Continue',
-    position: 'bottomCenter',
-    requires_click: true,
-    conditionalActions: [
-      { do: [{ type: 'goto', body: { target: 'hub' } }] },
-    ],
-  }];
+function onboardingScreenControls(opts: { isFirst: boolean; isLast: boolean; multiScreen: boolean }): Control[] {
+  // Onboarding navigation:
+  // - Single-screen onboarding: just "Continue" → hub
+  // - Multi-screen onboarding:
+  //     • First screen → Skip onboarding (secondary, goto: hub) + Next (primary, next_sibling)
+  //     • Middle screens → Previous (secondary, previous_sibling) + Next (primary, next_sibling)
+  //     • Last screen → Previous (secondary) + Continue (primary, goto: hub)
+  // This prevents the skip-screen bug where a "Continue → hub" on screen 1 jumps past screen 2+.
+  const { isFirst, isLast, multiScreen } = opts;
+
+  if (!multiScreen) {
+    // Single-screen onboarding — keep the simple Continue → hub
+    return [{
+      id: 'ctrl.onboarding.continue',
+      label: 'Continue',
+      position: 'bottomCenter',
+      requires_click: true,
+      conditionalActions: [
+        { do: [{ type: 'goto', body: { target: 'hub' } }] },
+      ],
+    }];
+  }
+
+  const controls: Control[] = [];
+
+  // Left button: Skip (first) or Previous (middle / last)
+  if (isFirst) {
+    controls.push({
+      id: 'ctrl.onboarding.skip',
+      label: 'Skip onboarding',
+      position: 'bottomLeft',
+      requires_click: true,
+      style: { variant: 'secondary' },
+      conditionalActions: [
+        { do: [{ type: 'goto', body: { target: 'hub' } }] },
+      ],
+    });
+  } else {
+    controls.push({
+      id: 'ctrl.onboarding.prev',
+      label: 'Previous',
+      position: 'bottomLeft',
+      requires_click: true,
+      style: { variant: 'secondary' },
+      conditionalActions: [
+        { do: [{ type: 'goto', body: { target: 'previous_sibling' } }] },
+      ],
+    });
+  }
+
+  // Right button: Next (first / middle) or Continue (last)
+  if (isLast) {
+    controls.push({
+      id: 'ctrl.onboarding.continue',
+      label: 'Continue',
+      position: 'bottomRight',
+      requires_click: true,
+      conditionalActions: [
+        { do: [{ type: 'goto', body: { target: 'hub' } }] },
+      ],
+    });
+  } else {
+    controls.push({
+      id: 'ctrl.onboarding.next',
+      label: 'Next',
+      position: 'bottomRight',
+      requires_click: true,
+      conditionalActions: [
+        { do: [{ type: 'goto', body: { target: 'next_sibling' } }] },
+      ],
+    });
+  }
+
+  return controls;
 }
 
 function campaignScreenControls(): Control[] {
@@ -219,8 +280,15 @@ export function applyControls(productPreset: Preset, plan: Plan): ControlsArtifa
   // Onboarding (sibling of hub) — applied whenever the plan has an onboarding section,
   // regardless of preset. The skill only proposes onboarding for academy, but the
   // applier is agnostic.
-  for (const screen of plan.onboarding ?? []) {
-    controls[`onboarding-${screen.n}`] = onboardingScreenControls();
+  const onboardingScreens = plan.onboarding ?? [];
+  const multiScreen = onboardingScreens.length > 1;
+  for (let i = 0; i < onboardingScreens.length; i++) {
+    const screen = onboardingScreens[i];
+    controls[`onboarding-${screen.n}`] = onboardingScreenControls({
+      isFirst: i === 0,
+      isLast: i === onboardingScreens.length - 1,
+      multiScreen,
+    });
   }
 
   if (hasHub) controls['hub'] = hubControls();

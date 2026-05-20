@@ -73,19 +73,27 @@ For each screen in the plan:
 
   **Caption requirements (apply to every image caption):**
   1. **Subject** — what's in the image, one short clause.
-  2. **Visual style direction** — 3–6 mood words derived from the **brief's tone, audience, and topic**. Map roughly:
-     - friendly / educational / lifestyle → `"warm pastel cartoon style"`, `"soft hand-drawn illustration"`, `"playful flat illustration"`
-     - tech / crypto / sharp → `"dark vector style, neon accents"`, `"clean geometric flat style"`, `"glowing cyberpunk illustration"`
-     - corporate / financial → `"minimal flat illustration, muted palette"`, `"professional vector style, navy + slate"`
-     - luxury / premium → `"refined editorial illustration, soft gradients"`
-     - Pick from the brief. Be consistent across all captions in the same lesson — don't switch styles mid-flow.
-  3. **`1:1 aspect ratio`** — append this literally to every caption. All Luly illustrations render square in the CMS layout.
+  2. **Visual style direction** — 3–6 mood words derived from the brief.
+     - If `brief.brand` is **present**, derive style from the brand's own voice and ecosystem (e.g. Phantom → "purple-violet ghost aesthetic, dark vector, soft glow"). Read `brief.brand.voice` for cues.
+     - Otherwise derive from `brief.tone` + `brief.audience` + `brief.intent`. Mapping:
+       - friendly / educational / lifestyle → `"warm pastel cartoon style"`, `"soft hand-drawn illustration"`, `"playful flat illustration"`
+       - tech / crypto / sharp → `"dark vector style, neon accents"`, `"clean geometric flat style"`, `"glowing cyberpunk illustration"`
+       - corporate / financial → `"minimal flat illustration, muted palette"`, `"professional vector style, navy + slate"`
+       - luxury / premium → `"refined editorial illustration, soft gradients"`
+     - Be consistent across all captions in the same lesson — don't switch styles mid-flow.
+  3. **Exact HEX color anchors — when `brief.brand.colors` is present.** Append the brand's primary + (optional) secondary or background colors directly to the prompt as literal HEX strings. This locks the image-gen output to the real brand palette rather than guessing. Example fragment: `using brand palette #AB9FF2 primary, #5F4FE3 secondary on #0B0B0F background`.
+     - Skip this clause if `brief.brand` is absent or has no colors.
+     - Always include the HEX with the `#` prefix and uppercase letters for consistency.
+  4. **`1:1 aspect ratio`** — append this literally to every caption. All Luly illustrations render square in the CMS layout.
 
-  Format: `"<subject>, <style direction>, 1:1 aspect ratio"`.
+  Format (with brand): `"<subject>, <style direction>, using brand palette <hex...>, 1:1 aspect ratio"`.
+  Format (without brand): `"<subject>, <style direction>, 1:1 aspect ratio"`.
 
-  Example for a friendly German-learning lesson: `"caption": "Two cartoon characters chatting at a cafe with German books, warm pastel cartoon style, 1:1 aspect ratio"`.
+  Example for a Phantom academy lesson (brand present): `"caption": "Stylised purple ghost mascot waving in front of a multi-chain wallet interface, dark vector style with soft violet glow, using brand palette #AB9FF2 primary, #5F4FE3 secondary on #0B0B0F background, 1:1 aspect ratio"`.
 
-  Example for a crypto / Base lesson: `"caption": "Stylised wallet icon with on-chain transaction trails, dark vector style with neon blue accents, 1:1 aspect ratio"`.
+  Example for a friendly German-learning lesson (no brand): `"caption": "Two cartoon characters chatting at a cafe with German books, warm pastel cartoon style, 1:1 aspect ratio"`.
+
+  Example for a generic crypto / Base lesson (no brand): `"caption": "Stylised wallet icon with on-chain transaction trails, dark vector style with neon blue accents, 1:1 aspect ratio"`.
 - Keep block bodies minimal — only the fields below.
 
 ### Block format catalog (stage-4 fields only)

@@ -2,12 +2,32 @@ import type { Preset } from './presets';
 
 export type LengthHint = 'quick' | 'standard' | 'long';
 
+export interface BrandColors {
+  primary?: string;       // HEX, e.g. "#AB9FF2"
+  secondary?: string;
+  background?: string;
+  accent?: string;
+  text?: string;
+  [key: string]: string | undefined;
+}
+
+export interface Brand {
+  company: string;         // e.g. "Phantom"
+  website?: string;
+  docsUrl?: string;
+  colors?: BrandColors;    // HEX values pulled from real brand sources
+  logo?: string;           // absolute URL to logo image
+  fonts?: string[];        // e.g. ["Inter"]
+  voice?: string;          // 1-line brand voice description
+}
+
 export interface Brief {
   intent: string;
   audience: string;
   tone: string;
   lengthHint: LengthHint;
   materials: string[];
+  brand?: Brand;           // present when the product is for a specific company
 }
 
 export interface ProductType {

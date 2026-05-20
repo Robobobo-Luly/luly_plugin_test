@@ -21,6 +21,22 @@ Read:
 
 If any is missing, stop and direct the user to the appropriate prior skill.
 
+### 1b. Honor `brief.brand.colors` when present
+
+If `brief.brand.colors` exists, **anchor the theme to those values** rather than inventing fresh hues:
+
+- `brief.brand.colors.primary` → use **verbatim** as the theme's `primary` token. Do not pick a different brand color.
+- `brief.brand.colors.secondary` → use as `secondary`.
+- `brief.brand.colors.background` → use as `background` (and derive `surface` as a near-tint of it).
+- `brief.brand.colors.text` → use as `textColor`.
+- `brief.brand.colors.accent` → if present, route to whichever token best fits (often `secondary` or `successLight`).
+- Other brand colors → derive `primaryLight`, `border`, `disabled` from the brand palette by lightness adjustments rather than inventing new hues.
+- Header/footer/semantic tokens still need to be generated — pick them to harmonize with the brand colors (e.g. headerBackground matches background or surface; success/failure/warning stay in their canonical hue families).
+
+This keeps the theme visually faithful to the company's brand. Do NOT override the brand's primary just because you think a different color would look better.
+
+If `brief.brand.colors` is absent or empty, proceed with the freeform palette generation in step 2 below.
+
 ### 2. Generate a fresh color palette
 
 > ⚠ **All 22 color tokens are required.** Four are commonly forgotten — pick them up-front as part of your palette plan, not as an afterthought:

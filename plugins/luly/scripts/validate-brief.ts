@@ -36,7 +36,45 @@ function validate(raw: unknown): Brief {
     if (!isNonEmptyString(m)) fail(`"materials[${i}]" must be a non-empty string`);
   }
 
-  const knownKeys = new Set(['intent', 'audience', 'tone', 'lengthHint', 'materials']);
+  // Optional brand block — only validated if present
+  if (obj.brand !== undefined) {
+    if (obj.brand === null || typeof obj.brand !== 'object' || Array.isArray(obj.brand)) {
+      fail('"brand" must be an object if present');
+    }
+    const brand = obj.brand as Record<string, unknown>;
+    if (!isNonEmptyString(brand.company)) fail('"brand.company" must be a non-empty string');
+
+    for (const optStr of ['website', 'docsUrl', 'logo', 'voice'] as const) {
+      if (brand[optStr] !== undefined && !isNonEmptyString(brand[optStr])) {
+        fail(`"brand.${optStr}" must be a non-empty string if present`);
+      }
+    }
+    if (brand.fonts !== undefined) {
+      if (!Array.isArray(brand.fonts)) fail('"brand.fonts" must be an array of strings if present');
+      for (const [i, f] of (brand.fonts as unknown[]).entries()) {
+        if (!isNonEmptyString(f)) fail(`"brand.fonts[${i}]" must be a non-empty string`);
+      }
+    }
+    if (brand.colors !== undefined) {
+      if (brand.colors === null || typeof brand.colors !== 'object' || Array.isArray(brand.colors)) {
+        fail('"brand.colors" must be an object if present');
+      }
+      const hexRe = /^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$/;
+      for (const [k, v] of Object.entries(brand.colors as Record<string, unknown>)) {
+        if (!isNonEmptyString(v) || !hexRe.test(v)) {
+          fail(`"brand.colors.${k}" must be a 6- or 8-char hex string (e.g. "#AB9FF2")`);
+        }
+      }
+    }
+
+    const brandKnownKeys = new Set(['company', 'website', 'docsUrl', 'colors', 'logo', 'fonts', 'voice']);
+    const brandExtra = Object.keys(brand).filter((k) => !brandKnownKeys.has(k));
+    if (brandExtra.length > 0) {
+      fail(`unknown field(s) in "brand": ${brandExtra.join(', ')} (allowed: ${[...brandKnownKeys].join(', ')})`);
+    }
+  }
+
+  const knownKeys = new Set(['intent', 'audience', 'tone', 'lengthHint', 'materials', 'brand']);
   const extra = Object.keys(obj).filter((k) => !knownKeys.has(k));
   if (extra.length > 0) {
     fail(`unknown field(s): ${extra.join(', ')} (allowed: ${[...knownKeys].join(', ')})`);
