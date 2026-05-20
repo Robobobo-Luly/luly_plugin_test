@@ -387,7 +387,23 @@ Write `tmp/luly-agent/theme.json` with the full theme:
 
 `layout` is optional; `style.*` size fields beyond fontHeading/fontBody are optional too.
 
-Validate: `${CLAUDE_PLUGIN_ROOT}/bin/luly validate-theme`. The validator confirms all 18 color tokens are present and valid hex, and both fonts are in the supported list.
+Validate: `${CLAUDE_PLUGIN_ROOT}/bin/luly validate-theme`. The validator confirms all 22 color tokens are present and valid hex, and both fonts are in the supported list.
+
+### Stage 5b — course-icon.svg
+
+Design a creative SVG course-card icon using the theme palette and the course topic. Write the SVG markup to `tmp/luly-agent/course-icon.svg` as plain text (no XML declaration, no doctype, just `<svg>…</svg>`).
+
+Requirements:
+- `viewBox="0 0 640 360"` (16:9 card)
+- Self-contained: no `<script>`, no `<image href>` to external URLs, no `xlink:href`, no `<style>` blocks
+- Use only colors from `theme.json` (which already reflects `brief.brand.colors` if present)
+- At least 2 distinct shapes + a typographic element (course title fragment or initials)
+- A topical visual concept when obvious (e.g., Phantom academy → ghost silhouette; security course → shield; language course → speech bubble); otherwise abstract geometry composed from the palette
+- Pretty-printed, debuggable markup
+
+See `luly-icon/SKILL.md` for worked examples (Phantom academy, warm-friendly course).
+
+The SVG is later inlined into `course.body.cardImageSvg` by the assembler and rendered directly in the hub course card (no URL, no data URI — just markup).
 
 ### Stage 6 — overrides.json
 

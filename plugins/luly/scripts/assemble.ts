@@ -272,11 +272,11 @@ function isSimpleCourse(preset: string): boolean {
 function courseBodyFor(
   preset: string,
   courseKey: string,
-  opts: { courseAuthor?: string; cardImageUrl?: string } = {},
+  opts: { courseAuthor?: string; cardImageSvg?: string } = {},
 ): Record<string, unknown> {
   if (isSimpleCourse(preset)) {
     const body: Record<string, unknown> = { flowType: 'simple', courseKey };
-    if (opts.cardImageUrl) body.cardImageUrl = opts.cardImageUrl;
+    if (opts.cardImageSvg) body.cardImageSvg = opts.cardImageSvg;
     return body;
   }
   const body: Record<string, unknown> = {
@@ -285,39 +285,24 @@ function courseBodyFor(
     courseKey,
     sequentialLessons: true,
   };
-  if (opts.cardImageUrl) body.cardImageUrl = opts.cardImageUrl;
+  if (opts.cardImageSvg) body.cardImageSvg = opts.cardImageSvg;
   return body;
 }
 
 /**
- * Synthesise a simple SVG data-URI for a course card. Uses the theme primary as
- * the background and renders the course title in textOnPrimary. Gives the
- * catalog card a branded look without requiring real asset upload.
+ * Read the agent-authored course-icon SVG (written by /luly-icon) and return
+ * its raw markup. Returns undefined when the file is missing — assemble then
+ * proceeds without a card image and the renderer falls back to its default.
+ *
+ * The SVG is stored inline (as text in the JSON), not as a URL or data URI.
+ * The renderer inlines it via dangerouslySetInnerHTML in HubCourseCard.
  */
-function buildCourseCardSvg(title: string, primary: string, textOnPrimary: string): string {
-  // Keep the title within roughly 4 lines × 18 chars before truncating
-  const safe = title.length > 70 ? title.slice(0, 67) + '…' : title;
-  // Split into lines roughly every 22 chars at word boundary
-  const words = safe.split(/\s+/);
-  const lines: string[] = [];
-  let current = '';
-  for (const w of words) {
-    if (current.length + 1 + w.length > 22) {
-      if (current) lines.push(current);
-      current = w;
-    } else {
-      current = current ? `${current} ${w}` : w;
-    }
-    if (lines.length >= 3) break;
-  }
-  if (current && lines.length < 4) lines.push(current);
-  const tspans = lines.map((l, i) => `<tspan x="48" dy="${i === 0 ? 0 : 44}">${escapeXml(l)}</tspan>`).join('');
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${primary}"/><stop offset="1" stop-color="${primary}" stop-opacity="0.78"/></linearGradient></defs><rect width="640" height="360" fill="url(#g)"/><text x="48" y="142" fill="${textOnPrimary}" font-family="Inter, sans-serif" font-size="36" font-weight="700">${tspans}</text></svg>`;
-  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
-}
-
-function escapeXml(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+function loadCourseIconSvg(): string | undefined {
+  const path = resolve(process.cwd(), 'tmp/luly-agent/course-icon.svg');
+  if (!existsSync(path)) return undefined;
+  const raw = readFileSync(path, 'utf8').trim();
+  if (!raw.startsWith('<svg')) return undefined;
+  return raw;
 }
 
 function buildLessonNode(
@@ -348,11 +333,7 @@ function buildLessonNode(
 
 function buildCourseOnly(inputs: AssembleInputs): NodeExport {
   const preset = inputs.productType.preset;
-  const cardImageUrl = buildCourseCardSvg(
-    inputs.plan.courseTitle,
-    inputs.theme.colors.primary,
-    inputs.theme.colors.textOnPrimary,
-  );
+  const cardImageSvg = loadCourseIconSvg();
   const course: NodeExport = {
     type: 'course',
     title: inputs.plan.courseTitle,
@@ -360,7 +341,7 @@ function buildCourseOnly(inputs: AssembleInputs): NodeExport {
     slug: uuidv4(),
     body: courseBodyFor(preset, inputs.productType.key, {
       courseAuthor: inputs.productType.courseAuthor,
-      cardImageUrl,
+      cardImageSvg,
     }),
     controls: instantiateControls(inputs.controlsMap['course']),
     lexoRank: ranksFor(1)[0],
@@ -460,14 +441,11 @@ function buildFlow(inputs: AssembleInputs): NodeExport {
   flow.children!.push(hub);
 
   // Course — body shape varies by preset:
-  //   simple courses  → { flowType: 'simple', courseKey, cardImageUrl? }
-  //   learning courses → { author, flowType: 'learning', courseKey, sequentialLessons, cardImageUrl? }
+  //   simple courses  → { flowType: 'simple', courseKey, cardImageSvg? }
+  //   learning courses → { author, flowType: 'learning', courseKey, sequentialLessons, cardImageSvg? }
+  // Card icon SVG is authored by /luly-icon and stored inline as text.
   const courseIsSimple = isSimpleCourse(preset);
-  const cardImageUrl = buildCourseCardSvg(
-    courseTitle,
-    inputs.theme.colors.primary,
-    inputs.theme.colors.textOnPrimary,
-  );
+  const cardImageSvg = loadCourseIconSvg();
   const course: NodeExport = {
     type: 'course',
     title: courseTitle,
@@ -475,7 +453,7 @@ function buildFlow(inputs: AssembleInputs): NodeExport {
     slug: uuidv4(),
     body: courseBodyFor(preset, inputs.productType.key, {
       courseAuthor: inputs.productType.courseAuthor,
-      cardImageUrl,
+      cardImageSvg,
     }),
     controls: instantiateControls(inputs.controlsMap['course']),
     lexoRank: ranksFor(1)[0],
