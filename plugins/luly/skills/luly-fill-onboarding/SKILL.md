@@ -28,6 +28,7 @@ For every onboarding screen in `plan.parsed.json.onboarding`:
 - Pick the single best block format given the synopsis. For onboarding, `image-richtext` is the most common choice (a hero image + welcome copy). Use `richtext` if there's no natural image.
 - Write `content` and `question` fields as **plain Markdown**. Same rules as `/luly-fill-lesson`.
 - Image URLs: use the canonical project placeholder `/assets/placeholder-image.svg` (real, renders cleanly). For each image-bearing block, set `caption` to a one-sentence description of the illustration — it shows under the image in the CMS AND serves as the prompt for a future image-gen step.
+- **Caption format** (same as `/luly-fill-lesson`): `"<subject>, <brief-derived style direction>, 1:1 aspect ratio"`. The style direction (3–6 mood words) is derived from the brief's tone — e.g. `"warm pastel cartoon style"` for friendly briefs, `"dark vector with neon accents"` for crypto / tech briefs, `"minimal flat illustration, muted palette"` for corporate briefs. Keep style consistent across all onboarding screens. Always append `1:1 aspect ratio`.
 
 Keep each screen short — onboarding shouldn't have walls of text. One headline + a sentence or two.
 
@@ -47,7 +48,7 @@ Write `tmp/luly-agent/onboarding.json`:
         {
           "format": "image-richtext",
           "imageUrl": "/assets/placeholder-image.svg",
-          "caption": "Friendly welcoming illustration of an academy entrance — warm, soft palette",
+          "caption": "Friendly welcoming illustration of an academy entrance, warm pastel cartoon style, 1:1 aspect ratio",
           "imagePosition": "left",
           "content": "## Welcome\nLearn the essentials of self-custody in 3 short lessons."
         }

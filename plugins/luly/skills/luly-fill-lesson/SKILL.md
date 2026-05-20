@@ -69,7 +69,23 @@ For each screen in the plan:
 - Write the `content` and `question` fields as **plain Markdown**:
   use headings, bullets, emphasis. Do NOT produce TipTap JSON, do NOT stringify, do NOT escape.
 - Image URLs: use the canonical project placeholder `/assets/placeholder-image.svg` — it's a real SVG that renders cleanly in the CMS. Do NOT invent paths like `/placeholder/foo.svg` — those files don't exist and produce broken-image icons. Real per-block images come later via image-gen or manual upload.
-- For image-bearing blocks (`image-richtext`, `image`, `video`), set the `caption` field to a one-sentence description of the illustration. This caption is visible to the user under the image in the CMS, AND it's the prompt a future image-gen step will consume to produce a real asset. Example: `"caption": "Flat illustration of two cartoon characters learning German, friendly warm style"`.
+- For image-bearing blocks (`image-richtext`, `image`, `video`), set the `caption` field to a one-sentence description of the illustration. This caption is visible to the user under the image in the CMS, AND it's the prompt a future image-gen step will consume to produce a real asset.
+
+  **Caption requirements (apply to every image caption):**
+  1. **Subject** — what's in the image, one short clause.
+  2. **Visual style direction** — 3–6 mood words derived from the **brief's tone, audience, and topic**. Map roughly:
+     - friendly / educational / lifestyle → `"warm pastel cartoon style"`, `"soft hand-drawn illustration"`, `"playful flat illustration"`
+     - tech / crypto / sharp → `"dark vector style, neon accents"`, `"clean geometric flat style"`, `"glowing cyberpunk illustration"`
+     - corporate / financial → `"minimal flat illustration, muted palette"`, `"professional vector style, navy + slate"`
+     - luxury / premium → `"refined editorial illustration, soft gradients"`
+     - Pick from the brief. Be consistent across all captions in the same lesson — don't switch styles mid-flow.
+  3. **`1:1 aspect ratio`** — append this literally to every caption. All Luly illustrations render square in the CMS layout.
+
+  Format: `"<subject>, <style direction>, 1:1 aspect ratio"`.
+
+  Example for a friendly German-learning lesson: `"caption": "Two cartoon characters chatting at a cafe with German books, warm pastel cartoon style, 1:1 aspect ratio"`.
+
+  Example for a crypto / Base lesson: `"caption": "Stylised wallet icon with on-chain transaction trails, dark vector style with neon blue accents, 1:1 aspect ratio"`.
 - Keep block bodies minimal — only the fields below.
 
 ### Block format catalog (stage-4 fields only)
@@ -77,7 +93,7 @@ For each screen in the plan:
 | format | Required fields |
 |---|---|
 | `text` | `content` (Markdown) — canonical pure-rich-text block (RichTextRenderer). |
-| `image-richtext` | `imageUrl` (use `/assets/placeholder-image.svg` when no real asset is available — the canonical CMS placeholder, renders cleanly), `imagePosition` (`left`\|`right`), `content` (Markdown), optional `caption` (1-sentence description of the illustration — doubles as the visible caption shown under the image in the CMS AND the prompt a future image-gen step uses to produce the real illustration — e.g. *"flat illustration of two people learning German at a cafe, friendly warm style"*). |
+| `image-richtext` | `imageUrl` (use `/assets/placeholder-image.svg` — the canonical CMS placeholder), `imagePosition` (`left`\|`right`), `content` (Markdown), `caption` (**required for all image-bearing blocks** — one sentence in the format `"<subject>, <brief-derived style direction>, 1:1 aspect ratio"`; see caption rules above). |
 | `image` | `url`, `alt` |
 | `video` | `url` (optional `poster`) |
 | `quiz-text` | `question` (Markdown), `choices` (≥2 `{id,text}`, unique ids), `correctAnswer` (one of the ids), `text` (Markdown — context/setup copy beside the quiz; REQUIRED when using this format. For pure quiz screens use `question` instead) |
