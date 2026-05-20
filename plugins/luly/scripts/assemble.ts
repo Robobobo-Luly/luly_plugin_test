@@ -396,6 +396,12 @@ function buildFlow(inputs: AssembleInputs): NodeExport {
   };
   if (spec.campaignType) flowBody.campaignType = spec.campaignType;
 
+  // Propagate brand logo from the brief to the flow's headerLogo so the
+  // app header + hub fall back to it when no per-hub logo is set.
+  if (inputs.brief.brand?.logo) {
+    flowBody.headerLogo = inputs.brief.brand.logo;
+  }
+
   flowBody.locales = {
     supported: inputs.formatProfile.locales,
     default: inputs.formatProfile.locales[0],
@@ -437,14 +443,16 @@ function buildFlow(inputs: AssembleInputs): NodeExport {
     });
   }
 
-  // Hub — academy preset carries the academy name as the hub title; emit
-  // hubLogo as empty string so the renderer doesn't show the default base icon.
+  // Hub — academy preset carries the academy name as the hub title.
+  // hubLogo defaults to brand logo when available, otherwise empty string
+  // (which prevents the renderer from falling back to the default base icon).
+  const hubLogoUrl = inputs.brief.brand?.logo ?? '';
   const hub: NodeExport = {
     type: 'hub',
     title: isAcademy ? flowTitle : 'Hub',
     description: '',
     slug: uuidv4(),
-    body: { hubLogo: '' },
+    body: { hubLogo: hubLogoUrl },
     controls: instantiateControls(inputs.controlsMap['hub']),
     lexoRank: ranksFor(1)[0],
     children: [],
