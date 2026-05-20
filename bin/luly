@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# Luly plugin runner.
+#
+# Usage:
+#   luly <subcommand> [args...]
+#
+# Subcommands map 1:1 to TypeScript entry points in ../scripts/.
+# Preserves the caller's $PWD so scripts that read/write tmp/luly-agent/ in
+# the user's project directory continue to work unchanged.
+
+set -euo pipefail
+
+# Resolve the plugin root (the directory containing this bin/ folder).
+SCRIPT_PATH="${BASH_SOURCE[0]}"
+while [ -L "$SCRIPT_PATH" ]; do
+  TARGET="$(readlink "$SCRIPT_PATH")"
+  case "$TARGET" in
+    /*) SCRIPT_PATH="$TARGET" ;;
+    *)  SCRIPT_PATH="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)/$TARGET" ;;
+  esac
+done
+PLUGIN_ROOT="$(cd "$(dirname "$SCRIPT_PATH")/.." && pwd)"
+
+if [ $# -eq 0 ]; then
+  echo "luly: missing subcommand" >&2
+  echo "Available subcommands: $(ls "$PLUGIN_ROOT/scripts" | grep -E '^(validate-|apply-|assemble)' | sed 's/\.ts$//' | tr '\n' ' ')" >&2
+  exit 2
+fi
+
+SUBCMD="$1"
+shift
+
+SCRIPT="$PLUGIN_ROOT/scripts/$SUBCMD.ts"
+if [ ! -f "$SCRIPT" ]; then
+  echo "luly: unknown subcommand '$SUBCMD' (no $SCRIPT)" >&2
+  exit 2
+fi
+
+# First-run dependency install. Cheap check after that.
+if [ ! -d "$PLUGIN_ROOT/node_modules" ]; then
+  echo "luly: first run — installing plugin dependencies in $PLUGIN_ROOT ..." >&2
+  (cd "$PLUGIN_ROOT" && npm install --silent --no-audit --no-fund --omit=optional) >&2
+fi
+
+TS_NODE="$PLUGIN_ROOT/node_modules/.bin/ts-node"
+TSCONFIG="$PLUGIN_ROOT/scripts/tsconfig.json"
+
+# Run with the user's original cwd so scripts pick up ./tmp/luly-agent there.
+exec "$TS_NODE" --project "$TSCONFIG" "$SCRIPT" "$@"

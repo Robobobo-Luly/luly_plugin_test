@@ -1,0 +1,10 @@
+{
+  "name": "luly",
+  "version": "0.1.0",
+  "description": "Author Luly flows (academies, courses, marketing campaigns, waitlists, interactive proposals) end-to-end from a single natural-language prompt. Ships 13 skills plus the validator / assembler scripts they call.",
+  "author": {
+    "name": "Luly"
+  },
+  "homepage": "https://luly.app",
+  "keywords": ["luly", "cms", "flow", "academy", "campaign", "authoring"]
+}

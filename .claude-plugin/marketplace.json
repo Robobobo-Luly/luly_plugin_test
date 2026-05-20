@@ -1,0 +1,14 @@
+{
+  "name": "luly",
+  "owner": {
+    "name": "Luly",
+    "url": "https://luly.app"
+  },
+  "plugins": [
+    {
+      "name": "luly",
+      "source": ".",
+      "description": "Author Luly flows (academies, courses, marketing campaigns, waitlists, interactive proposals) end-to-end from a single natural-language prompt. Ships 13 skills plus the validator / assembler scripts they call."
+    }
+  ]
+}
