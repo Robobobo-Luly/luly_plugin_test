@@ -1,7 +1,7 @@
 {
-  "name": "luly-v0-1-6",
-  "version": "0.1.6",
-  "description": "Author Luly flows (academies, courses, marketing campaigns, waitlists, interactive proposals) end-to-end from a single natural-language prompt. Ships 14 skills plus the validator / assembler scripts they call. Version-suffixed plugin name lets you see at a glance which version is loaded — e.g. Skill(luly-v0-1-6:luly-plan).",
+  "name": "luly-v0-1-7",
+  "version": "0.1.7",
+  "description": "Author Luly flows (academies, courses, marketing campaigns, waitlists, interactive proposals) end-to-end from a single natural-language prompt. Ships 14 skills plus the validator / assembler scripts they call. Version-suffixed plugin name lets you see at a glance which version is loaded — e.g. Skill(luly-v0-1-7:luly-plan).",
   "author": {
     "name": "Luly"
   },

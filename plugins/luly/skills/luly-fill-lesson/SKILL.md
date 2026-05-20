@@ -142,7 +142,6 @@ For each screen in the plan:
   ❌ Wrong (mandatory 1:1 on a hero banner that's wide in the layout):
   Forcing `1:1 aspect ratio` on a block the layout renders 16:9 wastes pixels. Match the block's actual aspect or omit.
 - Keep block bodies minimal — only the fields below.
-- `imagePosition`: `left` or `right`. Don't repeat the same position on two adjacent screens.
 
 ### Block format catalog (stage-4 fields only)
 
