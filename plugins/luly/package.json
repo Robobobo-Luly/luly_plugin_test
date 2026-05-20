@@ -1,6 +1,6 @@
 {
   "name": "@luly/agent",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Validators and assembler that back the Luly Claude Code plugin skills.",
   "dependencies": {
