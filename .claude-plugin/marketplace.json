@@ -7,7 +7,10 @@
   "plugins": [
     {
       "name": "luly",
-      "source": ".",
+      "source": {
+        "source": "github",
+        "repo": "Robobobo-Luly/luly_plugin_test"
+      },
       "description": "Author Luly flows (academies, courses, marketing campaigns, waitlists, interactive proposals) end-to-end from a single natural-language prompt. Ships 13 skills plus the validator / assembler scripts they call."
     }
   ]
