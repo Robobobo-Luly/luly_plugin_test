@@ -23,6 +23,12 @@ If any is missing, stop and direct the user to the appropriate prior skill.
 
 ### 2. Generate a fresh color palette
 
+> ⚠ **All 22 color tokens are required.** Four are commonly forgotten — pick them up-front as part of your palette plan, not as an afterthought:
+> - `headerBackground` + `headerText` (header bar — pick as a contrast pair, ≥ 4.5:1)
+> - `footerBackground` + `footerText` (footer bar — pick as a contrast pair, ≥ 4.5:1)
+>
+> Don't skip these. A theme.json without all four will fail validation every time.
+
 From the brief, infer a colour direction (don't ask):
 
 - **Light vs dark background** — pick based on tone: warm/friendly/playful → light cream/white; sharp/tech/crypto → dark navy/slate; corporate/financial → very light gray; high-contrast/a11y → pure white.
@@ -121,6 +127,16 @@ Optional layout (maxWidth, padding) similarly defaults sanely.
 
 ### 5. Write the file
 
+**Pre-flight checklist** — confirm each of these before emitting JSON. Validation fails on any missing token:
+
+- [ ] `background`, `surface`, `primary`, `primaryLight`, `secondary`, `onSurface` (6 surface/brand)
+- [ ] `textColor`, `mutedTextColor`, `disabledTextColor`, `textOnPrimary` (4 text)
+- [ ] **`headerBackground`, `headerText`, `footerBackground`, `footerText`** ← the four most commonly forgotten
+- [ ] `border`, `disabled` (2 utility)
+- [ ] `success`, `successLight`, `failure`, `failureLight`, `warning`, `warningLight` (6 semantic)
+
+Total: **22 color tokens**. Re-count before writing.
+
 Write `tmp/luly-agent/theme.json` with the full theme:
 
 ```json
@@ -171,7 +187,7 @@ ${CLAUDE_PLUGIN_ROOT}/bin/luly validate-theme
 ```
 
 The validator confirms:
-- All 18 required color tokens present and valid hex.
+- All 22 required color tokens present and valid hex (including `headerBackground`, `headerText`, `footerBackground`, `footerText`).
 - `fontHeading` and `fontBody` are in the supported list.
 - Any optional size fields are valid CSS sizes.
 
