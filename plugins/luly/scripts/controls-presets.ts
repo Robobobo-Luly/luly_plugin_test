@@ -185,7 +185,7 @@ function onboardingScreenControls(opts: { isFirst: boolean; isLast: boolean; mul
       label: 'Skip onboarding',
       position: 'bottomLeft',
       requires_click: true,
-      style: { variant: 'secondary' },
+      styleName: 'secondary',
       conditionalActions: [
         { do: [{ type: 'goto', body: { target: 'hub' } }] },
       ],
@@ -196,7 +196,7 @@ function onboardingScreenControls(opts: { isFirst: boolean; isLast: boolean; mul
       label: 'Previous',
       position: 'bottomLeft',
       requires_click: true,
-      style: { variant: 'secondary' },
+      styleName: 'secondary',
       conditionalActions: [
         { do: [{ type: 'goto', body: { target: 'previous_sibling' } }] },
       ],

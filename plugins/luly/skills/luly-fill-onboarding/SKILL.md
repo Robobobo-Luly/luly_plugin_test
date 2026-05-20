@@ -28,11 +28,13 @@ For every onboarding screen in `plan.parsed.json.onboarding`:
 - Pick the single best block format given the synopsis. For onboarding, `image-richtext` is the most common choice (a hero image + welcome copy). Use `richtext` if there's no natural image.
 - Write `content` and `question` fields as **plain Markdown**. Same rules as `/luly-fill-lesson`.
 - Image URLs: use the canonical project placeholder `/assets/placeholder-image.svg` (real, renders cleanly). For each image-bearing block, set `caption` to a one-sentence description of the illustration — it shows under the image in the CMS AND serves as the prompt for a future image-gen step.
-- **Caption format** (same as `/luly-fill-lesson`):
-  - With brand: `"<subject>, <style direction derived from brand voice>, using brand palette <#HEX primary>, <#HEX secondary> on <#HEX background>, 1:1 aspect ratio"`.
-  - Without brand: `"<subject>, <style direction from brief tone>, 1:1 aspect ratio"`.
+- **Caption format** (same hard rule as `/luly-fill-lesson`):
+  - With brand colors: `"<subject>, <style direction>, using palette <#HEX> primary, <#HEX> background, 1:1 aspect ratio"`.
+  - Without brand colors: `"<subject>, <style direction>, 1:1 aspect ratio"` — no color words.
 
-  When `brief.brand.colors` is present, **append literal HEX values** (e.g. `#AB9FF2`) to anchor the image-gen output to the real brand palette. Style direction examples: `"warm pastel cartoon style"` for friendly briefs, `"dark vector with neon accents"` for crypto / tech briefs, `"minimal flat illustration, muted palette"` for corporate briefs. Keep style consistent across all onboarding screens.
+  > ⛔ **Banned color words in captions:** `purple`, `blue`, `green`, `red`, `orange`, `violet`, `navy`, `teal`, `pink`, `yellow`, `dark`/`light`/`warm`/`cool` (as color descriptors), `soft gradient`, `muted palette`, `brand colors` (when not followed by HEX). Use ONLY 6-char HEX strings (e.g. `#AB9FF2`) sourced from `brief.brand.colors`. If brand colors aren't defined, omit color mentions entirely — don't invent HEX.
+
+  Style direction is about *technique* (`"flat vector illustration"`, `"soft hand-drawn line art"`, `"playful cartoon style"`, `"minimal geometric composition"`) — not color. Keep style consistent across all onboarding screens.
 
 Keep each screen short — onboarding shouldn't have walls of text. One headline + a sentence or two.
 

@@ -71,29 +71,52 @@ For each screen in the plan:
 - Image URLs: use the canonical project placeholder `/assets/placeholder-image.svg` — it's a real SVG that renders cleanly in the CMS. Do NOT invent paths like `/placeholder/foo.svg` — those files don't exist and produce broken-image icons. Real per-block images come later via image-gen or manual upload.
 - For image-bearing blocks (`image-richtext`, `image`, `video`), set the `caption` field to a one-sentence description of the illustration. This caption is visible to the user under the image in the CMS, AND it's the prompt a future image-gen step will consume to produce a real asset.
 
-  **Caption requirements (apply to every image caption):**
+  **Caption requirements (every image caption — non-negotiable):**
+
   1. **Subject** — what's in the image, one short clause.
-  2. **Visual style direction** — 3–6 mood words derived from the brief.
-     - If `brief.brand` is **present**, derive style from the brand's own voice and ecosystem (e.g. Phantom → "purple-violet ghost aesthetic, dark vector, soft glow"). Read `brief.brand.voice` for cues.
-     - Otherwise derive from `brief.tone` + `brief.audience` + `brief.intent`. Mapping:
-       - friendly / educational / lifestyle → `"warm pastel cartoon style"`, `"soft hand-drawn illustration"`, `"playful flat illustration"`
-       - tech / crypto / sharp → `"dark vector style, neon accents"`, `"clean geometric flat style"`, `"glowing cyberpunk illustration"`
-       - corporate / financial → `"minimal flat illustration, muted palette"`, `"professional vector style, navy + slate"`
-       - luxury / premium → `"refined editorial illustration, soft gradients"`
-     - Be consistent across all captions in the same lesson — don't switch styles mid-flow.
-  3. **Exact HEX color anchors — when `brief.brand.colors` is present.** Append the brand's primary + (optional) secondary or background colors directly to the prompt as literal HEX strings. This locks the image-gen output to the real brand palette rather than guessing. Example fragment: `using brand palette #AB9FF2 primary, #5F4FE3 secondary on #0B0B0F background`.
-     - Skip this clause if `brief.brand` is absent or has no colors.
-     - Always include the HEX with the `#` prefix and uppercase letters for consistency.
-  4. **`1:1 aspect ratio`** — append this literally to every caption. All Luly illustrations render square in the CMS layout.
 
-  Format (with brand): `"<subject>, <style direction>, using brand palette <hex...>, 1:1 aspect ratio"`.
-  Format (without brand): `"<subject>, <style direction>, 1:1 aspect ratio"`.
+  2. **Visual style direction** — 3–6 mood words about *technique / texture / illustration mode*. Examples: `"flat vector illustration"`, `"soft hand-drawn line art"`, `"glowing cyberpunk render"`, `"minimal geometric composition"`, `"refined editorial illustration"`, `"playful cartoon style"`. Be consistent across all captions in the same lesson.
 
-  Example for a Phantom academy lesson (brand present): `"caption": "Stylised purple ghost mascot waving in front of a multi-chain wallet interface, dark vector style with soft violet glow, using brand palette #AB9FF2 primary, #5F4FE3 secondary on #0B0B0F background, 1:1 aspect ratio"`.
+  3. **Color anchors — ALWAYS use literal HEX, NEVER color words.**
 
-  Example for a friendly German-learning lesson (no brand): `"caption": "Two cartoon characters chatting at a cafe with German books, warm pastel cartoon style, 1:1 aspect ratio"`.
+     > ⛔ **Banned in captions:** vague color words like `"purple"`, `"blue"`, `"green"`, `"red"`, `"orange"`, `"violet"`, `"navy"`, `"teal"`, `"pink"`, `"yellow"`, `"black"`, `"white"`, `"dark"` (as a color), `"light"` (as a color), `"warm tones"`, `"cool tones"`, `"soft gradient"` (without HEX), `"muted palette"` (without HEX), `"brand colors"` (without HEX).
+     > ✅ **Required:** every color mention in a caption is a 6-char HEX string with `#` prefix (e.g. `#AB9FF2`).
 
-  Example for a generic crypto / Base lesson (no brand): `"caption": "Stylised wallet icon with on-chain transaction trails, dark vector style with neon blue accents, 1:1 aspect ratio"`.
+     Source of HEX values, in order:
+     - If `brief.brand.colors` exists, pull from there — `primary`, `secondary`, `background`, `accent`, `text`. Use what's present, skip what isn't.
+     - If `brief.brand.colors` doesn't exist, **omit color mentions entirely**. Describe the subject + style + composition without any color words. The image-gen step can color it later. Do NOT invent HEX values.
+
+     Format the color clause as: `using palette <#HEX role>, <#HEX role>, <#HEX role>`. Roles are optional descriptors (`primary`, `background`, `accent`).
+
+  4. **`1:1 aspect ratio`** — append literally. Every caption.
+
+  **Caption format:**
+  - With brand colors: `"<subject>, <style direction>, using palette <#HEX> primary, <#HEX> background, 1:1 aspect ratio"`.
+  - Without brand colors: `"<subject>, <style direction>, 1:1 aspect ratio"` — no color words at all.
+
+  **Worked examples:**
+
+  ✅ Phantom academy (brand has `#AB9FF2` primary, `#FFFFFF` background, `#4A4A4A` accent):
+  ```
+  "Friendly ghost mascot waving from inside a smartphone, flat vector illustration with soft glow, using palette #AB9FF2 primary, #FFFFFF background, #4A4A4A accent, 1:1 aspect ratio"
+  ```
+
+  ✅ Generic German-learning lesson (no brand):
+  ```
+  "Two cartoon characters chatting at a cafe with German books, warm pastel cartoon style, 1:1 aspect ratio"
+  ```
+
+  ❌ Wrong (uses banned vague words):
+  ```
+  "Ghost mascot waving hello, soft purple gradient background, modern minimal style"
+  ```
+  Replace `"soft purple gradient background"` with either `"using palette #AB9FF2 primary, #FFFFFF background"` (if brand HEX available) or just omit the color phrase entirely.
+
+  ❌ Wrong (invents HEX not in the brief):
+  ```
+  "Wallet icon, dark vector with deep #1A1A2E background"
+  ```
+  Brief didn't define `#1A1A2E` — either find it in `brief.brand.colors` or don't reference it.
 - Keep block bodies minimal — only the fields below.
 
 ### Block format catalog (stage-4 fields only)

@@ -8,6 +8,7 @@ import { applyControls } from './controls-presets';
 import { markdownToTipTapString } from './markdown-to-tiptap';
 import type {
   BlockExport,
+  Brief,
   Control,
   FormatProfile,
   Lesson,
@@ -203,6 +204,7 @@ function deepMerge<A extends Record<string, unknown>>(target: A, source: Record<
 // ----------------------------------------------------------------------------
 
 interface AssembleInputs {
+  brief: Brief;
   productType: ProductType;
   plan: Plan;
   formatProfile: FormatProfile;
@@ -482,6 +484,7 @@ function main(): void {
   const workdir = resolve(process.cwd(), 'tmp/luly-agent');
   if (!existsSync(workdir)) fail(`workdir not found: ${workdir}`);
 
+  const brief = readJson<Brief>(join(workdir, 'brief.json'), 'brief.json');
   const productType = readJson<ProductType>(join(workdir, 'product-type.json'), 'product-type.json');
   const plan = readJson<Plan>(join(workdir, 'plan.parsed.json'), 'plan.parsed.json');
   const formatProfile = readJson<FormatProfile>(join(workdir, 'format-profile.json'), 'format-profile.json');
@@ -542,8 +545,8 @@ function main(): void {
   const isCourseOnly = productType.preset === 'academy-course';
 
   const root = isCourseOnly
-    ? buildCourseOnly({ productType, plan, formatProfile, theme, lessons, onboarding, controlsMap: controlsArtifact.controls, overrides })
-    : buildFlow({ productType, plan, formatProfile, theme, lessons, onboarding, controlsMap: controlsArtifact.controls, overrides });
+    ? buildCourseOnly({ brief, productType, plan, formatProfile, theme, lessons, onboarding, controlsMap: controlsArtifact.controls, overrides })
+    : buildFlow({ brief, productType, plan, formatProfile, theme, lessons, onboarding, controlsMap: controlsArtifact.controls, overrides });
 
   const outputPath = join(workdir, `${productType.key}.luly.json`);
   writeFileSync(outputPath, JSON.stringify(root, null, 2) + '\n', 'utf8');
