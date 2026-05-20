@@ -3,9 +3,15 @@ name: luly-icon
 description: Step 5b of the Luly authoring pipeline. Design TWO inline-SVG artifacts for the course — a 16:9 card cover (cardImageSvg) and a 1:1 course icon (iconSvg) — using the resolved theme palette (and brief.brand.colors when present) plus the course topic. Output is stored as inline SVG text, embedded into course.body at assemble time. Run after /luly-style and before /luly-controls.
 ---
 
-# Luly — Step 5b: Course visuals (card cover + course icon)
+# Luly — Step 4b: Course visuals (card cover + course icon)
 
 You design **two** SVG visuals for the course. Both are inlined into the course node as raw markup — no URLs, no data URIs, no external assets.
+
+## Preset gate — when this skill applies
+
+Read `tmp/luly-agent/product-type.json` first. If `preset` is one of `campaign-simple`, `waitlist`, or `interactive-proposal`, **stop immediately** — do not write any SVG files. Those presets have no hub catalog so the card cover + icon never render. Just print one line ("course visuals — skipped, no hub for this preset") and exit.
+
+This skill runs only for `academy`, `academy-course`, and `campaign-course`.
 
 | Artifact | Field on course.body | File you write | Aspect | viewBox | Where it shows |
 |---|---|---|---|---|---|

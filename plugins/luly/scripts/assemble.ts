@@ -341,8 +341,14 @@ function buildLessonNode(
 
 function buildCourseOnly(inputs: AssembleInputs): NodeExport {
   const preset = inputs.productType.preset;
-  const cardImageSvg = loadCardCoverSvg();
-  const iconSvg = loadCourseIconSvg();
+  // Card cover + course icon SVGs only apply to learning-shape presets that
+  // have a hub catalog (academy, academy-course, campaign-course). Simple
+  // courses (campaign-simple, waitlist, interactive-proposal) have no hub
+  // so the SVGs would never render. Skip the file reads entirely — this also
+  // protects against stale SVG artifacts from a previous run polluting a
+  // fresh generation of a simple preset.
+  const cardImageSvg = isSimpleCourse(preset) ? undefined : loadCardCoverSvg();
+  const iconSvg = isSimpleCourse(preset) ? undefined : loadCourseIconSvg();
   const course: NodeExport = {
     type: 'course',
     title: inputs.plan.courseTitle,
@@ -451,14 +457,16 @@ function buildFlow(inputs: AssembleInputs): NodeExport {
   flow.children!.push(hub);
 
   // Course — body shape varies by preset:
-  //   simple courses  → { flowType: 'simple', courseKey, cardImageSvg?, iconSvg? }
+  //   simple courses  → { flowType: 'simple', courseKey } (no SVG fields)
   //   learning courses → { author, flowType: 'learning', courseKey, sequentialLessons, cardImageSvg?, iconSvg? }
-  // Both SVGs are authored by /luly-icon and stored inline as text.
-  // - cardImageSvg = wide 16:9 card cover (card-cover.svg)
-  // - iconSvg      = square 1:1 course icon (course-icon.svg)
+  // Both SVGs are authored by /luly-icon and stored inline as text:
+  //   - cardImageSvg = wide 16:9 card cover (card-cover.svg)
+  //   - iconSvg      = square 1:1 course icon (course-icon.svg)
+  // Simple presets have no hub catalog → skip loading SVGs (defensive against
+  // stale tmp artifacts from a previous run polluting a fresh generation).
   const courseIsSimple = isSimpleCourse(preset);
-  const cardImageSvg = loadCardCoverSvg();
-  const iconSvg = loadCourseIconSvg();
+  const cardImageSvg = courseIsSimple ? undefined : loadCardCoverSvg();
+  const iconSvg = courseIsSimple ? undefined : loadCourseIconSvg();
   const course: NodeExport = {
     type: 'course',
     title: courseTitle,

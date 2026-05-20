@@ -117,7 +117,6 @@ These are reference palettes that pass the contrast targets. Generate fresh per 
 |---|---|
 | `"Inter", sans-serif` | Default — clean, modern, neutral |
 | `"Inter Tight", sans-serif` | Tighter spacing; tech / sharp brands |
-| `"SF Pro Display", -apple-system, sans-serif` | Apple-ecosystem look, headings |
 | `"Roboto", sans-serif` | Geometric, neutral; Android-ecosystem feel |
 | `"Matter", sans-serif` | Modern grotesque, slightly distinctive |
 | `"Nunito", sans-serif` | Friendly, rounded, warm |
@@ -184,7 +183,7 @@ Write `tmp/luly-agent/theme.json` with the full theme:
   "style": {
     "fontHeading": "\"<one of the supported fonts>\", sans-serif",
     "fontBody": "\"<one of the supported fonts>\", sans-serif",
-    "buttonBorderRadius": "12px"
+    "buttonBorderRadius": "..."
   },
   "layout": {
     "maxWidth": "1200px"

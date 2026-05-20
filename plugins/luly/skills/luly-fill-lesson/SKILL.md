@@ -1,6 +1,6 @@
 ---
 name: luly-fill-lesson
-description: Step 4 of the Luly authoring pipeline. For a single lesson, read brief + format-profile + plan, write the lesson's screens and blocks as JSON. Content fields hold Markdown — Stage 9 compiles them to TipTap at assemble time. Run once per lesson; default behaviour processes the next un-filled lesson. Use after /luly-format has produced format-profile.json.
+description: Step 5 of the Luly authoring pipeline (runs AFTER theme + icon stages). For a single lesson, read brief + product-type + plan + format-profile + theme, write the lesson's screens and blocks as JSON. Image captions reference real HEX values from theme.json (and brand.colors). Content fields hold Markdown — Stage 9 compiles them to TipTap at assemble time. Run once per lesson; default behaviour processes the next un-filled lesson. Use after /luly-style has produced theme.json.
 ---
 
 # Luly — Step 4: Fill one lesson
@@ -13,12 +13,13 @@ context, no styles, no controls. See `docs/flow-json-schema.html` § Step 4.
 ### 1. Load prior stages
 
 Read:
-- `tmp/luly-agent/brief.json`
+- `tmp/luly-agent/brief.json` — for tone, audience, and `brand.colors` / `brand.voice` if present
 - `tmp/luly-agent/product-type.json`
 - `tmp/luly-agent/plan.parsed.json`
 - `tmp/luly-agent/format-profile.json`
+- `tmp/luly-agent/theme.json` — **REQUIRED for caption HEX values**. The pipeline is ordered so theme always exists by the time fill-lesson runs.
 
-If any is missing, stop and direct the user to the appropriate prior skill.
+If any is missing, stop and direct the user to the appropriate prior skill. Specifically: if `theme.json` is missing, run `/luly-style` first — content captions depend on it.
 
 ### 2. Pick the lesson
 
@@ -82,11 +83,18 @@ For each screen in the plan:
      > ⛔ **Banned in captions:** vague color words like `"purple"`, `"blue"`, `"green"`, `"red"`, `"orange"`, `"violet"`, `"navy"`, `"teal"`, `"pink"`, `"yellow"`, `"black"`, `"white"`, `"dark"` (as a color), `"light"` (as a color), `"warm tones"`, `"cool tones"`, `"soft gradient"` (without HEX), `"muted palette"` (without HEX), `"brand colors"` (without HEX).
      > ✅ **Required:** every color mention in a caption is a 6-char HEX string with `#` prefix (e.g. `#AB9FF2`).
 
-     Source of HEX values, in order:
-     - If `brief.brand.colors` exists, pull from there — `primary`, `secondary`, `background`, `accent`, `text`. Use what's present, skip what isn't.
-     - If `brief.brand.colors` doesn't exist, **omit color mentions entirely**. Describe the subject + style + composition without any color words. The image-gen step can color it later. Do NOT invent HEX values.
+     **Source of HEX values** — both `theme.json` and `brief.brand.colors` are available at this stage. Use them in this priority:
 
-     Format the color clause as: `using palette <#HEX role>, <#HEX role>, <#HEX role>`. Roles are optional descriptors (`primary`, `background`, `accent`).
+     1. **`theme.json.colors` is the canonical source** — it's the resolved palette the rendered UI will actually use. Always reference these. Map:
+        - `theme.colors.primary` → caption primary
+        - `theme.colors.background` → caption background
+        - `theme.colors.secondary` → caption accent / secondary
+        - `theme.colors.textColor` → caption text color (rare; only if the prompt explicitly describes text inside the image)
+     2. **`brief.brand.colors`** — these are already reflected in `theme.json` (the style stage anchors theme to brand), so reading from `theme.json` is enough. If the brand block specifies a color the theme doesn't surface (rare), reference the brand value directly.
+
+     Format the color clause as: `using palette <#HEX> primary, <#HEX> background, <#HEX> accent` — roles are optional descriptors. Pick 2–3 most relevant colors; don't dump all 22 tokens.
+
+     Because `theme.json` always exists at this point, **there is no "without colors" branch** — every caption gets HEX anchors.
 
   4. **Aspect ratio — optional, context-aware.** Don't reflexively append "1:1 aspect ratio" to every caption. Pick what fits the block's place in the layout:
      - **Square (1:1)** for thumbnails, small icons, and most inline image-richtext blocks where the image sits beside copy.
@@ -97,9 +105,10 @@ For each screen in the plan:
      Pick once per lesson and stay consistent across that lesson's blocks. The card cover + course icon have their own dedicated step (`/luly-icon`) and ratios — those are not in scope here.
 
   **Caption format:**
-  - With brand colors + aspect: `"<subject>, <style direction>, using palette <#HEX> primary, <#HEX> background, <aspect> aspect ratio"`.
-  - With brand colors, no aspect: `"<subject>, <style direction>, using palette <#HEX> primary, <#HEX> background"`.
-  - Without brand colors: `"<subject>, <style direction>"` — no color words, aspect optional.
+  - With aspect: `"<subject>, <style direction>, using palette <#HEX> primary, <#HEX> background, <aspect> aspect ratio"`.
+  - Without aspect: `"<subject>, <style direction>, using palette <#HEX> primary, <#HEX> background"`.
+
+  The HEX clause is mandatory; the aspect clause is optional (see rule 4).
 
   **Worked examples:**
 
@@ -113,22 +122,22 @@ For each screen in the plan:
   "Ghost mascot looking through a multi-chain wallet interface with gentle glow, flat vector illustration, using palette #AB9FF2 primary, #FFFFFF background, 16:9 aspect ratio"
   ```
 
-  ✅ Generic German-learning lesson (no brand, no aspect specified):
+  ✅ Generic lesson with HEX from theme (no brand block, theme generated as `#E85A3C` primary, `#FFF8F0` background):
   ```
-  "Two cartoon characters chatting at a cafe with German books, warm pastel cartoon style"
+  "Two cartoon characters chatting at a cafe with German books, warm pastel cartoon style, using palette #E85A3C primary, #FFF8F0 background"
   ```
 
   ❌ Wrong (uses banned vague color words):
   ```
   "Ghost mascot waving hello, soft purple gradient background, modern minimal style"
   ```
-  Replace `"soft purple gradient background"` with either `"using palette #AB9FF2 primary, #FFFFFF background"` (if brand HEX available) or omit the color phrase entirely.
+  Replace `"soft purple gradient background"` with `"using palette #AB9FF2 primary, #FFFFFF background"` — the HEX comes from `theme.json.colors`.
 
-  ❌ Wrong (invents HEX not in the brief):
+  ❌ Wrong (invents HEX not in `theme.json`):
   ```
   "Wallet icon, dark vector with deep #1A1A2E background"
   ```
-  Brief didn't define `#1A1A2E` — either find it in `brief.brand.colors` or don't reference it.
+  `#1A1A2E` doesn't exist in `theme.json.colors`. Use a real theme token (e.g. `theme.colors.background` or `theme.colors.surface`).
 
   ❌ Wrong (mandatory 1:1 on a hero banner that's wide in the layout):
   Forcing `1:1 aspect ratio` on a block the layout renders 16:9 wastes pixels. Match the block's actual aspect or omit.

@@ -1,6 +1,6 @@
 ---
 name: luly-fill-onboarding
-description: Step 4a of the Luly authoring pipeline. For an academy (or any flow whose plan declares an "## Onboarding" section), generate the welcome / intro screens that live as siblings of the hub. Reads brief + plan + format-profile and writes tmp/luly-agent/onboarding.json. Run once after /luly-fill-lesson has filled the regular lessons.
+description: Step 5a of the Luly authoring pipeline (runs AFTER theme + icon + lessons). For an academy (or any flow whose plan declares an "## Onboarding" section), generate the welcome / intro screens that live as siblings of the hub. Reads brief + plan + format-profile + theme and writes tmp/luly-agent/onboarding.json. Image captions reference real HEX from theme.json.
 ---
 
 # Luly — Step 4a: Fill onboarding screens
@@ -14,12 +14,15 @@ This skill only writes content for the onboarding screens declared in `plan.pars
 ### 1. Load prior stages
 
 Read:
-- `tmp/luly-agent/brief.json`
+- `tmp/luly-agent/brief.json` — for tone, audience, and `brand` if present
 - `tmp/luly-agent/product-type.json`
 - `tmp/luly-agent/plan.parsed.json` — must have a non-empty `onboarding` array
 - `tmp/luly-agent/format-profile.json`
+- `tmp/luly-agent/theme.json` — **REQUIRED for caption HEX values**
 
 If `plan.parsed.json.onboarding` is empty or missing, stop and tell the user to either (a) add a `## Onboarding` section to `plan.md` and re-run `/luly-plan`, or (b) skip this stage entirely.
+
+If `theme.json` is missing, run `/luly-style` first.
 
 ### 2. Generate the screens
 
@@ -29,10 +32,10 @@ For every onboarding screen in `plan.parsed.json.onboarding`:
 - Write `content` and `question` fields as **plain Markdown**. Same rules as `/luly-fill-lesson`.
 - Image URLs: use the canonical project placeholder `/assets/placeholder-image.svg` (real, renders cleanly). For each image-bearing block, set `caption` to a one-sentence description of the illustration — it shows under the image in the CMS AND serves as the prompt for a future image-gen step.
 - **Caption format** (same hard rule as `/luly-fill-lesson`):
-  - With brand colors: `"<subject>, <style direction>, using palette <#HEX> primary, <#HEX> background"` (+ optional aspect ratio).
-  - Without brand colors: `"<subject>, <style direction>"` — no color words.
+  - `"<subject>, <style direction>, using palette <#HEX> primary, <#HEX> background"` (+ optional aspect ratio).
+  - The HEX clause is **mandatory** — pull from `theme.json.colors` (`primary`, `background`, optionally `secondary` as accent). Theme always exists at this stage.
 
-  > ⛔ **Banned color words in captions:** `purple`, `blue`, `green`, `red`, `orange`, `violet`, `navy`, `teal`, `pink`, `yellow`, `dark`/`light`/`warm`/`cool` (as color descriptors), `soft gradient`, `muted palette`, `brand colors` (when not followed by HEX). Use ONLY 6-char HEX strings (e.g. `#AB9FF2`) sourced from `brief.brand.colors`. If brand colors aren't defined, omit color mentions entirely — don't invent HEX.
+  > ⛔ **Banned color words in captions:** `purple`, `blue`, `green`, `red`, `orange`, `violet`, `navy`, `teal`, `pink`, `yellow`, `dark`/`light`/`warm`/`cool` (as color descriptors), `soft gradient`, `muted palette`, `brand colors` (when not followed by HEX). Use ONLY 6-char HEX strings (e.g. `#AB9FF2`) sourced from `theme.json.colors`.
 
   **Aspect ratio is optional** — append it only when you can reasonably match the layout (1:1 for square hero, 16:9 for wide hero, 9:16 for mobile full-bleed). Onboarding screens are typically square-ish hero blocks, so `1:1 aspect ratio` is a sensible default; skip the clause if unsure.
 
