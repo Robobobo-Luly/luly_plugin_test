@@ -1,5 +1,6 @@
 import type { Preset } from './presets';
 
+/** @deprecated — kept for backward compat with existing brief.json files. New briefs omit this field; lesson/screen counts are picked by /luly-plan from per-preset ranges plus prompt signals. */
 export type LengthHint = 'quick' | 'standard' | 'long';
 
 export interface BrandColors {
@@ -25,7 +26,8 @@ export interface Brief {
   intent: string;
   audience: string;
   tone: string;
-  lengthHint: LengthHint;
+  /** @deprecated — see LengthHint. Validator accepts but no longer requires this. */
+  lengthHint?: LengthHint;
   materials: string[];
   brand?: Brand;           // present when the product is for a specific company
 }

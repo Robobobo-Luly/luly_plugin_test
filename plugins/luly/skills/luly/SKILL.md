@@ -91,7 +91,6 @@ For each slot below, extract from the prompt if present; otherwise use the defau
 | topic | the noun phrase ("german courses", "crypto basics", "Phantom") | required — ask once if missing |
 | audience | "for beginners / pros / mixed / mobile users / B2B / ..." | "general audience" |
 | tone | "funny / serious / friendly / professional / technical / minimal / playful / ..." | inferred from preset; campaign defaults to "friendly, concrete"; academy defaults to "clear, supportive" |
-| length | "quick / short / single page" → quick; "deep dive / full" → long; else standard | `standard` |
 | has-quizzes | "quizzes / tests / questions" → on; "no quiz" → off | preset default |
 | has-form | "form / signup / waitlist / capture emails" → on; "no form" → off | preset default |
 | form copy hints | "first 50 users discount", "early access", "join the beta" — preserve verbatim for stage 5 | use generic copy |
@@ -124,7 +123,7 @@ Examples worth asking:
 - Two preset candidates equally plausible ("make a sales pitch for X" → `interactive-proposal` or `campaign-simple`?).
 - Topic missing entirely.
 
-Don't ask: tone, length, theme, locale, form copy specifics, image choices. Trust the defaults; the user can iterate after import.
+Don't ask: tone, lesson count, theme, locale, form copy specifics, image choices. Trust the defaults and per-preset ranges; the user can iterate after import.
 
 One question per pause, then resume.
 

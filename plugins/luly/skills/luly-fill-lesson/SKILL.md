@@ -142,13 +142,14 @@ For each screen in the plan:
   ❌ Wrong (mandatory 1:1 on a hero banner that's wide in the layout):
   Forcing `1:1 aspect ratio` on a block the layout renders 16:9 wastes pixels. Match the block's actual aspect or omit.
 - Keep block bodies minimal — only the fields below.
+- `imagePosition`: `left` or `right`. Don't repeat the same position on two adjacent screens.
 
 ### Block format catalog (stage-4 fields only)
 
 | format | Required fields |
 |---|---|
 | `text` | `content` (Markdown) — canonical pure-rich-text block (RichTextRenderer). |
-| `image-richtext` | `imageUrl` (use `/assets/placeholder-image.svg` — the canonical CMS placeholder), `imagePosition` (`left`\|`right`), `content` (Markdown), `caption` (**required for all image-bearing blocks** — one sentence in the format `"<subject>, <brief-derived style direction>, 1:1 aspect ratio"`; see caption rules above). |
+| `image-richtext` | `imageUrl` (use `/assets/placeholder-image.svg` — the canonical CMS placeholder), `imagePosition` (`left`\|`right` — see rule below), `content` (Markdown), `caption` (**required for all image-bearing blocks** — one sentence in the format `"<subject>, <brief-derived style direction>, 1:1 aspect ratio"`; see caption rules above). |
 | `image` | `url`, `alt` |
 | `video` | `url` (optional `poster`) |
 | `quiz-text` | `question` (Markdown), `choices` (≥2 `{id,text}`, unique ids), `correctAnswer` (one of the ids), `text` (Markdown — context/setup copy beside the quiz; REQUIRED when using this format. For pure quiz screens use `question` instead) |

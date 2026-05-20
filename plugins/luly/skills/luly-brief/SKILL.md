@@ -63,18 +63,6 @@ All color values must be 6- or 8-char hex (e.g. `#AB9FF2` or `#AB9FF2FF`). The v
 
 If brand research fails (no usable sources, site behind auth, etc.), set only `company` and proceed — downstream stages fall back gracefully when colors / logo are absent. Tell the user one line about what you found and didn't find.
 
-### 2. Infer lengthHint without asking
-
-Infer `lengthHint` from the intent:
-
-| Signal | Choose |
-|---|---|
-| "quick", "single", "landing", "one-pager" | `quick` |
-| Default if unclear | `standard` |
-| "deep dive", "full academy", "complete course", "8+ lessons" | `long` |
-
-Only ask the user if the intent is genuinely ambiguous.
-
 ### 3. Write the file
 
 Write `tmp/luly-agent/brief.json` with these fields. The `brand` block is optional — include only when the product is for a specific company (see step 1b):
@@ -84,7 +72,6 @@ Write `tmp/luly-agent/brief.json` with these fields. The `brand` block is option
   "intent":     "string, non-empty",
   "audience":   "string, non-empty",
   "tone":       "string, non-empty",
-  "lengthHint": "quick | standard | long",
   "materials":  ["string", "..."],
   "brand": {
     "company":  "string, non-empty (required if brand present)",

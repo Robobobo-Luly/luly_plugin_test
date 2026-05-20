@@ -25,15 +25,20 @@ Read `tmp/luly-agent/brief.json` and `tmp/luly-agent/product-type.json`.
 For an `academy` preset, plan **one course only** — the first one the academy
 will hold. Adding more courses later is a separate flow.
 
-### 3. Decide lesson and screen counts
+### 3. Lesson and screen counts
 
-Use `brief.lengthHint` as a heuristic and adjust to intent:
+Pick within each preset's range, honoring any explicit signal in the brief.
 
-| lengthHint | with-lessons | screens-only |
+| Preset | Lessons | Screens per lesson |
 |---|---|---|
-| `quick` | 1 lesson × 3–5 screens | 3–5 screens |
-| `standard` | 3 lessons × 3–4 screens | 5–8 screens |
-| `long` | 5–8 lessons × 3–5 screens | (rare — usually upgrade to course shape) |
+| `academy` | 2–8 | 3–5 |
+| `academy-course` | 2–8 | 3–5 |
+| `campaign-course` | 2–6 | 3–5 |
+| `campaign-simple` | 1 | 4–7 |
+| `waitlist` | 1 | 3–5 |
+| `interactive-proposal` | 1 | 5–8 |
+
+If your plan would emit 1 lesson, the preset must be `campaign-simple`, `waitlist`, or `interactive-proposal`.
 
 ### 4. Draft the markdown
 

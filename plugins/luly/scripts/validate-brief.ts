@@ -27,8 +27,12 @@ function validate(raw: unknown): Brief {
   if (!isNonEmptyString(obj.audience)) fail('"audience" must be a non-empty string');
   if (!isNonEmptyString(obj.tone)) fail('"tone" must be a non-empty string');
 
-  if (!isNonEmptyString(obj.lengthHint) || !VALID_LENGTH.includes(obj.lengthHint as LengthHint)) {
-    fail(`"lengthHint" must be one of: ${VALID_LENGTH.join(', ')}`);
+  // lengthHint is deprecated but still accepted for backward compat.
+  // New briefs omit it; lesson/screen counts come from per-preset ranges in /luly-plan.
+  if (obj.lengthHint !== undefined) {
+    if (!isNonEmptyString(obj.lengthHint) || !VALID_LENGTH.includes(obj.lengthHint as LengthHint)) {
+      fail(`"lengthHint" if present must be one of: ${VALID_LENGTH.join(', ')}`);
+    }
   }
 
   if (!Array.isArray(obj.materials)) fail('"materials" must be an array (can be empty)');
@@ -98,7 +102,7 @@ function main(): void {
   }
 
   const brief = validate(raw);
-  ok(`${inputPath} — intent="${brief.intent.slice(0, 60)}${brief.intent.length > 60 ? '…' : ''}", lengthHint=${brief.lengthHint}, materials=${brief.materials.length}`);
+  ok(`${inputPath} — intent="${brief.intent.slice(0, 60)}${brief.intent.length > 60 ? '…' : ''}", materials=${brief.materials.length}${brief.lengthHint ? ` (legacy lengthHint=${brief.lengthHint})` : ''}`);
 }
 
 main();
