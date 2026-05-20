@@ -274,11 +274,12 @@ function isSimpleCourse(preset: string): boolean {
 function courseBodyFor(
   preset: string,
   courseKey: string,
-  opts: { courseAuthor?: string; cardImageSvg?: string } = {},
+  opts: { courseAuthor?: string; cardImageSvg?: string; iconSvg?: string } = {},
 ): Record<string, unknown> {
   if (isSimpleCourse(preset)) {
     const body: Record<string, unknown> = { flowType: 'simple', courseKey };
     if (opts.cardImageSvg) body.cardImageSvg = opts.cardImageSvg;
+    if (opts.iconSvg) body.iconSvg = opts.iconSvg;
     return body;
   }
   const body: Record<string, unknown> = {
@@ -288,24 +289,29 @@ function courseBodyFor(
     sequentialLessons: true,
   };
   if (opts.cardImageSvg) body.cardImageSvg = opts.cardImageSvg;
+  if (opts.iconSvg) body.iconSvg = opts.iconSvg;
   return body;
 }
 
 /**
- * Read the agent-authored course-icon SVG (written by /luly-icon) and return
- * its raw markup. Returns undefined when the file is missing — assemble then
- * proceeds without a card image and the renderer falls back to its default.
+ * Read an agent-authored SVG file (written by /luly-icon) and return its raw
+ * markup. Returns undefined when the file is missing or doesn't start with
+ * <svg — assemble then proceeds without that field and the renderer falls
+ * back to its default (cardImageUrl / iconUrl / placeholder).
  *
  * The SVG is stored inline (as text in the JSON), not as a URL or data URI.
- * The renderer inlines it via dangerouslySetInnerHTML in HubCourseCard.
+ * The renderer inlines it via dangerouslySetInnerHTML.
  */
-function loadCourseIconSvg(): string | undefined {
-  const path = resolve(process.cwd(), 'tmp/luly-agent/course-icon.svg');
+function loadInlineSvg(relativePath: string): string | undefined {
+  const path = resolve(process.cwd(), relativePath);
   if (!existsSync(path)) return undefined;
   const raw = readFileSync(path, 'utf8').trim();
   if (!raw.startsWith('<svg')) return undefined;
   return raw;
 }
+
+const loadCardCoverSvg = () => loadInlineSvg('tmp/luly-agent/card-cover.svg');
+const loadCourseIconSvg = () => loadInlineSvg('tmp/luly-agent/course-icon.svg');
 
 function buildLessonNode(
   lesson: Lesson,
@@ -335,7 +341,8 @@ function buildLessonNode(
 
 function buildCourseOnly(inputs: AssembleInputs): NodeExport {
   const preset = inputs.productType.preset;
-  const cardImageSvg = loadCourseIconSvg();
+  const cardImageSvg = loadCardCoverSvg();
+  const iconSvg = loadCourseIconSvg();
   const course: NodeExport = {
     type: 'course',
     title: inputs.plan.courseTitle,
@@ -344,6 +351,7 @@ function buildCourseOnly(inputs: AssembleInputs): NodeExport {
     body: courseBodyFor(preset, inputs.productType.key, {
       courseAuthor: inputs.productType.courseAuthor,
       cardImageSvg,
+      iconSvg,
     }),
     controls: instantiateControls(inputs.controlsMap['course']),
     lexoRank: ranksFor(1)[0],
@@ -443,11 +451,14 @@ function buildFlow(inputs: AssembleInputs): NodeExport {
   flow.children!.push(hub);
 
   // Course — body shape varies by preset:
-  //   simple courses  → { flowType: 'simple', courseKey, cardImageSvg? }
-  //   learning courses → { author, flowType: 'learning', courseKey, sequentialLessons, cardImageSvg? }
-  // Card icon SVG is authored by /luly-icon and stored inline as text.
+  //   simple courses  → { flowType: 'simple', courseKey, cardImageSvg?, iconSvg? }
+  //   learning courses → { author, flowType: 'learning', courseKey, sequentialLessons, cardImageSvg?, iconSvg? }
+  // Both SVGs are authored by /luly-icon and stored inline as text.
+  // - cardImageSvg = wide 16:9 card cover (card-cover.svg)
+  // - iconSvg      = square 1:1 course icon (course-icon.svg)
   const courseIsSimple = isSimpleCourse(preset);
-  const cardImageSvg = loadCourseIconSvg();
+  const cardImageSvg = loadCardCoverSvg();
+  const iconSvg = loadCourseIconSvg();
   const course: NodeExport = {
     type: 'course',
     title: courseTitle,
@@ -456,6 +467,7 @@ function buildFlow(inputs: AssembleInputs): NodeExport {
     body: courseBodyFor(preset, inputs.productType.key, {
       courseAuthor: inputs.productType.courseAuthor,
       cardImageSvg,
+      iconSvg,
     }),
     controls: instantiateControls(inputs.controlsMap['course']),
     lexoRank: ranksFor(1)[0],

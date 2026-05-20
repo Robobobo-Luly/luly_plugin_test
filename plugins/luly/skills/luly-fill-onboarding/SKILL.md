@@ -29,10 +29,12 @@ For every onboarding screen in `plan.parsed.json.onboarding`:
 - Write `content` and `question` fields as **plain Markdown**. Same rules as `/luly-fill-lesson`.
 - Image URLs: use the canonical project placeholder `/assets/placeholder-image.svg` (real, renders cleanly). For each image-bearing block, set `caption` to a one-sentence description of the illustration — it shows under the image in the CMS AND serves as the prompt for a future image-gen step.
 - **Caption format** (same hard rule as `/luly-fill-lesson`):
-  - With brand colors: `"<subject>, <style direction>, using palette <#HEX> primary, <#HEX> background, 1:1 aspect ratio"`.
-  - Without brand colors: `"<subject>, <style direction>, 1:1 aspect ratio"` — no color words.
+  - With brand colors: `"<subject>, <style direction>, using palette <#HEX> primary, <#HEX> background"` (+ optional aspect ratio).
+  - Without brand colors: `"<subject>, <style direction>"` — no color words.
 
   > ⛔ **Banned color words in captions:** `purple`, `blue`, `green`, `red`, `orange`, `violet`, `navy`, `teal`, `pink`, `yellow`, `dark`/`light`/`warm`/`cool` (as color descriptors), `soft gradient`, `muted palette`, `brand colors` (when not followed by HEX). Use ONLY 6-char HEX strings (e.g. `#AB9FF2`) sourced from `brief.brand.colors`. If brand colors aren't defined, omit color mentions entirely — don't invent HEX.
+
+  **Aspect ratio is optional** — append it only when you can reasonably match the layout (1:1 for square hero, 16:9 for wide hero, 9:16 for mobile full-bleed). Onboarding screens are typically square-ish hero blocks, so `1:1 aspect ratio` is a sensible default; skip the clause if unsure.
 
   Style direction is about *technique* (`"flat vector illustration"`, `"soft hand-drawn line art"`, `"playful cartoon style"`, `"minimal geometric composition"`) — not color. Keep style consistent across all onboarding screens.
 

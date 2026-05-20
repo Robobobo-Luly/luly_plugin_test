@@ -88,35 +88,50 @@ For each screen in the plan:
 
      Format the color clause as: `using palette <#HEX role>, <#HEX role>, <#HEX role>`. Roles are optional descriptors (`primary`, `background`, `accent`).
 
-  4. **`1:1 aspect ratio`** — append literally. Every caption.
+  4. **Aspect ratio — optional, context-aware.** Don't reflexively append "1:1 aspect ratio" to every caption. Pick what fits the block's place in the layout:
+     - **Square (1:1)** for thumbnails, small icons, and most inline image-richtext blocks where the image sits beside copy.
+     - **Wide (16:9)** for hero-style image blocks that span the full screen width, or for any block clearly used as a banner.
+     - **Tall (4:5 or 9:16)** only when the layout is mobile-only story mode and the image is full-bleed.
+     - **Omit entirely** when you genuinely don't know — better to let the image-gen step pick than to lock in a wrong ratio.
+
+     Pick once per lesson and stay consistent across that lesson's blocks. The card cover + course icon have their own dedicated step (`/luly-icon`) and ratios — those are not in scope here.
 
   **Caption format:**
-  - With brand colors: `"<subject>, <style direction>, using palette <#HEX> primary, <#HEX> background, 1:1 aspect ratio"`.
-  - Without brand colors: `"<subject>, <style direction>, 1:1 aspect ratio"` — no color words at all.
+  - With brand colors + aspect: `"<subject>, <style direction>, using palette <#HEX> primary, <#HEX> background, <aspect> aspect ratio"`.
+  - With brand colors, no aspect: `"<subject>, <style direction>, using palette <#HEX> primary, <#HEX> background"`.
+  - Without brand colors: `"<subject>, <style direction>"` — no color words, aspect optional.
 
   **Worked examples:**
 
-  ✅ Phantom academy (brand has `#AB9FF2` primary, `#FFFFFF` background, `#4A4A4A` accent):
+  ✅ Phantom inline image-richtext (brand has `#AB9FF2`, `#FFFFFF`, `#4A4A4A`; square thumbnail):
   ```
   "Friendly ghost mascot waving from inside a smartphone, flat vector illustration with soft glow, using palette #AB9FF2 primary, #FFFFFF background, #4A4A4A accent, 1:1 aspect ratio"
   ```
 
-  ✅ Generic German-learning lesson (no brand):
+  ✅ Phantom hero banner block (wide):
   ```
-  "Two cartoon characters chatting at a cafe with German books, warm pastel cartoon style, 1:1 aspect ratio"
+  "Ghost mascot looking through a multi-chain wallet interface with gentle glow, flat vector illustration, using palette #AB9FF2 primary, #FFFFFF background, 16:9 aspect ratio"
   ```
 
-  ❌ Wrong (uses banned vague words):
+  ✅ Generic German-learning lesson (no brand, no aspect specified):
+  ```
+  "Two cartoon characters chatting at a cafe with German books, warm pastel cartoon style"
+  ```
+
+  ❌ Wrong (uses banned vague color words):
   ```
   "Ghost mascot waving hello, soft purple gradient background, modern minimal style"
   ```
-  Replace `"soft purple gradient background"` with either `"using palette #AB9FF2 primary, #FFFFFF background"` (if brand HEX available) or just omit the color phrase entirely.
+  Replace `"soft purple gradient background"` with either `"using palette #AB9FF2 primary, #FFFFFF background"` (if brand HEX available) or omit the color phrase entirely.
 
   ❌ Wrong (invents HEX not in the brief):
   ```
   "Wallet icon, dark vector with deep #1A1A2E background"
   ```
   Brief didn't define `#1A1A2E` — either find it in `brief.brand.colors` or don't reference it.
+
+  ❌ Wrong (mandatory 1:1 on a hero banner that's wide in the layout):
+  Forcing `1:1 aspect ratio` on a block the layout renders 16:9 wastes pixels. Match the block's actual aspect or omit.
 - Keep block bodies minimal — only the fields below.
 
 ### Block format catalog (stage-4 fields only)
