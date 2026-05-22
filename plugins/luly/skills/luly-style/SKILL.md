@@ -1,225 +1,208 @@
 ---
 name: luly-style
-description: Step 5 of the Luly authoring pipeline. Generate a fresh 22-token color palette matched to the brief's tone, audience, topic, and product preset; pick fontHeading and fontBody from the closed list of supported fonts; write theme.json as a full direct theme spec (no presets, no resolver). Use after lessons are filled; before controls / metadata stages.
+description: Stage 3 of the Luly authoring pipeline. Generate the 22-token color palette + fonts, and design two SVG visuals (wide card cover + square course icon) when the preset has a hub catalog. Output is theme.md plus two .svg files. Absorbs the old luly-icon stage.
 ---
 
-# Luly — Step 5: Workspace theme
+# Luly — Stage 3: Theme & visuals
 
-Colors are **NOT picked from a preset palette**. The agent generates the full 22-token palette per request — choosing hues, lightness, and contrast that actually fit the brief's tone, audience, and topic.
-
-Fonts are **restricted to the closed list below** — these are the only fonts the CMS actually renders.
+One agent, three artifacts: a palette/fonts markdown, a wide card cover SVG, a square course icon SVG. The visuals use the resolved palette so they're brand-coherent.
 
 ## Process
 
 ### 1. Load prior stages
 
 Read:
-- `tmp/luly-agent/brief.json`
-- `tmp/luly-agent/product-type.json`
-- `tmp/luly-agent/plan.parsed.json` (for context)
-- `tmp/luly-agent/format-profile.json`
+- `tmp/luly-agent/intake.md` — for brand colors (if present), tone, audience
+- `tmp/luly-agent/plan.md` — for preset, course title, section titles (visual concept hints)
 
-If any is missing, stop and direct the user to the appropriate prior skill.
+### 2. Honor brand colors when present
 
-### 1b. Honor `brief.brand.colors` when present
+If `intake.md` has a `Colors:` block, **anchor the theme to those values verbatim**:
 
-If `brief.brand.colors` exists, **anchor the theme to those values** rather than inventing fresh hues:
+- `primary` from brand → theme `primary`
+- `background` from brand → theme `background` (derive `surface` as a near-tint)
+- `secondary` from brand → theme `secondary`
+- `text` from brand → theme `textColor`
+- `accent` from brand → route to whichever token best fits (often `secondary` or `successLight`)
+- Other brand colors → derive `primaryLight`, `border`, `disabled` from the brand palette via lightness shifts
+- Header/footer/semantic tokens — generate to harmonize with the brand
 
-- `brief.brand.colors.primary` → use **verbatim** as the theme's `primary` token. Do not pick a different brand color.
-- `brief.brand.colors.secondary` → use as `secondary`.
-- `brief.brand.colors.background` → use as `background` (and derive `surface` as a near-tint of it).
-- `brief.brand.colors.text` → use as `textColor`.
-- `brief.brand.colors.accent` → if present, route to whichever token best fits (often `secondary` or `successLight`).
-- Other brand colors → derive `primaryLight`, `border`, `disabled` from the brand palette by lightness adjustments rather than inventing new hues.
-- Header/footer/semantic tokens still need to be generated — pick them to harmonize with the brand colors (e.g. headerBackground matches background or surface; success/failure/warning stay in their canonical hue families).
+Never override the brand's primary because you think a different color looks better.
 
-This keeps the theme visually faithful to the company's brand. Do NOT override the brand's primary just because you think a different color would look better.
+If no brand colors, generate a fresh palette matched to the tone/audience/topic.
 
-If `brief.brand.colors` is absent or empty, proceed with the freeform palette generation in step 2 below.
+### 3. Pick fonts
 
-### 2. Generate a fresh color palette
+`fontHeading` and `fontBody` MUST come from this closed list (verbatim CSS family strings):
 
-> ⚠ **All 22 color tokens are required.** Four are commonly forgotten — pick them up-front as part of your palette plan, not as an afterthought:
-> - `headerBackground` + `headerText` (header bar — pick as a contrast pair, ≥ 4.5:1)
-> - `footerBackground` + `footerText` (footer bar — pick as a contrast pair, ≥ 4.5:1)
->
-> Don't skip these. A theme.json without all four will fail validation every time.
+```
+"Inter", sans-serif
+"Inter Tight", sans-serif
+"SF Pro Display", -apple-system, sans-serif
+"Roboto", sans-serif
+"Matter", sans-serif
+"Nunito", sans-serif
+"Poppins", sans-serif
+"Open Sans", sans-serif
+"Montserrat", sans-serif
+"Lato", sans-serif
+```
 
-From the brief, infer a colour direction (don't ask):
+Same-font pairs (Inter/Inter) are fine. For more character: Montserrat/Inter, Nunito/Open Sans, Poppins/Lato.
 
-- **Light vs dark background** — pick based on tone: warm/friendly/playful → light cream/white; sharp/tech/crypto → dark navy/slate; corporate/financial → very light gray; high-contrast/a11y → pure white.
-- **Primary brand color** — pick a hue from a palette that fits the topic + tone. Examples: language learning → warm orange/teal; finance → navy/forest; crypto → cyan/violet; lifestyle → soft coral/sage. Do NOT default to blue every time.
-- **Secondary** — a complementary or analogous hue, used sparingly.
-- **Neutrals** — `surface`, `onSurface`, `border`, `disabled` — soft tints of the background.
-- **Text** — `textColor` (high contrast against background), `mutedTextColor` (~60% strength), `disabledTextColor` (~30%), `textOnPrimary` (contrast against primary — usually pure white or pure dark).
-- **Semantics** — `success`/`successLight` (green family), `failure`/`failureLight` (red family), `warning`/`warningLight` (amber/orange).
+### 4. Contrast targets (mandatory)
 
-All values are **6- or 8-char hex strings** (no 3-char shorthand, no `rgb()`, no named colors).
-
-### Contrast targets (mandatory — check before emitting)
-
-| Pair | Target | Notes |
-|---|---|---|
-| `textColor` vs `background` | **≥ 7:1 (AAA)** | Body copy must be confidently readable. |
-| `textOnPrimary` vs `primary` | **≥ 4.5:1 (AA)** | If `primary` is light, `textOnPrimary` must be dark; vice-versa. |
-| `mutedTextColor` vs `background` | **≥ 4.5:1 (AA)** | Same hue as textColor, blended ~70% toward background. |
-| `surface` vs `background` | 5–15% lightness shift | Don't make them identical — surface must read as a raised panel. |
-| `border` vs `background` | subtle but visible | ~10–20% darker on light themes; lighter on dark themes. |
-| `headerText` vs `headerBackground` | **≥ 4.5:1 (AA)** | Logo + menu links sit on the header bar. Pick them as a pair. |
-| `footerText` vs `footerBackground` | **≥ 4.5:1 (AA)** | "Powered by Luly" + legal links + social icons all share `footerText`. |
-
-If your draft fails any of these (mentally estimate luminance), iterate the hex values before writing the file. A perfectly tonal palette that fails contrast is a worse outcome than a slightly less elegant palette that passes.
-
-### Worked palette anchors
-
-These are reference palettes that pass the contrast targets. Generate fresh per request — don't copy verbatim — but use them as anchors for what "right" looks like.
-
-| Vibe | background | surface | primary | primaryLight | textColor | mutedTextColor | textOnPrimary | success |
-|---|---|---|---|---|---|---|---|---|
-| Warm friendly | `#FFF8F0` | `#FFEAD5` | `#E85A3C` | `#FFD9C2` | `#2C1810` | `#7A5A40` | `#FFFFFF` | `#10B981` |
-| Dark tech | `#0B0F1A` | `#161B2A` | `#22D3EE` | `#0E3A47` | `#E6E9EF` | `#94A3B8` | `#001017` | `#34D399` |
-| Corporate | `#F8FAFC` | `#FFFFFF` | `#1E3A8A` | `#DBEAFE` | `#0F172A` | `#475569` | `#FFFFFF` | `#15803D` |
-| Minimal | `#FFFFFF` | `#F5F5F5` | `#111111` | `#E0E0E0` | `#0A0A0A` | `#525252` | `#FFFFFF` | `#16A34A` |
-| Playful pastel | `#FFFBF5` | `#FFF1E0` | `#F472B6` | `#FCE7F3` | `#1F2937` | `#6B7280` | `#FFFFFF` | `#34D399` |
-
-#### The 22 required color tokens
-
-| Token | Role | Pick guidance |
-|---|---|---|
-| `background` | Main page background | Light or dark based on tone |
-| `surface` | Cards, panels | A tint of background (lighter on light, slightly raised on dark) |
-| `primary` | Brand colour — buttons, active states | The hero hue for the brand/topic |
-| `primaryLight` | Selected-state backgrounds | A 10–20% tint of primary blended with background |
-| `secondary` | Accent background — sticky bars, Connect-wallet pill | Complementary or analogous to primary. Not the footer anymore — that's its own token. |
-| `onSurface` | Secondary surface (answer options, chips) | Slightly different shade of surface |
-| `textColor` | Headings, main body text | High contrast against background (~AA contrast ratio) |
-| `mutedTextColor` | Descriptions, subtitles | ~60% strength of textColor |
-| `disabledTextColor` | Disabled labels, placeholders | ~30% strength |
-| `textOnPrimary` | Text on primary buttons | Pure white on dark primary, pure dark on light primary |
-| `headerBackground` | App header bar + mega-menu dropdown | Usually equals `background` for an integrated look, or a tinted variant for contrast |
-| `headerText` | Header logo, menu links, burger glyph, mega-menu titles + items | Pick as a pair with `headerBackground` (≥ 4.5:1) |
-| `footerBackground` | App footer bar | Often dark (sticky branded base) or matches `background` for a quiet footer |
-| `footerText` | "Powered by Luly" + Luly mark, legal links, social icons (X, Telegram, LinkedIn) | Pick as a pair with `footerBackground` (≥ 4.5:1) |
-| `border` | Card outlines, separators | Subtle — close to background |
-| `disabled` | Disabled element bg | Neutral light/dark |
-| `success` | Correct answer, success | Green family (e.g., `#10B981`) |
-| `successLight` | Background behind correct answer | Pale tint of success |
-| `failure` | Wrong answer, errors | Red family (e.g., `#EF4444`) |
-| `failureLight` | Background behind wrong answer | Pale tint of failure |
-| `warning` | Warnings | Amber/orange (e.g., `#F59E0B`) |
-| `warningLight` | Background for warnings | Pale tint of warning |
-
-### 3. Pick fonts from the closed supported list
-
-`fontHeading` and `fontBody` must be **exactly** one of these CSS family strings (use the string verbatim, including outer quotes):
-
-| Font | Use it for |
+| Pair | Target |
 |---|---|
-| `"Inter", sans-serif` | Default — clean, modern, neutral |
-| `"Inter Tight", sans-serif` | Tighter spacing; tech / sharp brands |
-| `"Roboto", sans-serif` | Geometric, neutral; Android-ecosystem feel |
-| `"Matter", sans-serif` | Modern grotesque, slightly distinctive |
-| `"Nunito", sans-serif` | Friendly, rounded, warm |
-| `"Poppins", sans-serif` | Geometric, friendly, mid-2010s startup look |
-| `"Open Sans", sans-serif` | Humanist, very readable, neutral |
-| `"Montserrat", sans-serif` | Confident, modern, slightly geometric headings |
-| `"Lato", sans-serif` | Semi-rounded, warm, broadly readable body |
+| `textColor` vs `background` | ≥ 7:1 (AAA) |
+| `textOnPrimary` vs `primary` | ≥ 4.5:1 (AA) |
+| `mutedTextColor` vs `background` | ≥ 4.5:1 (AA) |
+| `surface` vs `background` | 5–15% lightness shift (distinguishable) |
+| `headerText` vs `headerBackground` | ≥ 4.5:1 |
+| `footerText` vs `footerBackground` | ≥ 4.5:1 |
 
-Pairing guidance:
-- **Same-font pairs are fine** (e.g. Inter / Inter). Default.
-- For more character: Montserrat heading + Inter body; Nunito heading + Open Sans body; Poppins heading + Lato body.
-- Don't mix two heavy display fonts. Don't pick anything outside the list.
+A perfectly tonal palette that fails contrast is worse than a slightly less elegant palette that passes.
 
-### 4. Optionally pick size tokens
+### 5. Write `theme.md`
 
-Most flows don't need these — the renderer falls back to sane defaults. Only set them when the brand tone clearly calls for it:
+Path: `tmp/luly-agent/theme.md`. Overwrite.
 
-- Sharp/tech → `buttonBorderRadius: "4px"`, `containerBorderRadius: "6px"`
-- Warm/friendly → `buttonBorderRadius: "12px"`, `containerBorderRadius: "16px"`
-- Pill/playful → `buttonBorderRadius: "9999px"`
+```markdown
+## Palette
+- background: #FFFFFF
+- surface: #FAFAFA
+- primary: #AB9FF2
+- primaryLight: #E8E2FB
+- secondary: #5F4FE3
+- onSurface: #FAFAFA
+- textColor: #0B0B0F
+- mutedTextColor: #555560
+- disabledTextColor: #B0B0B5
+- textOnPrimary: #FFFFFF
+- headerBackground: #FFFFFF
+- headerText: #0B0B0F
+- footerBackground: #FAFAFA
+- footerText: #555560
+- border: #E5E5E5
+- disabled: #F5F5F5
+- success: #10B981
+- successLight: #E8F8EF
+- failure: #DC2626
+- failureLight: #FBE6E6
+- warning: #F59E0B
+- warningLight: #FFE8C2
 
-Optional layout (maxWidth, padding) similarly defaults sanely.
-
-### 5. Write the file
-
-**Pre-flight checklist** — confirm each of these before emitting JSON. Validation fails on any missing token:
-
-- [ ] `background`, `surface`, `primary`, `primaryLight`, `secondary`, `onSurface` (6 surface/brand)
-- [ ] `textColor`, `mutedTextColor`, `disabledTextColor`, `textOnPrimary` (4 text)
-- [ ] **`headerBackground`, `headerText`, `footerBackground`, `footerText`** ← the four most commonly forgotten
-- [ ] `border`, `disabled` (2 utility)
-- [ ] `success`, `successLight`, `failure`, `failureLight`, `warning`, `warningLight` (6 semantic)
-
-Total: **22 color tokens**. Re-count before writing.
-
-Write `tmp/luly-agent/theme.json` with the full theme:
-
-```json
-{
-  "colors": {
-    "background": "#...",
-    "surface": "#...",
-    "primary": "#...",
-    "primaryLight": "#...",
-    "secondary": "#...",
-    "onSurface": "#...",
-    "textColor": "#...",
-    "mutedTextColor": "#...",
-    "disabledTextColor": "#...",
-    "textOnPrimary": "#...",
-    "headerBackground": "#...",
-    "headerText": "#...",
-    "footerBackground": "#...",
-    "footerText": "#...",
-    "border": "#...",
-    "disabled": "#...",
-    "success": "#...",
-    "successLight": "#...",
-    "failure": "#...",
-    "failureLight": "#...",
-    "warning": "#...",
-    "warningLight": "#..."
-  },
-  "style": {
-    "fontHeading": "\"<one of the supported fonts>\", sans-serif",
-    "fontBody": "\"<one of the supported fonts>\", sans-serif",
-    "buttonBorderRadius": "..."
-  },
-  "layout": {
-    "maxWidth": "1200px"
-  }
-}
+## Fonts
+- heading: "Inter", sans-serif
+- body: "Inter", sans-serif
+- buttonBorderRadius: 12px
 ```
 
-`layout` is optional; you can omit it entirely. `style.*` size fields beyond fontHeading/fontBody are optional too.
+All 22 color tokens are required. The four commonly-forgotten ones — `headerBackground`, `headerText`, `footerBackground`, `footerText` — pick them as contrast pairs.
 
-### 6. Validate
+### 6. Visuals — preset gate
 
-Run:
+**Skip visuals entirely** if the preset is `campaign-simple`, `waitlist`, or `interactive-proposal`. Those have no hub catalog so the SVGs would never render. Do not write `card-cover.svg` or `course-icon.svg` for those presets.
 
+Otherwise (academy / academy-course / campaign-course), continue to step 7.
+
+### 7. Design two SVGs
+
+Same visual concept across both for coherence. Pick one metaphor that fits the course topic:
+
+| Topic hint | Visual metaphor |
+|---|---|
+| Phantom wallet | Stylised ghost outline |
+| Solana ecosystem | Diagonal motion line / chevron pair |
+| Language course | Speech bubble with quote glyph |
+| DeFi yield | Coin stack / upward arrow |
+| Security | Shield with keyhole |
+| API tutorial | Stylised brackets `{ }` with connecting line |
+
+When unsure, default to abstract geometry from the palette. Abstract + brand colors reads as "branded course."
+
+Universal constraints (apply to both):
+- No external references (no `<image href>`, no `xlink:href`).
+- No `<script>` tags. No event handlers.
+- Inline styles only — no `<style>` blocks.
+- Use only colors from `theme.md`.
+- At least 2 distinct shapes per SVG.
+- Pretty-printed with 2-space indent.
+- No XML declaration, no doctype. Just `<svg …> … </svg>`.
+
+### 7a. Card cover — 10:3
+
+- **`viewBox="0 0 640 192"`** — wide 10:3 aspect.
+- Use the full canvas. Background fill mandatory.
+- Typography allowed (course title, academy name, tagline) — the cover is wide enough.
+- File: `tmp/luly-agent/card-cover.svg`.
+
+### 7b. Course icon — 1:1
+
+- **`viewBox="0 0 256 256"`** — square.
+- **No text** — rendered at ~32px on the card; detail is wasted past that.
+- Single subject centered, with breathing room (reads as a mark, not a tile).
+- Same concept as the card cover — coherence.
+- File: `tmp/luly-agent/course-icon.svg`.
+
+### 8. Worked example — Phantom academy
+
+Theme: purple `#AB9FF2`, dark bg `#0B0B0F`, text white `#FFFFFF`.
+
+**Card cover (10:3):**
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 192" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0B0B0F"/>
+      <stop offset="1" stop-color="#1A1530"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.25" cy="0.5" r="0.4">
+      <stop offset="0" stop-color="#AB9FF2" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#AB9FF2" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="640" height="192" fill="url(#bg)"/>
+  <circle cx="160" cy="96" r="150" fill="url(#glow)"/>
+  <!-- Ghost silhouette -->
+  <path d="M160 30 C 200 30 230 60 230 100 L 230 150 L 215 135 L 200 150 L 185 135 L 170 150 L 155 135 L 140 150 L 125 135 L 110 150 L 95 135 L 95 100 C 95 60 125 30 160 30 Z" fill="#AB9FF2"/>
+  <ellipse cx="138" cy="93" rx="7" ry="10" fill="#0B0B0F"/>
+  <ellipse cx="178" cy="93" rx="7" ry="10" fill="#0B0B0F"/>
+  <text x="290" y="85" fill="#FFFFFF" font-family="Inter, sans-serif" font-size="28" font-weight="700">What is Phantom?</text>
+  <text x="290" y="125" fill="#AB9FF2" font-family="Inter, sans-serif" font-size="16" font-weight="500" letter-spacing="2">PHANTOM ACADEMY</text>
+</svg>
 ```
-${CLAUDE_PLUGIN_ROOT}/bin/luly validate-theme
+
+**Course icon (1:1):**
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#AB9FF2" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#AB9FF2" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="256" height="256" rx="48" ry="48" fill="#0B0B0F"/>
+  <circle cx="128" cy="128" r="100" fill="url(#glow)"/>
+  <path d="M128 64 C 170 64 200 96 200 138 L 200 200 L 184 184 L 168 200 L 152 184 L 136 200 L 120 184 L 104 200 L 88 184 L 72 200 L 56 184 L 56 138 C 56 96 86 64 128 64 Z" fill="#AB9FF2"/>
+  <ellipse cx="108" cy="128" rx="8" ry="11" fill="#0B0B0F"/>
+  <ellipse cx="148" cy="128" rx="8" ry="11" fill="#0B0B0F"/>
+</svg>
 ```
 
-The validator confirms:
-- All 22 required color tokens present and valid hex (including `headerBackground`, `headerText`, `footerBackground`, `footerText`).
-- `fontHeading` and `fontBody` are in the supported list.
-- Any optional size fields are valid CSS sizes.
+### 9. Hand off
 
-On success, prints the resolved palette + fonts for sanity-check.
-
-### 7. Hand off
-
-Tell the user:
-- `theme.json` is at `tmp/luly-agent/theme.json`.
-- Next stage is `/luly-controls` (when running manually).
+Tell the user where the three artifacts are. Next stage: `/luly-fill`.
 
 ## Hard rules
 
-- Read-only on prior stage artifacts.
-- Write only to `tmp/luly-agent/theme.json`.
-- All 22 required color tokens must be present and valid 6- or 8-char hex.
-- `fontHeading` and `fontBody` MUST be one of the 10 supported CSS strings, **verbatim** — do not invent fonts.
-- No `preset` field. No `overrides` block. Direct theme spec only.
-- No `rgb()`, no 3-char `#FFF`, no named colors.
+- Read-only on intake.md and plan.md.
+- Write only to `theme.md` + (for hub presets) `card-cover.svg` + `course-icon.svg`.
+- All 22 color tokens present and valid hex.
+- Fonts from the closed list, verbatim.
+- Card cover viewBox `0 0 640 192`. Course icon viewBox `0 0 256 256`.
+- Card cover may use text; course icon may not.
+- Same visual concept for both.
 - Do not run any other skill in this conversation.

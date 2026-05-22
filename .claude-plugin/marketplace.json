@@ -6,7 +6,7 @@
   },
   "plugins": [
     {
-      "name": "luly-v0-1-7",
+      "name": "luly-v0-2-0",
       "source": "./plugins/luly",
       "description": "Author Luly flows (academies, courses, marketing campaigns, waitlists, interactive proposals) end-to-end from a single natural-language prompt. Ships 14 skills plus the validator / assembler scripts they call. Plugin name carries the version so it's always visible in Skill() calls."
     }
