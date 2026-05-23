@@ -47,8 +47,8 @@ Mirror the screen count from the plan exactly — no adding, no dropping.
 | Format | Required header fields | Body |
 |---|---|---|
 | `text` | `type: text` | Markdown content (pure rich text) |
-| `image-richtext` | `type: image-richtext`<br>`image: /assets/placeholder-image.svg`<br>`position: left` or `right`<br>`caption: "<see caption rules below>"` | Markdown content |
-| `image` | `type: image`<br>`url: <url>`<br>`alt: <alt text>`<br>`caption: "<…>"` (optional) | (none) |
+| `image-richtext` | `type: image-richtext`<br>`image: <see SVG illustration rules below>`<br>`position: left` or `right`<br>`caption: "<see caption rules below>"` | Markdown content |
+| `image` | `type: image`<br>`url: <see SVG illustration rules below>`<br>`alt: <alt text>`<br>`caption: "<…>"` (optional) | (none) |
 | `video` | `type: video`<br>`url: <url>`<br>`poster: <url>` (optional)<br>`caption: "<…>"` (optional) | (none) |
 | `quiz-text` | `type: quiz-text`<br>`text: "<setup copy beside the quiz>"`<br>`question: "<the question>"`<br>`choices:` bulleted list (≥2)<br>`correct: <id>` | (none — copy lives in `text`) |
 | `question` | `type: question`<br>`question: "<the question>"`<br>`choices:` bulleted list (≥2)<br>`correct: <id>` | (none) |
@@ -93,6 +93,52 @@ fields:
 ```
 
 Field types: `text | email | number | tel | textarea | select | checkbox`. (Note: no `url` type.) For `checkbox`, `checkboxLabel` is plain text (never Markdown); `links` is an optional array.
+
+### 5b. SVG illustrations — default inline visual (new)
+
+For every image-bearing block (`image-richtext`, `image`), design a **minimal SVG illustration** inline. The data URI goes in the `image:` (or `url:` for `image` blocks) field. The caption stays separately as the prompt for a future image-gen step.
+
+This gives you both: a real visible illustration today + a high-quality image-gen prompt for later.
+
+**Design rules for the inline SVG:**
+
+- **viewBox: `0 0 256 256`** for inline / square illustrations. Use `0 0 320 200` for wider hero-style images if the layout needs it.
+- **2–5 simple shapes maximum.** Rect, circle, ellipse, line, simple paths. No fancy gradients required (one optional `<linearGradient>` is fine).
+- **Theme HEX only.** Pull from `theme.md` palette — usually `background`, `primary`, `secondary`, and one accent. Don't invent hex codes.
+- **No text inside the SVG.** The caption is the text. Image = pure visual.
+- **No `<script>`, no `xlink:href`, no `<image href>` external references, no `<style>` blocks.** Self-contained markup.
+- **Coherent across the lesson** — same illustration style across screens in a section. E.g., if you use rounded rectangles + diagonal lines for screen 1, keep that vocabulary for screen 2.
+
+**How to inline it in content.md:**
+
+After designing the SVG, base64-encode it via Bash and paste the resulting `data:image/svg+xml;base64,...` URI as the `image:` (or `url:`) value.
+
+Bash command pattern:
+
+```bash
+SVG='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="#FFFFFF"/><circle cx="128" cy="128" r="64" fill="#AB9FF2"/></svg>'
+echo -n "$SVG" | base64
+```
+
+The output is the base64 string. Prepend `data:image/svg+xml;base64,` and paste as the value:
+
+```
+## Section 1 · Screen 1 — What is Phantom?
+type: image-richtext
+image: data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTYgMjU2Ij48cmVjdCB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgZmlsbD0iI0ZGRkZGRiIvPjxjaXJjbGUgY3g9IjEyOCIgY3k9IjEyOCIgcj0iNjQiIGZpbGw9IiNBQjlGRjIiLz48L3N2Zz4=
+position: right
+caption: "Stylised multi-chain wallet icon, flat vector illustration, using palette #AB9FF2 primary, #FFFFFF background, 1:1 aspect ratio"
+
+**Phantom** is a multi-chain self-custodial wallet...
+```
+
+**Composition hints for what to draw:**
+
+- Match the topic at a metaphorical level: wallet topic → wallet/coin shape; security topic → shield; networks → connected dots; etc.
+- When unsure, default to abstract geometric composition using the theme palette. Branded color is more important than literal subject.
+- Reuse the same metaphor from the card cover / course icon when sensible — visual coherence across the product.
+
+**If you genuinely can't design a meaningful SVG** (very abstract screen, no obvious visual), fall back to: `image: /assets/placeholder-image.svg` — the canonical placeholder. Don't ship an empty white square.
 
 ### 6. Image captions — HEX from theme, no vague color words
 

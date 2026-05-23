@@ -100,6 +100,23 @@ Path: `<workdir>/theme.md`. Overwrite.
 
 All 22 color tokens are required. The four commonly-forgotten ones — `headerBackground`, `headerText`, `footerBackground`, `footerText` — pick them as contrast pairs.
 
+### 5b. Clean SVG logo (when brand is present)
+
+If `intake.md` declares a brand with a `Logo:` URL — or even just a company name with no clean logo URL — design a **clean SVG version of the company's logo / wordmark**. This becomes the app header logo (replaces the default Luly mark) AND can be referenced from the card-cover and course-icon visuals for coherence.
+
+What "clean SVG version" means:
+- If the brand's actual SVG is simple and clean (under ~2KB, no rasters, no scripts), you may copy and minimize it.
+- Otherwise design a simplified version: a recognisable silhouette + the wordmark if it's iconic. Phantom = the ghost. Apple = the apple shape. Etc.
+- If you can't reasonably approximate (obscure brand, no usable source), skip this step — header falls back to default Luly mark, no harm done.
+
+Constraints:
+- **viewBox proportional to a wordmark or square mark** — typical wordmark `0 0 200 60`, square mark `0 0 64 64`.
+- **Use theme palette HEX values** (or the brand's actual logo colors if they're already in the palette).
+- **No `<script>`, no `<image href>` external refs, no `<style>` blocks.** Self-contained.
+- **No XML declaration / doctype.** Just `<svg …> … </svg>`.
+
+Write to `<workdir>/logo.svg`. Assemble base64-inlines it into `flow.body.headerLogo` + `hub.body.hubLogo` and sets `flow.body.headerLogoLink` to `"/"`.
+
 ### 6. Visuals — preset gate
 
 **Skip visuals entirely** if the preset is `campaign-simple`, `waitlist`, or `interactive-proposal`. Those have no hub catalog so the SVGs would never render. Do not write `card-cover.svg` or `course-icon.svg` for those presets.

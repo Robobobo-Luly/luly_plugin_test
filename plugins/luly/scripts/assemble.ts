@@ -187,6 +187,7 @@ function deepMerge<A extends Record<string, unknown>>(target: A, source: Record<
 // ----------------------------------------------------------------------------
 
 interface AssembleInputs {
+  workdir: string;
   brief: Brief;
   productType: ProductType;
   plan: Plan;
@@ -277,24 +278,26 @@ function courseBodyFor(
 }
 
 /**
- * Read an agent-authored SVG file (written by /luly-icon) and return its raw
+ * Read an agent-authored SVG file from the per-run workdir and return its raw
  * markup. Returns undefined when the file is missing or doesn't start with
  * <svg — assemble then proceeds without that field and the renderer falls
- * back to its default (cardImageUrl / iconUrl / placeholder).
- *
- * The SVG is stored inline (as text in the JSON), not as a URL or data URI.
- * The renderer inlines it via dangerouslySetInnerHTML.
+ * back to its default.
  */
-function loadInlineSvg(relativePath: string): string | undefined {
-  const path = resolve(process.cwd(), relativePath);
+function loadInlineSvg(workdir: string, name: string): string | undefined {
+  const path = join(workdir, name);
   if (!existsSync(path)) return undefined;
   const raw = readFileSync(path, 'utf8').trim();
   if (!raw.startsWith('<svg')) return undefined;
   return raw;
 }
 
-const loadCardCoverSvg = () => loadInlineSvg('tmp/luly-agent/card-cover.svg');
-const loadCourseIconSvg = () => loadInlineSvg('tmp/luly-agent/course-icon.svg');
+/**
+ * Convert an SVG markup string to a base64 data URI suitable for <img src>.
+ */
+function svgToDataUri(svg: string): string {
+  const b64 = Buffer.from(svg, 'utf8').toString('base64');
+  return `data:image/svg+xml;base64,${b64}`;
+}
 
 function buildLessonNode(
   lesson: Lesson,
@@ -330,8 +333,8 @@ function buildCourseOnly(inputs: AssembleInputs): NodeExport {
   // so the SVGs would never render. Skip the file reads entirely — this also
   // protects against stale SVG artifacts from a previous run polluting a
   // fresh generation of a simple preset.
-  const cardImageSvg = isSimpleCourse(preset) ? undefined : loadCardCoverSvg();
-  const iconSvg = isSimpleCourse(preset) ? undefined : loadCourseIconSvg();
+  const cardImageSvg = isSimpleCourse(preset) ? undefined : loadInlineSvg(inputs.workdir, 'card-cover.svg');
+  const iconSvg = isSimpleCourse(preset) ? undefined : loadInlineSvg(inputs.workdir, 'course-icon.svg');
   const course: NodeExport = {
     type: 'course',
     title: inputs.plan.courseTitle,
@@ -378,8 +381,19 @@ function buildFlow(inputs: AssembleInputs): NodeExport {
 
   // Propagate brand logo from the brief to the flow's headerLogo so the
   // app header + hub fall back to it when no per-hub logo is set.
-  if (inputs.brief.brand?.logo) {
+  // Header logo + link. Priority:
+  //   1. Clean SVG at <workdir>/logo.svg (written by /luly-style when brand exists)
+  //      — inlined as base64 data URI; sets headerLogoLink to "/" so the logo
+  //      links to the product's published root.
+  //   2. brand.logo URL from intake — falls back to whatever the brand exposed.
+  //   3. Neither — header falls back to default Luly mark.
+  const logoSvg = loadInlineSvg(inputs.workdir, 'logo.svg');
+  if (logoSvg) {
+    flowBody.headerLogo = svgToDataUri(logoSvg);
+    flowBody.headerLogoLink = '/';
+  } else if (inputs.brief.brand?.logo) {
     flowBody.headerLogo = inputs.brief.brand.logo;
+    flowBody.headerLogoLink = '/';
   }
 
   flowBody.locales = {
@@ -426,7 +440,11 @@ function buildFlow(inputs: AssembleInputs): NodeExport {
   // Hub — academy preset carries the academy name as the hub title.
   // hubLogo defaults to brand logo when available, otherwise empty string
   // (which prevents the renderer from falling back to the default base icon).
-  const hubLogoUrl = inputs.brief.brand?.logo ?? '';
+  // hub.body.hubLogo: prefer the clean SVG (same as headerLogo); else fall back
+  // to brand.logo URL; else empty string (renderer suppresses default base icon).
+  const hubLogoUrl = logoSvg
+    ? svgToDataUri(logoSvg)
+    : (inputs.brief.brand?.logo ?? '');
   const hub: NodeExport = {
     type: 'hub',
     title: isAcademy ? flowTitle : 'Hub',
@@ -448,8 +466,8 @@ function buildFlow(inputs: AssembleInputs): NodeExport {
   // Simple presets have no hub catalog → skip loading SVGs (defensive against
   // stale tmp artifacts from a previous run polluting a fresh generation).
   const courseIsSimple = isSimpleCourse(preset);
-  const cardImageSvg = courseIsSimple ? undefined : loadCardCoverSvg();
-  const iconSvg = courseIsSimple ? undefined : loadCourseIconSvg();
+  const cardImageSvg = courseIsSimple ? undefined : loadInlineSvg(inputs.workdir, 'card-cover.svg');
+  const iconSvg = courseIsSimple ? undefined : loadInlineSvg(inputs.workdir, 'course-icon.svg');
   const course: NodeExport = {
     type: 'course',
     title: courseTitle,
@@ -549,8 +567,8 @@ function main(): void {
   const isCourseOnly = productType.preset === 'academy-course';
 
   const root = isCourseOnly
-    ? buildCourseOnly({ brief, productType, plan, formatProfile, theme, lessons, onboarding, controlsMap: controlsArtifact.controls, overrides: null })
-    : buildFlow({ brief, productType, plan, formatProfile, theme, lessons, onboarding, controlsMap: controlsArtifact.controls, overrides: null });
+    ? buildCourseOnly({ workdir, brief, productType, plan, formatProfile, theme, lessons, onboarding, controlsMap: controlsArtifact.controls, overrides: null })
+    : buildFlow({ workdir, brief, productType, plan, formatProfile, theme, lessons, onboarding, controlsMap: controlsArtifact.controls, overrides: null });
 
   const outputPath = join(workdir, `${productType.key}.luly.json`);
   writeFileSync(outputPath, JSON.stringify(root, null, 2) + '\n', 'utf8');
