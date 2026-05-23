@@ -526,6 +526,16 @@ function main(): void {
       `plan has ${planSectionNs.length} section(s) but section(s) [${missing.join(', ')}] not present in content.md`
     );
   }
+  // Symmetric check — guard against content.md having MORE sections than plan
+  // (catches stale leakage from a previous run if the orchestrator forgot to
+  // clear the workdir, or content.md was manually edited with extra sections).
+  const extra = lessons.map(l => l.n).filter((n) => !new Set(planSectionNs).has(n));
+  if (extra.length > 0) {
+    fail(
+      `content.md has section(s) [${extra.join(', ')}] not declared in plan.md — ` +
+      `looks like stale content from a previous run. Clear tmp/luly-agent/ and re-run.`
+    );
+  }
 
   if (plan.onboarding.length > 0) {
     if (!onboarding || onboarding.screens.length !== plan.onboarding.length) {

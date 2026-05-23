@@ -104,9 +104,21 @@ Don't ask: tone, count, theme, locale, form copy specifics, image choices.
 
 One question per pause, then resume.
 
+## Step 0 — clear the workdir (mandatory)
+
+**Before stage 1**, delete every file inside `tmp/luly-agent/` (the directory itself can stay). Use Bash:
+
+```
+rm -f tmp/luly-agent/*.md tmp/luly-agent/*.json tmp/luly-agent/*.svg
+```
+
+Why this is mandatory: artifacts from a previous run that aren't overwritten by the current run could leak into the final JSON. v0.2 reads all artifacts by fixed filename (not by glob), so a stale `theme.md` or `card-cover.svg` would be picked up if the current run's skills don't rewrite it for any reason. Clearing the workdir up-front makes every generation hermetic.
+
+If the user explicitly asks to **resume** a partial generation (rare), skip this step. Otherwise always clear.
+
 ## Migrating from v0.1.x
 
-If `tmp/luly-agent/` contains old artifacts (`brief.json`, `product-type.json`, `format-profile.json`, `lesson-*.json`, etc.), they're ignored by v0.2. Clear the directory before running a fresh v0.2 generation, or accept that the new generation will overwrite only the new artifacts and leave the old ones alongside.
+The Step 0 clear above also handles migration: any v0.1.x artifacts (`brief.json`, `lesson-N.json`, `controls.json`, etc.) get wiped before v0.2 stages write fresh.
 
 ## Hand-off
 
