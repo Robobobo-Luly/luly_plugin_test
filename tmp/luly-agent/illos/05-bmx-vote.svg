@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
-  <rect width="256" height="256" fill="#F7F2E9"/>
-  <rect x="48" y="120" width="160" height="96" rx="8" fill="none" stroke="#15191E" stroke-width="3"/>
-  <rect x="108" y="110" width="40" height="16" fill="#0E7C7B"/>
-  <circle cx="128" cy="60" r="26" fill="none" stroke="#E97451" stroke-width="3"/>
-  <text x="128" y="69" text-anchor="middle" font-family="Montserrat, sans-serif" font-size="22" font-weight="700" fill="#E97451">B</text>
-  <line x1="128" y1="86" x2="128" y2="110" stroke="#E97451" stroke-width="3" stroke-linecap="round"/>
-  <polygon points="128,110 122,102 134,102" fill="#E97451"/>
-</svg>
