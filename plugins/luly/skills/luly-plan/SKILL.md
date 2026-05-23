@@ -1,35 +1,23 @@
 ---
 name: luly-plan
-description: Step 2 of the Luly authoring pipeline. Read brief.json and product-type.json, draft a Markdown course or campaign outline (course title, lesson titles, screen synopses), iterate with the user, write plan.md. Use after /luly-product-type has run and before any content-writing stages. The cheap human-readable iteration gate.
+description: Stage 2 of the Luly authoring pipeline. Read intake.md, write plan.md — a single markdown doc with frontmatter (preset, key, format toggles) plus a section/screen outline. Absorbs the old format-profile stage via the frontmatter block.
 ---
 
-# Luly — Step 2: Markdown plan
+# Luly — Stage 2: Plan
 
-This is the cheap iteration gate. Get the structure right here — actual screen
-copy comes in Step 4. See `docs/flow-json-schema.html` § Step 2 for context.
+You write the structure: which sections, how many screens per section, what each screen is about. Format toggles (story vs responsive, quizzes on/off) live in the frontmatter so they ride along with the plan.
 
 ## Process
 
-### 1. Load prior stages
+### 1. Load intake
 
-Read `tmp/luly-agent/brief.json` and `tmp/luly-agent/product-type.json`.
+Read `<workdir>/intake.md`. Pay attention to preset, key, intent, audience, tone, brand voice if present. If intake is missing, stop and tell the user to run `/luly-intake` first.
 
-- If `brief.json` is missing → tell the user to run `/luly-brief` and stop.
-- If `product-type.json` is missing → tell the user to run `/luly-product-type` and stop.
+### 2. Decide section + screen counts
 
-### 2. Pick the markdown shape from the preset
+Per-preset ranges (pick within based on topic depth + audience + any explicit prompt signal):
 
-- preset `academy` or `campaign-course` → **with-lessons** shape (H1 course title, then `## Lesson N — title` sections each holding screens)
-- preset `campaign-simple`, `waitlist`, `interactive-proposal` → **screens-only** shape (H1 campaign title, then `- Screen N: ...` bullets directly under H1)
-
-For an `academy` preset, plan **one course only** — the first one the academy
-will hold. Adding more courses later is a separate flow.
-
-### 3. Lesson and screen counts
-
-Pick within each preset's range, honoring any explicit signal in the brief.
-
-| Preset | Lessons | Screens per lesson |
+| Preset | Sections | Screens per section |
 |---|---|---|
 | `academy` | 2–8 | 3–5 |
 | `academy-course` | 2–8 | 3–5 |
@@ -38,102 +26,72 @@ Pick within each preset's range, honoring any explicit signal in the brief.
 | `waitlist` | 1 | 3–5 |
 | `interactive-proposal` | 1 | 5–8 |
 
-If your plan would emit 1 lesson, the preset must be `campaign-simple`, `waitlist`, or `interactive-proposal`.
+If your plan would have 1 section, the preset must be `campaign-simple`, `waitlist`, or `interactive-proposal`.
 
-### 4. Draft the markdown
+Onboarding section — for `academy` preset only — typically 2–3 screens, sibling of the hub.
 
-Use **exactly** these line formats — the validator regexes are strict:
+### 3. Write `plan.md`
 
-- Course title: `# <title>` (exactly one H1) — for `academy` preset this is the **first course's name** (e.g. "What is Blockchain"), NOT the academy name; the academy name lives in `product-type.academyName`. For all other presets the H1 is the flow / workspace / campaign name.
-- **Onboarding section (academy preset only, optional)**: `## Onboarding` followed by `- Screen N: <synopsis>` bullets (N sequential 1..K). The section is a sibling of the lesson sections and must come before the first `## Lesson`. Use 2–3 onboarding screens for `academy`: "Welcome", "What you'll learn", optionally "Get started". **Do NOT add an onboarding section for any other preset — including `academy-course`, which adds a course to an existing academy that already has its own onboarding.**
-- Lesson heading: `## Lesson N — <title>` (em-dash or hyphen, N starts at 1, sequential)
-- Screen bullet: `- Screen N: <one-line synopsis>` (N sequential within its lesson, onboarding section, or under H1)
-
-Optional one-line intro paragraph between H1 and the first lesson, bullet, or
-onboarding section is allowed — it's preserved in the parsed sidecar as `intro`.
-
-Synopses are one short line each — no full screen copy. That's Step 4's job.
-
-Example (with-lessons, academy preset — note onboarding):
+Path: `<workdir>/plan.md`. Overwrite.
 
 ```markdown
-# Crypto Wallet Academy
+---
+preset: <from intake>
+key: <from intake>
+academyName: <from intake — academy preset only>
+mode: story                      # story | responsive
+quizzes: on                      # on | off
+forms: off                       # on | off
+locales: [en]
+---
 
-3 lessons. Beginners. Stories format.
+# <H1 — the course title>
 
-## Onboarding
-- Screen 1: Welcome — what you'll learn here
-- Screen 2: How progress works
+<optional one-line intro paragraph>
 
-## Lesson 1 — Your first wallet
-- Screen 1: What a wallet is, in 30 seconds
-- Screen 2: Custodial vs self-custody
-- Screen 3: Quiz — which one do you have?
+## Onboarding              (academy preset only)
+- Screen 1 — <synopsis>
+- Screen 2 — <synopsis>
+
+## Section 1 — <title>
+- Screen 1 — <synopsis>
+- Screen 2 — <synopsis>
+- Screen 3 — <synopsis>
+
+## Section 2 — <title>
+- Screen 1 — <synopsis>
+...
 ```
 
-Example (with-lessons, non-academy — no onboarding):
+**H1 meaning:**
+- `academy` → H1 is the **first course's** title (e.g. "What is Phantom?"). The academy name itself goes in the `academyName` frontmatter field.
+- `academy-course` → H1 is the course being added to an existing academy.
+- All other presets → H1 is the flow / campaign title.
 
-```markdown
-# Crypto Wallet Basics
+Synopses are ONE LINE each — what the screen is about, not the actual copy.
 
-3 lessons. Beginners. Stories format.
+### 4. Self-checks
 
-## Lesson 1 — Your first wallet
-- Screen 1: What a wallet is, in 30 seconds
-- Screen 2: Custodial vs self-custody
-- Screen 3: Quiz — which one do you have?
-```
+- Frontmatter contains all required fields: `preset`, `key`, `mode`, `quizzes`, `forms`, `locales`.
+- `mode` is `story` or `responsive`. `quizzes` / `forms` are `on` or `off`. `locales` is a list (e.g. `[en]` or `[en, de]`).
+- Section count is within the preset's range.
+- Each section has ≥ 1 screen.
+- Screen bullets use the exact form `- Screen N — <synopsis>` (em-dash or hyphen).
+- `## Onboarding` appears ONLY for the `academy` preset, before the first `## Section`.
+- Single-section plans use one of `campaign-simple` / `waitlist` / `interactive-proposal`.
 
-Example (screens-only):
+### 5. Show and iterate (optional)
 
-```markdown
-# Early Access — Mako Wallet
+For interactive use, you can show the plan and ask the user "Add / remove / rename anything?" before saving. For the orchestrator's one-prompt flow, skip iteration — write directly.
 
-7-screen waitlist flow.
+### 6. Hand off
 
-- Screen 1: Hero pitch
-- Screen 2: The problem we solve
-- Screen 3: What you'll get
-- Screen 4: Social proof
-- Screen 5: Email capture
-- Screen 6: Referral bonus
-- Screen 7: Thank-you + share
-```
-
-### 5. Show and iterate
-
-Show the draft to the user. Ask: "Add / remove / rename anything?" Iterate
-until they explicitly approve. Don't tune wording for the synopses — keep them
-short and signal-only.
-
-### 6. Write and validate
-
-Write `tmp/luly-agent/plan.md`. Overwrite any existing file without prompting.
-
-Then run:
-
-```
-${CLAUDE_PLUGIN_ROOT}/bin/luly validate-plan
-```
-
-The validator writes a parsed sidecar at `tmp/luly-agent/plan.parsed.json`
-which downstream stages consume. Report the one-line summary (shape, lesson
-count, screen count) back to the user.
-
-If validation fails, fix the markdown and re-run.
-
-### 7. Hand off
-
-Tell the user:
-- The plan is at `tmp/luly-agent/plan.md`.
-- The parsed sidecar is at `tmp/luly-agent/plan.parsed.json`.
-- Next stage is `/luly-format` (when it ships).
+Tell the user where the plan is. Next stage: `/luly-style`.
 
 ## Hard rules
 
-- Read-only on `brief.json` and `product-type.json`.
-- Write only to `tmp/luly-agent/plan.md`. Do **not** write `plan.parsed.json`
-  by hand — the validator owns it.
-- Do not invent new line formats. The three regexes are the contract.
-- Do not write actual screen copy. Synopses are signal, not content.
+- Single file: `<workdir>/plan.md`.
+- Markdown only. The assembler parses this directly at stage 5; no separate parsed sidecar.
+- Synopses are signal, not content. Stage 4 writes the actual copy.
+- Section count must respect the preset's range.
 - Do not run any other skill in this conversation.

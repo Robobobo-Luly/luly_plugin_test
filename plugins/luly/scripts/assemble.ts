@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, writeFileSync, readdirSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { resolve, join } from 'path';
 import { spawnSync } from 'child_process';
 import { v4 as uuidv4 } from 'uuid';
@@ -6,6 +6,7 @@ import { LexoRank } from 'lexorank';
 import { PRESETS } from './presets';
 import { applyControls } from './controls-presets';
 import { markdownToTipTapString } from './markdown-to-tiptap';
+import { parseIntake, parsePlan, parseTheme, parseContent } from './parsers';
 import type {
   BlockExport,
   Brief,
@@ -32,24 +33,6 @@ function fail(msg: string): never {
 }
 function ok(msg: string): void {
   console.log(green(`✓ assemble:`) + ` ${msg}`);
-}
-
-function readJson<T>(path: string, label: string): T {
-  if (!existsSync(path)) fail(`${label} not found at ${path}`);
-  try {
-    return JSON.parse(readFileSync(path, 'utf8')) as T;
-  } catch (err) {
-    fail(`could not parse ${label}: ${(err as Error).message}`);
-  }
-}
-
-function readJsonOptional<T>(path: string): T | null {
-  if (!existsSync(path)) return null;
-  try {
-    return JSON.parse(readFileSync(path, 'utf8')) as T;
-  } catch {
-    return null;
-  }
 }
 
 // ----------------------------------------------------------------------------
@@ -204,6 +187,7 @@ function deepMerge<A extends Record<string, unknown>>(target: A, source: Record<
 // ----------------------------------------------------------------------------
 
 interface AssembleInputs {
+  workdir: string;
   brief: Brief;
   productType: ProductType;
   plan: Plan;
@@ -294,24 +278,26 @@ function courseBodyFor(
 }
 
 /**
- * Read an agent-authored SVG file (written by /luly-icon) and return its raw
+ * Read an agent-authored SVG file from the per-run workdir and return its raw
  * markup. Returns undefined when the file is missing or doesn't start with
  * <svg — assemble then proceeds without that field and the renderer falls
- * back to its default (cardImageUrl / iconUrl / placeholder).
- *
- * The SVG is stored inline (as text in the JSON), not as a URL or data URI.
- * The renderer inlines it via dangerouslySetInnerHTML.
+ * back to its default.
  */
-function loadInlineSvg(relativePath: string): string | undefined {
-  const path = resolve(process.cwd(), relativePath);
+function loadInlineSvg(workdir: string, name: string): string | undefined {
+  const path = join(workdir, name);
   if (!existsSync(path)) return undefined;
   const raw = readFileSync(path, 'utf8').trim();
   if (!raw.startsWith('<svg')) return undefined;
   return raw;
 }
 
-const loadCardCoverSvg = () => loadInlineSvg('tmp/luly-agent/card-cover.svg');
-const loadCourseIconSvg = () => loadInlineSvg('tmp/luly-agent/course-icon.svg');
+/**
+ * Convert an SVG markup string to a base64 data URI suitable for <img src>.
+ */
+function svgToDataUri(svg: string): string {
+  const b64 = Buffer.from(svg, 'utf8').toString('base64');
+  return `data:image/svg+xml;base64,${b64}`;
+}
 
 function buildLessonNode(
   lesson: Lesson,
@@ -347,8 +333,8 @@ function buildCourseOnly(inputs: AssembleInputs): NodeExport {
   // so the SVGs would never render. Skip the file reads entirely — this also
   // protects against stale SVG artifacts from a previous run polluting a
   // fresh generation of a simple preset.
-  const cardImageSvg = isSimpleCourse(preset) ? undefined : loadCardCoverSvg();
-  const iconSvg = isSimpleCourse(preset) ? undefined : loadCourseIconSvg();
+  const cardImageSvg = isSimpleCourse(preset) ? undefined : loadInlineSvg(inputs.workdir, 'card-cover.svg');
+  const iconSvg = isSimpleCourse(preset) ? undefined : loadInlineSvg(inputs.workdir, 'course-icon.svg');
   const course: NodeExport = {
     type: 'course',
     title: inputs.plan.courseTitle,
@@ -382,7 +368,7 @@ function buildFlow(inputs: AssembleInputs): NodeExport {
     colors: inputs.theme.colors,
     style: inputs.theme.style,
   };
-  if (inputs.theme.layout) themeBlock.layout = inputs.theme.layout;
+  themeBlock.layout = inputs.theme.layout ?? { maxWidth: '1200px' };
 
   const flowBody: Record<string, unknown> = {
     product: spec.product,
@@ -395,8 +381,19 @@ function buildFlow(inputs: AssembleInputs): NodeExport {
 
   // Propagate brand logo from the brief to the flow's headerLogo so the
   // app header + hub fall back to it when no per-hub logo is set.
-  if (inputs.brief.brand?.logo) {
+  // Header logo + link. Priority:
+  //   1. Clean SVG at <workdir>/logo.svg (written by /luly-style when brand exists)
+  //      — inlined as base64 data URI; sets headerLogoLink to "/" so the logo
+  //      links to the product's published root.
+  //   2. brand.logo URL from intake — falls back to whatever the brand exposed.
+  //   3. Neither — header falls back to default Luly mark.
+  const logoSvg = loadInlineSvg(inputs.workdir, 'logo.svg');
+  if (logoSvg) {
+    flowBody.headerLogo = svgToDataUri(logoSvg);
+    flowBody.headerLogoLink = '/';
+  } else if (inputs.brief.brand?.logo) {
     flowBody.headerLogo = inputs.brief.brand.logo;
+    flowBody.headerLogoLink = '/';
   }
 
   flowBody.locales = {
@@ -443,7 +440,11 @@ function buildFlow(inputs: AssembleInputs): NodeExport {
   // Hub — academy preset carries the academy name as the hub title.
   // hubLogo defaults to brand logo when available, otherwise empty string
   // (which prevents the renderer from falling back to the default base icon).
-  const hubLogoUrl = inputs.brief.brand?.logo ?? '';
+  // hub.body.hubLogo: prefer the clean SVG (same as headerLogo); else fall back
+  // to brand.logo URL; else empty string (renderer suppresses default base icon).
+  const hubLogoUrl = logoSvg
+    ? svgToDataUri(logoSvg)
+    : (inputs.brief.brand?.logo ?? '');
   const hub: NodeExport = {
     type: 'hub',
     title: isAcademy ? flowTitle : 'Hub',
@@ -465,8 +466,8 @@ function buildFlow(inputs: AssembleInputs): NodeExport {
   // Simple presets have no hub catalog → skip loading SVGs (defensive against
   // stale tmp artifacts from a previous run polluting a fresh generation).
   const courseIsSimple = isSimpleCourse(preset);
-  const cardImageSvg = courseIsSimple ? undefined : loadCardCoverSvg();
-  const iconSvg = courseIsSimple ? undefined : loadCourseIconSvg();
+  const cardImageSvg = courseIsSimple ? undefined : loadInlineSvg(inputs.workdir, 'card-cover.svg');
+  const iconSvg = courseIsSimple ? undefined : loadInlineSvg(inputs.workdir, 'course-icon.svg');
   const course: NodeExport = {
     type: 'course',
     title: courseTitle,
@@ -500,73 +501,74 @@ function buildFlow(inputs: AssembleInputs): NodeExport {
 // Main
 // ----------------------------------------------------------------------------
 
+function readMd(path: string, label: string): string {
+  if (!existsSync(path)) fail(`${label} not found at ${path}`);
+  return readFileSync(path, 'utf8');
+}
+
 function main(): void {
-  const workdir = resolve(process.cwd(), 'tmp/luly-agent');
+  // Workdir = per-run subdirectory passed by the orchestrator (v0.2.2+):
+  //   ./bin/luly assemble "tmp/luly-agent/phantom-academy"
+  // Falls back to the legacy flat layout (tmp/luly-agent) when no arg given,
+  // for direct invocations outside the orchestrator.
+  const workdirArg = process.argv[2];
+  const workdir = workdirArg
+    ? resolve(process.cwd(), workdirArg)
+    : resolve(process.cwd(), 'tmp/luly-agent');
   if (!existsSync(workdir)) fail(`workdir not found: ${workdir}`);
 
-  const brief = readJson<Brief>(join(workdir, 'brief.json'), 'brief.json');
-  const productType = readJson<ProductType>(join(workdir, 'product-type.json'), 'product-type.json');
-  const plan = readJson<Plan>(join(workdir, 'plan.parsed.json'), 'plan.parsed.json');
-  const formatProfile = readJson<FormatProfile>(join(workdir, 'format-profile.json'), 'format-profile.json');
-  const theme = readJson<ThemeArtifact>(join(workdir, 'theme.json'), 'theme.json');
-  const controlsArtifact = readJson<{ preset: string; controls: Record<string, Control[]> }>(
-    join(workdir, 'controls.json'),
-    'controls.json'
-  );
-  const overrides = readJsonOptional<OverridesArtifact>(join(workdir, 'overrides.json'));
+  const intakeMd  = readMd(join(workdir, 'intake.md'),  'intake.md');
+  const planMd    = readMd(join(workdir, 'plan.md'),    'plan.md');
+  const themeMd   = readMd(join(workdir, 'theme.md'),   'theme.md');
+  const contentMd = readMd(join(workdir, 'content.md'), 'content.md');
 
-  const lessonFiles = readdirSync(workdir).filter((f) => /^lesson-\d+\.json$/.test(f));
-  if (lessonFiles.length === 0) fail(`no lesson-*.json files in ${workdir}`);
-  const lessons: Lesson[] = lessonFiles
-    .map((f) => Number(f.match(/^lesson-(\d+)\.json$/)![1]))
-    .sort((a, b) => a - b)
-    .map((n) => readJson<Lesson>(join(workdir, `lesson-${n}.json`), `lesson-${n}.json`));
+  const { brief, productType } = parseIntake(intakeMd);
+  const { plan, formatProfile } = parsePlan(planMd);
+  const theme = parseTheme(themeMd);
+  const parsed = parseContent(contentMd);
 
-  const planLessons = plan.lessons.map((l) => l.n);
-  const presentLessons = new Set(lessons.map((l) => l.n));
-  const missing = planLessons.filter((n) => !presentLessons.has(n));
-  if (missing.length > 0) {
-    fail(
-      `plan has ${planLessons.length} lesson(s) but lesson(s) [${missing.join(', ')}] not yet filled — ` +
-      `run /luly-fill-lesson before assembling`
-    );
-  }
+  // Merge section titles from plan into the filled lessons (content.md only carries
+  // per-screen titles; section titles live in plan.md).
+  const lessons: Lesson[] = parsed.lessons.map((l) => {
+    const planLesson = plan.lessons.find((pl) => pl.n === l.n);
+    return { ...l, title: planLesson?.title ?? l.title };
+  });
+  const onboarding = parsed.onboarding;
 
-  // Academy-course doesn't carry onboarding (lives on the parent academy)
-  if (productType.preset === 'academy-course' && plan.onboarding && plan.onboarding.length > 0) {
+  // Cross-checks (one final gate replaces all per-stage validators)
+  if (productType.preset === 'academy-course' && plan.onboarding.length > 0) {
     fail(
       'academy-course preset does not support onboarding screens — onboarding lives on the parent academy. ' +
-      'Remove the "## Onboarding" section from plan.md and re-run /luly-plan.'
+      'Remove the "## Onboarding" section from plan.md.'
     );
   }
 
-  // Onboarding is conditional: required iff plan declares an onboarding section
-  const onboardingPath = join(workdir, 'onboarding.json');
-  let onboarding: OnboardingArtifact | null = null;
-  if (plan.onboarding && plan.onboarding.length > 0) {
-    if (!existsSync(onboardingPath)) {
-      fail(
-        `plan declares ${plan.onboarding.length} onboarding screen(s) but onboarding.json not found — ` +
-        `run /luly-fill-onboarding before assembling`
-      );
-    }
-    onboarding = readJson<OnboardingArtifact>(onboardingPath, 'onboarding.json');
-    if (onboarding.screens.length !== plan.onboarding.length) {
-      fail(
-        `onboarding.json has ${onboarding.screens.length} screen(s) but plan declares ${plan.onboarding.length} — ` +
-        `re-run /luly-fill-onboarding`
-      );
-    }
-  } else if (existsSync(onboardingPath)) {
-    // Onboarding artifact exists but plan doesn't declare it — ignore silently with a warning
-    console.log(`\x1b[33m⚠ assemble:\x1b[0m onboarding.json exists but plan.parsed.json has no onboarding section — skipping`);
+  const planSectionNs = plan.lessons.map((l) => l.n);
+  const filledNs = new Set(lessons.map((l) => l.n));
+  const missing = planSectionNs.filter((n) => !filledNs.has(n));
+  if (missing.length > 0) {
+    fail(
+      `plan has ${planSectionNs.length} section(s) but section(s) [${missing.join(', ')}] not present in content.md`
+    );
   }
+
+  if (plan.onboarding.length > 0) {
+    if (!onboarding || onboarding.screens.length !== plan.onboarding.length) {
+      fail(
+        `plan declares ${plan.onboarding.length} onboarding screen(s) but content.md has ` +
+        `${onboarding?.screens.length ?? 0} — re-fill content.md`
+      );
+    }
+  }
+
+  // Compute controls inline (replaces the old apply-controls + controls.json stage)
+  const controlsArtifact = applyControls(productType.preset, plan);
 
   const isCourseOnly = productType.preset === 'academy-course';
 
   const root = isCourseOnly
-    ? buildCourseOnly({ brief, productType, plan, formatProfile, theme, lessons, onboarding, controlsMap: controlsArtifact.controls, overrides })
-    : buildFlow({ brief, productType, plan, formatProfile, theme, lessons, onboarding, controlsMap: controlsArtifact.controls, overrides });
+    ? buildCourseOnly({ workdir, brief, productType, plan, formatProfile, theme, lessons, onboarding, controlsMap: controlsArtifact.controls, overrides: null })
+    : buildFlow({ workdir, brief, productType, plan, formatProfile, theme, lessons, onboarding, controlsMap: controlsArtifact.controls, overrides: null });
 
   const outputPath = join(workdir, `${productType.key}.luly.json`);
   writeFileSync(outputPath, JSON.stringify(root, null, 2) + '\n', 'utf8');
@@ -609,7 +611,7 @@ function main(): void {
   else console.log(`  courses            = ${counts.course}`);
   console.log(`  lessons / screens  = ${counts.lesson} / ${counts.lessonScreen}`);
   console.log(`  blocks             = ${counts.block}`);
-  console.log(`  overrides applied  = ${overrides ? 'yes' : 'no'}`);
+  console.log(`  overrides applied  = no`);
   if (!isCourseOnly) console.log(`  locales            = [${formatProfile.locales.join(', ')}]`);
 
   // Run final validator
