@@ -489,7 +489,14 @@ function readMd(path: string, label: string): string {
 }
 
 function main(): void {
-  const workdir = resolve(process.cwd(), 'tmp/luly-agent');
+  // Workdir = per-run subdirectory passed by the orchestrator (v0.2.2+):
+  //   ./bin/luly assemble "tmp/luly-agent/phantom-academy"
+  // Falls back to the legacy flat layout (tmp/luly-agent) when no arg given,
+  // for direct invocations outside the orchestrator.
+  const workdirArg = process.argv[2];
+  const workdir = workdirArg
+    ? resolve(process.cwd(), workdirArg)
+    : resolve(process.cwd(), 'tmp/luly-agent');
   if (!existsSync(workdir)) fail(`workdir not found: ${workdir}`);
 
   const intakeMd  = readMd(join(workdir, 'intake.md'),  'intake.md');
@@ -524,16 +531,6 @@ function main(): void {
   if (missing.length > 0) {
     fail(
       `plan has ${planSectionNs.length} section(s) but section(s) [${missing.join(', ')}] not present in content.md`
-    );
-  }
-  // Symmetric check — guard against content.md having MORE sections than plan
-  // (catches stale leakage from a previous run if the orchestrator forgot to
-  // clear the workdir, or content.md was manually edited with extra sections).
-  const extra = lessons.map(l => l.n).filter((n) => !new Set(planSectionNs).has(n));
-  if (extra.length > 0) {
-    fail(
-      `content.md has section(s) [${extra.join(', ')}] not declared in plan.md — ` +
-      `looks like stale content from a previous run. Clear tmp/luly-agent/ and re-run.`
     );
   }
 

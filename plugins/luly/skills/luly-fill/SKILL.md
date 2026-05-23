@@ -12,9 +12,9 @@ One file. All screens. Per-screen YAML-style header for structured fields (block
 ### 1. Load prior stages
 
 Read:
-- `tmp/luly-agent/intake.md` — for tone, audience, brand voice
-- `tmp/luly-agent/plan.md` — for preset, frontmatter, sections, screen synopses
-- `tmp/luly-agent/theme.md` — **REQUIRED** for HEX values used in image captions
+- `<workdir>/intake.md` — for tone, audience, brand voice
+- `<workdir>/plan.md` — for preset, frontmatter, sections, screen synopses
+- `<workdir>/theme.md` — **REQUIRED** for HEX values used in image captions
 
 If any is missing, stop and tell the user to run the missing stage first.
 
@@ -111,7 +111,7 @@ Example: `"Friendly ghost mascot waving from inside a smartphone, flat vector il
 
 ### 7. Write `content.md`
 
-Path: `tmp/luly-agent/content.md`. Overwrite.
+Path: `<workdir>/content.md`. Overwrite.
 
 Worked example (Phantom academy with onboarding + 2 sections):
 
@@ -190,7 +190,7 @@ Tell the user where `content.md` is. Next: assemble (the orchestrator runs the `
 
 ## Hard rules
 
-- Single file: `tmp/luly-agent/content.md`.
+- Single file: `<workdir>/content.md`.
 - Markdown only. Per-screen header is plain key/value lines (YAML-style), not real YAML/JSON.
 - Body content is plain Markdown (will be compiled to TipTap at assemble time — don't pre-compile).
 - Block format names: use the catalog above verbatim. NEVER emit `richtext` as a format name — that's not registered. Use `text`.

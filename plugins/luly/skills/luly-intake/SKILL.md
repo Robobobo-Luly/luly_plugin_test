@@ -47,7 +47,7 @@ Kebab-case, `[a-z0-9-]`, 3-50 chars, no leading/trailing/double hyphens. Derived
 
 ### 5. Write `intake.md`
 
-Path: `tmp/luly-agent/intake.md`. Overwrite. Shape:
+Path: `<workdir>/intake.md`. Overwrite. Shape:
 
 ```markdown
 # Intake — <key>
@@ -106,7 +106,7 @@ Tell the user one line: where the intake is + what the next stage is. The orches
 ## Hard rules
 
 - Markdown only. No JSON.
-- One file: `tmp/luly-agent/intake.md`.
+- One file: `<workdir>/intake.md`.
 - Overwrite without prompting.
 - At most one clarifying question, only if a slot is genuinely ambiguous AND no default works.
 - Do not run any other skill in this conversation.

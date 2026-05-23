@@ -1,7 +1,7 @@
 {
-  "name": "luly-v0-2-1",
-  "version": "0.2.1",
-  "description": "Author Luly flows (academies, courses, marketing campaigns, waitlists, interactive proposals) end-to-end from a single natural-language prompt. v0.2 collapses the 10-stage JSON pipeline into 5 stages of markdown context-passing. Ships 5 active skills + 2 optional review skills, plus assembler + parsers. Version-suffixed plugin name shows the loaded version in every Skill() call.",
+  "name": "luly-v0-2-2",
+  "version": "0.2.2",
+  "description": "Author Luly flows (academies, courses, marketing campaigns, waitlists, interactive proposals) end-to-end from a single natural-language prompt. v0.2 collapses the 10-stage JSON pipeline into 5 stages of markdown context-passing. Each run lives in its own subdirectory under tmp/luly-agent/ for isolation. Version-suffixed plugin name shows the loaded version in every Skill() call.",
   "author": {
     "name": "Luly"
   },

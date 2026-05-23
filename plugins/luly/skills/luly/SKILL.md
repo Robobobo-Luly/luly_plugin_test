@@ -28,13 +28,13 @@ Start working immediately. Don't ask "shall I begin?" — they already asked.
 For each stage:
 
 1. **Read the per-stage skill file** at `${CLAUDE_PLUGIN_ROOT}/skills/luly-<name>/SKILL.md` — that file is the source of truth.
-2. Follow its instructions to produce the artifact in `tmp/luly-agent/`.
+2. Follow its instructions to produce the artifact in your `<workdir>` (the per-run subdir from Step 0). Per-stage skills reference paths like `<workdir>/intake.md` — substitute the actual path.
 3. Emit one progress line, then move on.
 
-After all 5 stages, run the assemble script:
+After all 5 stages, run the assemble script with the workdir as its argument:
 
 ```
-${CLAUDE_PLUGIN_ROOT}/bin/luly assemble
+${CLAUDE_PLUGIN_ROOT}/bin/luly assemble "<workdir>"
 ```
 
 It reads all 4 markdown artifacts + 2 SVGs (if present), parses, computes controls, compiles Markdown to TipTap, applies the theme, stamps slugs and ranks, validates, and writes the final JSON.
@@ -104,21 +104,32 @@ Don't ask: tone, count, theme, locale, form copy specifics, image choices.
 
 One question per pause, then resume.
 
-## Step 0 — clear the workdir (mandatory)
+## Step 0 — create a fresh per-run workdir (mandatory)
 
-**Before stage 1**, delete every file inside `tmp/luly-agent/` (the directory itself can stay). Use Bash:
+**Before stage 1**, derive a short kebab-case label from the user's prompt (e.g. "phantom academy" → `phantom-academy`, "solana summit waitlist" → `solana-summit-waitlist`) and create a fresh subdirectory under `tmp/luly-agent/` for this run. If a directory with that label already exists, append ` (1)`, ` (2)`, etc. until you find a name that doesn't collide.
 
+Use Bash:
+
+```bash
+# Substitute the kebab-case topic label you derived
+BASE="tmp/luly-agent/phantom-academy"
+WORKDIR="$BASE"
+n=1
+while [ -d "$WORKDIR" ]; do
+  WORKDIR="$BASE ($n)"
+  n=$((n+1))
+done
+mkdir -p "$WORKDIR"
+echo "$WORKDIR"
 ```
-rm -f tmp/luly-agent/*.md tmp/luly-agent/*.json tmp/luly-agent/*.svg
-```
 
-Why this is mandatory: artifacts from a previous run that aren't overwritten by the current run could leak into the final JSON. v0.2 reads all artifacts by fixed filename (not by glob), so a stale `theme.md` or `card-cover.svg` would be picked up if the current run's skills don't rewrite it for any reason. Clearing the workdir up-front makes every generation hermetic.
+The output path is your **workdir for this run** — pass it as the `<workdir>` placeholder when reading each per-stage skill and when running the assembler. Every artifact for this generation lives inside that directory. Old runs in sibling directories stay untouched.
 
-If the user explicitly asks to **resume** a partial generation (rare), skip this step. Otherwise always clear.
+If the user explicitly asks to **resume** a partial generation against a specific existing dir, use that dir as the workdir instead of creating new.
 
 ## Migrating from v0.1.x
 
-The Step 0 clear above also handles migration: any v0.1.x artifacts (`brief.json`, `lesson-N.json`, `controls.json`, etc.) get wiped before v0.2 stages write fresh.
+Per-run subdirectories side-step the v0.1.x stale-artifact bug structurally. Old `tmp/luly-agent/*.json` files (briefs, lessons, etc. from v0.1.x) live in the root of `tmp/luly-agent/`; v0.2 runs live in subdirectories beside them and never see each other.
 
 ## Hand-off
 

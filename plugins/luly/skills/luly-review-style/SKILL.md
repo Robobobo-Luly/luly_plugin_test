@@ -1,22 +1,22 @@
 ---
 name: luly-review-style
-description: Optional Step 8 reviewer of the Luly authoring pipeline. Reads the brief, product-type, theme.json, and (if present) overrides.json. Produces a Markdown review report at tmp/luly-agent/review-style.md flagging theme-brief mismatch, contrast / a11y problems, font choices that fight each other, override sprawl, and button-shape vs tone mismatches. Pure quality lift — does not modify any styling artifact, does not auto-fix.
+description: Optional Step 8 reviewer of the Luly authoring pipeline. Reads the brief, product-type, theme.json, and (if present) overrides.json. Produces a Markdown review report at <workdir>/review-style.md flagging theme-brief mismatch, contrast / a11y problems, font choices that fight each other, override sprawl, and button-shape vs tone mismatches. Pure quality lift — does not modify any styling artifact, does not auto-fix.
 ---
 
 # Luly style reviewer
 
-You are reviewing the workspace theme and per-screen overrides. **You do not modify any file** and you do not re-run any stage. Your only output is a Markdown report at `tmp/luly-agent/review-style.md`.
+You are reviewing the workspace theme and per-screen overrides. **You do not modify any file** and you do not re-run any stage. Your only output is a Markdown report at `<workdir>/review-style.md`.
 
 ## Process
 
 ### 1. Load prior stages
 
 Read:
-- `tmp/luly-agent/brief.json`
-- `tmp/luly-agent/product-type.json`
-- `tmp/luly-agent/theme.json`
-- `tmp/luly-agent/overrides.json` if it exists (it's optional)
-- `tmp/luly-agent/plan.parsed.json` (used only to count screens for override-sprawl ratio)
+- `<workdir>/brief.json`
+- `<workdir>/product-type.json`
+- `<workdir>/theme.json`
+- `<workdir>/overrides.json` if it exists (it's optional)
+- `<workdir>/plan.parsed.json` (used only to count screens for override-sprawl ratio)
 
 If `theme.json` is missing, stop and tell the user to run `/luly-style` first.
 
@@ -39,7 +39,7 @@ Apply `theme.overrides` (if present) on top of `theme.preset`'s defaults, using 
 
 ### 4. Write the report
 
-Write `tmp/luly-agent/review-style.md` in exactly the same format as `luly-review-content`:
+Write `<workdir>/review-style.md` in exactly the same format as `luly-review-content`:
 
 ```markdown
 # Style review
@@ -69,14 +69,14 @@ If there are zero findings, the Findings section reads `_None._` and Recommendat
 ### 5. Report to user
 
 Tell the user:
-- The report is at `tmp/luly-agent/review-style.md`.
+- The report is at `<workdir>/review-style.md`.
 - The verdict and finding counts.
 - If `fail` / `warn`: name the one or two highest-priority issues so the user can prioritise without reading the whole file.
 
 ## Hard rules
 
 - Read-only on all prior stage artifacts. Do not modify `theme.json` or `overrides.json`.
-- Write only to `tmp/luly-agent/review-style.md`. Overwrite any prior report.
+- Write only to `<workdir>/review-style.md`. Overwrite any prior report.
 - Do not propose specific hex codes unless the user explicitly asks. Flag the issue and recommend a direction (e.g. "lighten `mutedTextColor` toward `textColor`"), not a precise value.
 - Do not auto-fix. Surface the issue; the user re-runs `/luly-style` if they want a change.
 - Do not run any other skill in this conversation.

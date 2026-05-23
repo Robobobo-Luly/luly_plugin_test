@@ -12,8 +12,8 @@ One agent, three artifacts: a palette/fonts markdown, a wide card cover SVG, a s
 ### 1. Load prior stages
 
 Read:
-- `tmp/luly-agent/intake.md` — for brand colors (if present), tone, audience
-- `tmp/luly-agent/plan.md` — for preset, course title, section titles (visual concept hints)
+- `<workdir>/intake.md` — for brand colors (if present), tone, audience
+- `<workdir>/plan.md` — for preset, course title, section titles (visual concept hints)
 
 ### 2. Honor brand colors when present
 
@@ -65,7 +65,7 @@ A perfectly tonal palette that fails contrast is worse than a slightly less eleg
 
 ### 5. Write `theme.md`
 
-Path: `tmp/luly-agent/theme.md`. Overwrite.
+Path: `<workdir>/theme.md`. Overwrite.
 
 ```markdown
 ## Palette
@@ -135,7 +135,7 @@ Universal constraints (apply to both):
 - **`viewBox="0 0 640 192"`** — wide 10:3 aspect.
 - Use the full canvas. Background fill mandatory.
 - Typography allowed (course title, academy name, tagline) — the cover is wide enough.
-- File: `tmp/luly-agent/card-cover.svg`.
+- File: `<workdir>/card-cover.svg`.
 
 ### 7b. Course icon — 1:1
 
@@ -143,7 +143,7 @@ Universal constraints (apply to both):
 - **No text** — rendered at ~32px on the card; detail is wasted past that.
 - Single subject centered, with breathing room (reads as a mark, not a tile).
 - Same concept as the card cover — coherence.
-- File: `tmp/luly-agent/course-icon.svg`.
+- File: `<workdir>/course-icon.svg`.
 
 ### 8. Worked example — Phantom academy
 

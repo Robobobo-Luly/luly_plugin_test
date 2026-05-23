@@ -11,7 +11,7 @@ You write the structure: which sections, how many screens per section, what each
 
 ### 1. Load intake
 
-Read `tmp/luly-agent/intake.md`. Pay attention to preset, key, intent, audience, tone, brand voice if present. If intake is missing, stop and tell the user to run `/luly-intake` first.
+Read `<workdir>/intake.md`. Pay attention to preset, key, intent, audience, tone, brand voice if present. If intake is missing, stop and tell the user to run `/luly-intake` first.
 
 ### 2. Decide section + screen counts
 
@@ -32,7 +32,7 @@ Onboarding section — for `academy` preset only — typically 2–3 screens, si
 
 ### 3. Write `plan.md`
 
-Path: `tmp/luly-agent/plan.md`. Overwrite.
+Path: `<workdir>/plan.md`. Overwrite.
 
 ```markdown
 ---
@@ -90,7 +90,7 @@ Tell the user where the plan is. Next stage: `/luly-style`.
 
 ## Hard rules
 
-- Single file: `tmp/luly-agent/plan.md`.
+- Single file: `<workdir>/plan.md`.
 - Markdown only. The assembler parses this directly at stage 5; no separate parsed sidecar.
 - Synopses are signal, not content. Stage 4 writes the actual copy.
 - Section count must respect the preset's range.
