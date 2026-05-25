@@ -1,7 +1,7 @@
 {
-  "name": "luly-v0-2-5",
-  "version": "0.2.5",
-  "description": "Author Luly flows end-to-end from a single natural-language prompt. v0.2.5: brand-fidelity intake (multi-signal extraction, plausibility check, border-radius), branded placeholder data URIs (replace dead /assets paths), visible 'Back to academy' button on academy lesson screens, asset-state summary at assemble time. Earlier in v0.2: 10-stage pipeline collapsed to 5 (intake → plan → meta → style → fill → validate → assemble), per-section fill with carry-forward recap, validator agent against writing guidelines.",
+  "name": "luly-v0-2-6",
+  "version": "0.2.6",
+  "description": "Author Luly flows end-to-end from a single natural-language prompt. v0.2.6: reverts academy lesson exit to default close-icon (luly-app now hard-enforces icon-only topRight); documents 4 border-radius CSS vars (`buttonBorderRadius{,Mobile}`, `containerBorderRadius{,Mobile}`) the renderer reads; story screens within a section must use a single block shape (all image-richtext or all text) — forms/quizzes exempt. Earlier in v0.2: 5-stage pipeline (intake → plan → style → fill → assemble), per-run subdirectory workdir, inline SVG illustrations, brand-fidelity intake, branded placeholder data URIs.",
   "author": {
     "name": "Luly"
   },

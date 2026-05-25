@@ -6,9 +6,9 @@
   },
   "plugins": [
     {
-      "name": "luly-v0-2-5",
+      "name": "luly-v0-2-6",
       "source": "./plugins/luly",
-      "description": "Author Luly flows end-to-end from a single natural-language prompt. v0.2.5 brings brand-fidelity intake, branded placeholder data URIs, visible academy back button, and a loud asset-state summary at assemble time. Plugin name carries the version so it's always visible in Skill() calls."
+      "description": "Author Luly flows end-to-end from a single natural-language prompt. v0.2.6 reverts the academy lesson exit to the default close-icon (luly-app now hard-enforces icon-only topRight controls so content can't override), documents the four border-radius CSS vars the renderer reads, and adds a block-shape consistency rule to luly-fill so story screens don't toggle between image and text-only mid-arc."
     }
   ]
 }

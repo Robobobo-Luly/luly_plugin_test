@@ -77,7 +77,11 @@ The next section's pass reads this recap and respects it: don't redefine terms, 
 | `layout` | `type: layout`<br>`ratio: "50:50"` | (none — responsive mode only) |
 
 **Single-component vs composite:** never emit a composite (`image-richtext`, `quiz-text`, `form-text`) with one half empty. If the body would be empty, use the single-component variant (`image`, `question`, `form`) instead.
-Try to be consistent, if we started with responsive blocks and we have images on the left, keep them on the left, this is usually the preferred setup, media, forms, questions on the left (top for mobile), text content on the right (bottom)
+Try to be consistent, if we started with responsive blocks and we have images on the left, keep them on the left, this is usually the preferred setup, media, forms, questions on the right (bottom for mobile), text content on the left (top)
+
+**Block-shape consistency across story screens (mandatory):** within a single story arc (onboarding sequence, lesson, or a section's screens), all narrative screens should use the **same block shape** — either every story screen is `image-richtext` (image + text together) or every story screen is `text`. Don't intermix: a story that shows an illustration on screen 1 and then drops to text-only on screen 2 reads as a regression. Default to `image-richtext` for story content unless the user explicitly wants a stripped-down text-only feel, or the topic genuinely doesn't lend itself to per-screen illustration.
+
+Forms (`form`, `form-text`, `email-form`) and quizzes (`question`, `quiz-text`) are exempt from this rule — they're functional screens, not story beats, so a single-component `question` or `form` is fine even when neighboring story screens use `image-richtext`. A composite `quiz-text` / `form-text` is also fine if it adds context, but mixing single-component and composite within the same form sequence still feels inconsistent — pick one shape per form sequence.
 
 ### 5. Choices / Fields list syntax
 

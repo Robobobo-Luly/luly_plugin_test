@@ -31,6 +31,8 @@ Never override the brand's primary because you think a different color looks bet
 
 If intake also captured `ButtonBorderRadius` / `ContainerBorderRadius`, anchor the corresponding style tokens (`buttonBorderRadius`, `containerBorderRadius`) to those values verbatim. If only `ButtonBorderRadius` is present, derive `containerBorderRadius` as the same value or a slightly larger one (cards usually round a bit more than buttons). If neither is present, use the default Luly value below.
 
+The luly-app renderer reads four border-radius tokens via CSS vars (`buttonBorderRadius`, `buttonBorderRadiusMobile`, `containerBorderRadius`, `containerBorderRadiusMobile`). If you only emit the desktop pair (`buttonBorderRadius` / `containerBorderRadius`), the mobile variants silently fall back to renderer defaults — usually fine, but if the brand has a distinct mobile radius, emit the `*Mobile` counterparts too with the brand's mobile value.
+
 If no brand colors, **use the default Luly palette in step 5 verbatim**. Do not invent a topic-themed palette from the brand name or category — when the brand is unknown, neutral beats confidently-wrong.
 
 ### 3. Pick fonts
