@@ -7,6 +7,8 @@ description: Stage 2 of the Luly authoring pipeline. Read intake.md, write plan.
 
 You write the structure: which sections, how many screens per section, what each screen is about. Format toggles (story vs responsive, quizzes on/off) live in the frontmatter so they ride along with the plan.
 
+**Before writing**, read `${CLAUDE_PLUGIN_ROOT}/guidelines/writing-guidelines.md` and apply it — especially sentence-case titles, no trailing punctuation in headings, and the quiz rules (one quiz per lesson, 2–3 questions, three options).
+
 ## Process
 
 ### 1. Load intake
@@ -18,17 +20,20 @@ Read `<workdir>/intake.md`. Pay attention to preset, key, intent, audience, tone
 Per-preset ranges (pick within based on topic depth + audience + any explicit prompt signal):
 
 | Preset | Sections | Screens per section |
-|---|---|---|
-| `academy` | 2–8 | 3–5 |
-| `academy-course` | 2–8 | 3–5 |
-| `campaign-course` | 2–6 | 3–5 |
-| `campaign-simple` | 1 | 4–7 |
-| `waitlist` | 1 | 3–5 |
-| `interactive-proposal` | 1 | 5–8 |
+|---|---|---------------------|
+| `academy` | 2–8 | 3–8                 |
+| `academy-course` | 2–8 | 3–8                 |
+| `campaign-course` | 2–6 | 3–8                 |
+| `campaign-simple` | 1 | 4–10                |
+| `waitlist` | 1 | 3–8                 |
+| `interactive-proposal` | 1 | 4–10                |
 
 If your plan would have 1 section, the preset must be `campaign-simple`, `waitlist`, or `interactive-proposal`.
 
-Onboarding section — for `academy` preset only — typically 2–3 screens, sibling of the hub.
+Onboarding section — for `academy` preset only — typically 1–3 screens, sibling of the hub.
+
+Onboarding section also possible for courses, as well as completion section, but not necessary, in case if the intro 
+to course would add clear value, same for completion
 
 ### 3. Write `plan.md`
 

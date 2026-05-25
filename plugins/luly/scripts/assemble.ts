@@ -6,7 +6,7 @@ import { LexoRank } from 'lexorank';
 import { PRESETS } from './presets';
 import { applyControls } from './controls-presets';
 import { markdownToTipTapString } from './markdown-to-tiptap';
-import { parseIntake, parsePlan, parseTheme, parseContent } from './parsers';
+import { parseIntake, parsePlan, parseTheme, parseContent, parseMeta, MetaArtifact } from './parsers';
 import type {
   BlockExport,
   Brief,
@@ -25,7 +25,6 @@ import type {
 
 function red(s: string): string { return `\x1b[31m${s}\x1b[0m`; }
 function green(s: string): string { return `\x1b[32m${s}\x1b[0m`; }
-function yellow(s: string): string { return `\x1b[33m${s}\x1b[0m`; }
 
 function fail(msg: string): never {
   console.error(red(`✖ assemble failed:`) + ` ${msg}`);
@@ -197,6 +196,7 @@ interface AssembleInputs {
   onboarding: OnboardingArtifact | null;
   controlsMap: Record<string, Control[]>;
   overrides: OverridesArtifact | null;
+  meta: MetaArtifact;
 }
 
 function buildScreenNode(
@@ -401,6 +401,18 @@ function buildFlow(inputs: AssembleInputs): NodeExport {
     default: inputs.formatProfile.locales[0],
   };
 
+  // Bundled placeholder URLs — shown when a media block has no image, a course
+  // has no cardImageUrl, or a course has no iconUrl. Per-flow defaults; the CMS
+  // overrides at render time if a per-block / per-course value is set.
+  flowBody.mediaPlaceholderUrl = '/assets/placeholders/media.svg';
+  flowBody.cardPlaceholderUrl  = '/assets/placeholders/card.png';
+  flowBody.iconPlaceholderUrl  = '/assets/placeholders/icon.png';
+
+  // Marketing tags from meta.md (if any)
+  if (inputs.meta.tags && inputs.meta.tags.length > 0) {
+    flowBody.tags = inputs.meta.tags;
+  }
+
   // Title routing — academy preset uses academyName for the flow + hub title
   // and plan.courseTitle as the FIRST COURSE title. Other presets reuse
   // plan.courseTitle for everything.
@@ -442,9 +454,12 @@ function buildFlow(inputs: AssembleInputs): NodeExport {
   // (which prevents the renderer from falling back to the default base icon).
   // hub.body.hubLogo: prefer the clean SVG (same as headerLogo); else fall back
   // to brand.logo URL; else empty string (renderer suppresses default base icon).
-  const hubLogoUrl = logoSvg
-    ? svgToDataUri(logoSvg)
-    : (inputs.brief.brand?.logo ?? '');
+  // Hub logo decision — meta.md `hub-logo: placeholder` forces empty (the CMS
+  // falls back to flow.body.iconPlaceholderUrl). Default (or 'brand-logo') uses
+  // the workdir logo.svg / brand.logo URL chain.
+  const hubLogoUrl = inputs.meta.hubLogoDecision === 'placeholder'
+    ? ''
+    : (logoSvg ? svgToDataUri(logoSvg) : (inputs.brief.brand?.logo ?? ''));
   const hub: NodeExport = {
     type: 'hub',
     title: isAcademy ? flowTitle : 'Hub',
@@ -522,10 +537,24 @@ function main(): void {
   const themeMd   = readMd(join(workdir, 'theme.md'),   'theme.md');
   const contentMd = readMd(join(workdir, 'content.md'), 'content.md');
 
+  // meta.md is optional — when present, its values override plan-derived
+  // title/description, supply tags, and gate the academy hub-logo decision.
+  const metaPath = join(workdir, 'meta.md');
+  const meta: MetaArtifact = existsSync(metaPath)
+    ? parseMeta(readMd(metaPath, 'meta.md'))
+    : {};
+
   const { brief, productType } = parseIntake(intakeMd);
   const { plan, formatProfile } = parsePlan(planMd);
   const theme = parseTheme(themeMd);
   const parsed = parseContent(contentMd);
+
+  // Meta overrides — apply to plan and productType before downstream stages
+  // read them. Empty/absent meta fields leave plan values untouched.
+  if (meta.courseTitle) plan.courseTitle = meta.courseTitle;
+  if (meta.courseDescription) plan.intro = meta.courseDescription;
+  if (meta.academyName) productType.academyName = meta.academyName;
+  if (meta.academyDescription) productType.academyDescription = meta.academyDescription;
 
   // Merge section titles from plan into the filled lessons (content.md only carries
   // per-screen titles; section titles live in plan.md).
@@ -567,8 +596,8 @@ function main(): void {
   const isCourseOnly = productType.preset === 'academy-course';
 
   const root = isCourseOnly
-    ? buildCourseOnly({ workdir, brief, productType, plan, formatProfile, theme, lessons, onboarding, controlsMap: controlsArtifact.controls, overrides: null })
-    : buildFlow({ workdir, brief, productType, plan, formatProfile, theme, lessons, onboarding, controlsMap: controlsArtifact.controls, overrides: null });
+    ? buildCourseOnly({ workdir, brief, productType, plan, formatProfile, theme, lessons, onboarding, controlsMap: controlsArtifact.controls, overrides: null, meta })
+    : buildFlow({ workdir, brief, productType, plan, formatProfile, theme, lessons, onboarding, controlsMap: controlsArtifact.controls, overrides: null, meta });
 
   const outputPath = join(workdir, `${productType.key}.luly.json`);
   writeFileSync(outputPath, JSON.stringify(root, null, 2) + '\n', 'utf8');

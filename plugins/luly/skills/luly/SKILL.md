@@ -8,6 +8,10 @@ description: |
 
 The user types one thing. You run the 5-stage pipeline and hand back a JSON file ready for CMS import. **You never tell the user to type any `/luly-*` slash command** — you execute every stage inline.
 
+## Writing guidelines (read once, apply everywhere)
+
+Before generating any user-facing content (intake, plan, fill, non-section content, validator), read `${CLAUDE_PLUGIN_ROOT}/guidelines/writing-guidelines.md` and follow it. Those guidelines are authoritative — if a per-stage skill rule conflicts with them, the global guidelines win. Keep them in mind for every screen, title, description, quiz, and recap you write.
+
 ## When to trigger
 
 Auto-trigger on:
@@ -37,17 +41,19 @@ After all 5 stages, run the assemble script with the workdir as its argument:
 ${CLAUDE_PLUGIN_ROOT}/bin/luly assemble "<workdir>"
 ```
 
-It reads all 4 markdown artifacts + 2 SVGs (if present), parses, computes controls, compiles Markdown to TipTap, applies the theme, stamps slugs and ranks, validates, and writes the final JSON.
+It reads all markdown artifacts + optional SVGs, parses, computes controls, compiles Markdown to TipTap, applies the theme, stamps slugs and ranks, validates, and writes the final JSON.
 
 ### Stage table
 
-| # | Skill | Output | Skip when |
-|---|---|---|---|
-| 1 | `luly-intake` | `intake.md` | (always run) |
-| 2 | `luly-plan` | `plan.md` | (always run) |
-| 3 | `luly-style` | `theme.md` (+ `card-cover.svg` + `course-icon.svg`) | SVGs skipped when preset ∈ {`campaign-simple`, `waitlist`, `interactive-proposal`} |
-| 4 | `luly-fill` | `content.md` | (always run) |
-| — | `assemble` (script) | `<key>.luly.json` | (always run; final) |
+| # | Skill | Output |
+|---|---|---|
+| 1 | `luly-intake` | `intake.md` |
+| 2 | `luly-plan` | `plan.md` |
+| 2.5 | `luly-meta` | `meta.md` (title, description, tags, hub-logo decision) |
+| 3 | `luly-style` | `theme.md` |
+| 4 | `luly-fill` | `content.md` (+ `recaps/section-N-recap.md` per section) |
+| 4.5 | `luly-validate` | `validate-report.md` — guideline compliance (auto-fix mechanical issues; ask user on substantive ones) |
+| — | `assemble` (script) | `<key>.luly.json` |
 
 ### Progress reporting
 
@@ -75,19 +81,7 @@ Extract from the prompt if present; otherwise default. **Don't ask about a slot 
 | has-form | "form / signup / waitlist / capture emails" → on; "no form" → off | preset default |
 | form copy hints | "first 50 users discount", "early access" — preserve verbatim for stage 4 | use generic copy |
 | locales | "in german, english, spanish" | `[en]` |
-
-### Preset selection signals
-
-| Preset | When to pick |
-|---|---|
-| `academy` | "academy", "school", "learning hub", "training program" |
-| `academy-course` | "add a course to (the) academy", "extend the X academy" |
-| `campaign-course` | **explicit** "multi-step", "drip", "nurture sequence", "X-lesson series" |
-| `campaign-simple` | default for "marketing campaign", "promo", "launch", "landing", "ad campaign", "lead-gen" |
-| `waitlist` | "waitlist", "early access", "email signup", "lead capture" |
-| `interactive-proposal` | "sales proposal", "pitch deck", "demo for client X" |
-
-**Single-section → never `campaign-course`.** If the plan would emit 1 section, the preset must be `campaign-simple` / `waitlist` / `interactive-proposal` / `academy-course`.
+| maxImages | "with illustrations / with visuals / draw images / illustrated / max images" → on | off — image blocks ship caption-only and use the flow-level `mediaPlaceholderUrl` placeholder |
 
 ## When to ask the user
 
@@ -95,6 +89,7 @@ Ask only if all three are true:
 1. A slot is genuinely missing.
 2. No reasonable default exists.
 3. The choice meaningfully changes the output.
+4. Ambiguity about the target company name (i.e. there are several companies with that name) 
 
 Examples worth asking:
 - Two preset candidates equally plausible ("make a sales pitch for X" → `interactive-proposal` or `campaign-simple`?).
@@ -126,10 +121,6 @@ echo "$WORKDIR"
 The output path is your **workdir for this run** — pass it as the `<workdir>` placeholder when reading each per-stage skill and when running the assembler. Every artifact for this generation lives inside that directory. Old runs in sibling directories stay untouched.
 
 If the user explicitly asks to **resume** a partial generation against a specific existing dir, use that dir as the workdir instead of creating new.
-
-## Migrating from v0.1.x
-
-Per-run subdirectories side-step the v0.1.x stale-artifact bug structurally. Old `tmp/luly-agent/*.json` files (briefs, lessons, etc. from v0.1.x) live in the root of `tmp/luly-agent/`; v0.2 runs live in subdirectories beside them and never see each other.
 
 ## Hand-off
 

@@ -1,19 +1,32 @@
 /**
- * Minimal Markdown → TipTap (ProseMirror JSON) converter.
+ * Markdown → TipTap (ProseMirror JSON) converter.
  *
- * Closed subset (stage 4 commits to this):
- *   - # to #### headings
- *   - paragraphs (blank-line separated)
- *   - bulleted lists (- or *)
- *   - ordered lists (1. ...)
- *   - inline marks: **bold**, *italic* / _italic_, `code`, [label](url)
+ * Supported subset — aligned with the luly-app TipTap editor extensions:
+ *   Block:
+ *     - # to #### headings (4 levels)
+ *     - paragraphs (blank-line separated)
+ *     - bullet lists (- or *)
+ *     - check-style bullets (- [ ] or - [x]) → renders with checkmark icons
+ *     - ordered lists (1. ...)
+ *     - blockquote (> text)
+ *   Inline:
+ *     - **bold**, *italic* / _italic_, `code`, [label](url)
+ *     - Definition tooltips: {{term | description}}
+ *                            {{term | title | description}}
+ *                            renders as <span data-tooltip-title="..." data-tooltip-description="...">term</span>
+ *
+ * Not supported (CMS-only or special-case):
+ *   - tables (deliberate — keep content linear)
+ *   - inline icons / inline buttons (add in CMS)
+ *   - inline SVG, spoiler, font weight, color (rare; via raw HTML when needed)
+ *   - text alignment (CMS-only)
  *
  * Anything outside the subset is wrapped as a plain paragraph — the converter
  * never errors on input.
  */
 
 export interface TipTapMark {
-  type: 'bold' | 'italic' | 'code' | 'link';
+  type: 'bold' | 'italic' | 'code' | 'link' | 'descriptionTooltip';
   attrs?: Record<string, string>;
 }
 
@@ -63,6 +76,26 @@ const INLINE_PATTERNS: Array<{ re: RegExp; build: (m: RegExpExecArray) => Inline
       text: m[1],
       marks: [{ type: 'code' }],
     }),
+  },
+  // Definition tooltip: {{trigger | description}} OR {{trigger | title | description}}
+  //   2 parts → title = trigger text (the displayed word)
+  //   3 parts → custom title (popover heading) + description (popover body)
+  // The trigger text is what renders inline; the rest sits in mark attrs.
+  {
+    re: /\{\{\s*([^|}\n]+?)\s*\|\s*([^|}\n]+?)\s*(?:\|\s*([^}\n]+?)\s*)?\}\}/g,
+    build: (m) => {
+      const trigger = m[1].trim();
+      const a = m[2].trim();
+      const b = m[3]?.trim();
+      const title = b ? a : trigger;
+      const description = b ?? a;
+      return {
+        start: m.index,
+        end: m.index + m[0].length,
+        text: trigger,
+        marks: [{ type: 'descriptionTooltip', attrs: { title, description } }],
+      };
+    },
   },
   // Link: [label](url)
   {
@@ -142,9 +175,12 @@ function parseInline(line: string): TipTapText[] {
 // Block parsing
 // ----------------------------------------------------------------------------
 
-const HEADING_RE = /^(#{1,4})\s+(.+)$/;
-const ULIST_RE = /^[-*]\s+(.+)$/;
-const OLIST_RE = /^\d+\.\s+(.+)$/;
+const HEADING_RE    = /^(#{1,4})\s+(.+)$/;
+const ULIST_RE      = /^[-*]\s+(.+)$/;
+// Task-list bullet: `- [ ]` or `- [x]` (any case for x). Body is what's after the bracket.
+const ULIST_TASK_RE = /^[-*]\s+\[(?:\s|[xX])\]\s+(.+)$/;
+const OLIST_RE      = /^\d+\.\s+(.+)$/;
+const BLOCKQUOTE_RE = /^>\s?(.*)$/;
 
 function makeParagraph(text: string): TipTapNode {
   const trimmed = text.trim();
@@ -197,14 +233,27 @@ export function markdownToTipTap(input: string): TipTapDoc {
     if (ulistMatch) {
       flushParagraph();
       const items: TipTapNode[] = [];
+      // Detect whether ANY item in this list uses the task-list (`- [ ]` / `- [x]`)
+      // syntax. If so, the whole list becomes check-style (data-bullet-style="check").
+      // The bracketed marker itself is stripped from each item's text.
+      let isCheck = false;
       while (i < lines.length) {
         const li = lines[i].trim();
+        const taskM = li.match(ULIST_TASK_RE);
+        if (taskM) {
+          isCheck = true;
+          items.push(makeListItem(taskM[1].trim()));
+          i++;
+          continue;
+        }
         const m = li.match(ULIST_RE);
         if (!m) break;
         items.push(makeListItem(m[1].trim()));
         i++;
       }
-      content.push({ type: 'bulletList', content: items });
+      const listNode: TipTapNode = { type: 'bulletList', content: items };
+      if (isCheck) listNode.attrs = { 'data-bullet-style': 'check' };
+      content.push(listNode);
       continue;
     }
 
@@ -220,6 +269,34 @@ export function markdownToTipTap(input: string): TipTapDoc {
         i++;
       }
       content.push({ type: 'orderedList', content: items });
+      continue;
+    }
+
+    const bqMatch = trimmed.match(BLOCKQUOTE_RE);
+    if (bqMatch) {
+      flushParagraph();
+      // Collapse consecutive `> ` lines into one blockquote; blank-quoted lines
+      // (`>` alone) become paragraph separators inside the blockquote.
+      const inner: TipTapNode[] = [];
+      let paraBuf: string[] = [];
+      const flushBqPara = () => {
+        if (paraBuf.length === 0) return;
+        const t = paraBuf.join(' ').trim();
+        paraBuf = [];
+        if (t) inner.push(makeParagraph(t));
+      };
+      while (i < lines.length) {
+        const li = lines[i].trim();
+        const bm = li.match(BLOCKQUOTE_RE);
+        if (!bm) break;
+        const body = bm[1].trim();
+        if (body) paraBuf.push(body);
+        else flushBqPara();
+        i++;
+      }
+      flushBqPara();
+      if (inner.length === 0) inner.push({ type: 'paragraph' });
+      content.push({ type: 'blockquote', content: inner });
       continue;
     }
 

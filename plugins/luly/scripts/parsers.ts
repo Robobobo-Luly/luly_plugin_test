@@ -341,6 +341,57 @@ export function parseTheme(md: string): ThemeArtifact {
 }
 
 // ============================================================================
+// parseMeta — reads meta.md → marketing fields (title, description, tags,
+// academyName, academyDescription, hubLogoDecision). All fields optional;
+// caller falls back to plan-derived values when meta is missing.
+// ============================================================================
+
+export interface MetaArtifact {
+  courseTitle?: string;
+  courseDescription?: string;
+  tags?: string[];
+  academyName?: string;
+  academyDescription?: string;
+  hubLogoDecision?: 'brand-logo' | 'placeholder';
+}
+
+export function parseMeta(md: string): MetaArtifact {
+  const sections = splitSections(md);
+  const meta: MetaArtifact = {};
+
+  const courseBlock = sections.get('Course') ?? '';
+  const academyBlock = sections.get('Academy (academy preset only)') ?? sections.get('Academy') ?? '';
+
+  for (const line of courseBlock.split('\n').map(l => l.trim()).filter(Boolean)) {
+    const m = line.match(/^(\w[\w-]*?)\s*:\s*(.+)$/);
+    if (!m) continue;
+    const [, k, v] = m;
+    const key = k.toLowerCase();
+    if (key === 'title') meta.courseTitle = v.trim();
+    else if (key === 'description') meta.courseDescription = v.trim();
+    else if (key === 'tags') {
+      const inner = v.trim().replace(/^\[|\]$/g, '');
+      meta.tags = inner.split(',').map(s => s.trim().replace(/^["']|["']$/g, '')).filter(Boolean);
+    }
+  }
+
+  for (const line of academyBlock.split('\n').map(l => l.trim()).filter(Boolean)) {
+    const m = line.match(/^(\w[\w-]*?)\s*:\s*(.+)$/);
+    if (!m) continue;
+    const [, k, v] = m;
+    const key = k.toLowerCase();
+    if (key === 'name') meta.academyName = v.trim();
+    else if (key === 'description') meta.academyDescription = v.trim();
+    else if (key === 'hub-logo' || key === 'hublogo') {
+      const dec = v.trim().toLowerCase();
+      if (dec === 'brand-logo' || dec === 'placeholder') meta.hubLogoDecision = dec;
+    }
+  }
+
+  return meta;
+}
+
+// ============================================================================
 // parseContent — reads content.md → { lessons, onboarding }
 // ============================================================================
 
@@ -522,7 +573,7 @@ function buildBlock(hdr: Record<string, unknown>, body: string): LessonBlock {
     case 'image-richtext':
       return {
         format: 'image-richtext',
-        imageUrl: String(hdr.image ?? '/assets/placeholder-image.svg'),
+        imageUrl: String(hdr.image ?? '/assets/placeholders/media.svg'),
         imagePosition: (hdr.position as 'left' | 'right') ?? 'left',
         content: body,
         ...(hdr.caption ? { caption: String(hdr.caption) } : {}),
@@ -530,7 +581,7 @@ function buildBlock(hdr: Record<string, unknown>, body: string): LessonBlock {
     case 'image':
       return {
         format: 'image',
-        url: String(hdr.url ?? ''),
+        url: String(hdr.url ?? '/assets/placeholders/media.svg'),
         alt: String(hdr.alt ?? ''),
         ...(hdr.caption ? { caption: String(hdr.caption) } : {}),
       };

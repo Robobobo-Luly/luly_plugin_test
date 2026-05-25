@@ -1,7 +1,7 @@
 {
-  "name": "luly-v0-2-3",
-  "version": "0.2.3",
-  "description": "Author Luly flows (academies, courses, marketing campaigns, waitlists, interactive proposals) end-to-end from a single natural-language prompt. v0.2 collapses the 10-stage JSON pipeline into 5 stages of markdown context-passing. Each run lives in its own subdirectory under tmp/luly-agent/ for isolation. Default illustration approach is inline SVG (base64) with the caption preserved as a prompt for future image-gen.",
+  "name": "luly-v0-2-4",
+  "version": "0.2.4",
+  "description": "Author Luly flows (academies, courses, marketing campaigns, waitlists, interactive proposals) end-to-end from a single natural-language prompt. v0.2 collapses the 10-stage JSON pipeline into 5 stages of markdown context-passing. Each run lives in its own subdirectory under tmp/luly-agent/ for isolation. Markdown→TipTap now supports definition tooltips, check-style bullets, and blockquotes — aligned with the luly-app rich-text editor's actual feature set.",
   "author": {
     "name": "Luly"
   },

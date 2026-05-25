@@ -7,6 +7,8 @@ description: Stage 4 of the Luly authoring pipeline. Write all screen content (o
 
 One file. All screens. Per-screen YAML-style header for structured fields (block type, image, quiz choices, form fields, etc.), Markdown body for prose. Screens separated by `---`. Onboarding and sections are uniform — both are just "ordered groups of screens" in this doc.
 
+**Before writing any screen body**, read `${CLAUDE_PLUGIN_ROOT}/guidelines/writing-guidelines.md` and apply it. Key non-negotiables: stories are 3–4 sentences, fit one mobile screen, never end bullets or headings with punctuation, American English, no emojis, no rhetorical questions, no long compound sentences. Quizzes: one per lesson, 2–3 questions, three options, only one correct, shuffle correct-answer position across questions.
+
 ## Process
 
 ### 1. Load prior stages
@@ -30,17 +32,35 @@ From plan frontmatter (`mode`, `quizzes`, `forms`):
 
 Don't emit a block whose format is outside this set.
 
-### 3. For each screen in plan order
+### 3. Generate one section at a time, with carry-forward recap
 
-For every screen the plan declares (onboarding first if present, then sections in order):
+The plan is processed in order: onboarding first (if present), then Section 1, Section 2, ... in plan order. Each section is generated as **its own focused pass** rather than streamed alongside the others. This keeps tone consistent, makes per-section retries cheap, and lets each pass enforce its own per-lesson rules (one quiz per lesson, 2–3 questions, etc.).
 
+For each section:
+
+**(a) Read context.** Always: intake.md, plan.md, theme.md, writing-guidelines.md. Plus the **most recent recap file** (see (d)) if one exists from the previous section.
+
+**(b) Generate the section's screens.** For each screen in this section's plan entry:
 1. Pick **one** block format from the allowlist that fits the screen synopsis.
 2. Write a `## Onboarding · Screen N — title` or `## Section M · Screen N — title` header.
 3. Below the header, write a YAML-style block of structured fields (type, image, choices, etc.).
-4. After a blank line, write the Markdown body (the actual copy).
+4. After a blank line, write the Markdown body. Do not use tables. Pattern: title → intro sentence → optional bullets → optional closing line. No emojis. Each story 3–4 sentences (per writing-guidelines.md §3); split into two screens if longer.
 5. End the screen with `---` on its own line.
 
-Mirror the screen count from the plan exactly — no adding, no dropping.
+Screen count can deviate slightly — if a story would be too long, split into two screens rather than cramming.
+
+**(c) Append to content.md.** Write the section's screens to `<workdir>/content.md` in plan order. Use `>> Append` semantics — do NOT overwrite earlier sections when generating later ones. (Tactically: read content.md if it exists, append the new section, write the whole thing back. Or use shell `>>`.)
+
+**(d) Write a recap.** After completing the section, write `<workdir>/recaps/section-N-recap.md` — **3 sentences maximum** capturing:
+- Key terms introduced (e.g. "DEX", "AERO", "epoch")
+- Tone / voice settled on (e.g. "warm, plain-spoken, second person")
+- Recurring metaphors or analogies used (e.g. "two buckets that price each other")
+
+The next section's pass reads this recap and respects it: don't redefine terms, keep tone consistent, reuse metaphors.
+
+**(e) Move to the next section.** Repeat from (a).
+
+**Subagent option (orchestrator's choice):** the orchestrator MAY spawn an Agent subagent per section using the Agent tool, passing it the workdir + prior recap. This isolates context per section. If you do this, each subagent still produces the screens for one section and writes its recap file before returning. Default is a single agent processing sections sequentially.
 
 ### 4. Block format catalog
 
@@ -57,6 +77,7 @@ Mirror the screen count from the plan exactly — no adding, no dropping.
 | `layout` | `type: layout`<br>`ratio: "50:50"` | (none — responsive mode only) |
 
 **Single-component vs composite:** never emit a composite (`image-richtext`, `quiz-text`, `form-text`) with one half empty. If the body would be empty, use the single-component variant (`image`, `question`, `form`) instead.
+Try to be consistent, if we started with responsive blocks and we have images on the left, keep them on the left, this is usually the preferred setup, media, forms, questions on the left (top for mobile), text content on the right (bottom)
 
 ### 5. Choices / Fields list syntax
 
@@ -94,51 +115,83 @@ fields:
 
 Field types: `text | email | number | tel | textarea | select | checkbox`. (Note: no `url` type.) For `checkbox`, `checkboxLabel` is plain text (never Markdown); `links` is an optional array.
 
-### 5b. SVG illustrations — default inline visual (new)
+### 5a. Markdown content — what the renderer actually supports
 
-For every image-bearing block (`image-richtext`, `image`), design a **minimal SVG illustration** inline. The data URI goes in the `image:` (or `url:` for `image` blocks) field. The caption stays separately as the prompt for a future image-gen step.
+Every Markdown body (`content` field on `text`, `image-richtext`, `form-text`; `text` on `quiz-text`) is compiled to TipTap JSON at assemble time. The renderer supports more than vanilla Markdown — use the full feature set.
 
-This gives you both: a real visible illustration today + a high-quality image-gen prompt for later.
+**Block elements:**
 
-**Design rules for the inline SVG:**
+| Markdown | Renders as |
+|---|---|
+| `# H1` / `## H2` / `### H3` / `#### H4` | Headings (4 levels max; `#####` and beyond ignored) |
+| Blank line | Paragraph break |
+| `- item` or `* item` | Bullet list (default disc style) |
+| `- [ ] item` or `- [x] item` | **Check-style bullet list** — entire list renders with checkmark icons. If any item in the list uses `[ ]`/`[x]`, the whole list goes check-style. Checked vs unchecked state is purely visual (no interactive checkboxes). |
+| `1. item` | Numbered list |
+| `> quoted line` | Blockquote. Consecutive `>` lines collapse into one block; a `>` on its own creates a paragraph break inside the same quote. |
 
-- **viewBox: `0 0 256 256`** for inline / square illustrations. Use `0 0 320 200` for wider hero-style images if the layout needs it.
-- **2–5 simple shapes maximum.** Rect, circle, ellipse, line, simple paths. No fancy gradients required (one optional `<linearGradient>` is fine).
-- **Theme HEX only.** Pull from `theme.md` palette — usually `background`, `primary`, `secondary`, and one accent. Don't invent hex codes.
-- **No text inside the SVG.** The caption is the text. Image = pure visual.
-- **No `<script>`, no `xlink:href`, no `<image href>` external references, no `<style>` blocks.** Self-contained markup.
-- **Coherent across the lesson** — same illustration style across screens in a section. E.g., if you use rounded rectangles + diagonal lines for screen 1, keep that vocabulary for screen 2.
+**Inline marks:**
 
-**How to inline it in content.md:**
+| Markdown | Renders as |
+|---|---|
+| `**bold**` | Bold |
+| `*italic*` or `_italic_` | Italic |
+| `` `code` `` | Inline code |
+| `[label](https://url)` | Hyperlink |
+| `{{term \| description}}` | **Definition tooltip** — `term` renders inline with an underlined / hover-styled trigger; clicking it shows the popover with `description` as the body. The popover title defaults to `term` itself. |
+| `{{term \| title \| description}}` | Same as above but with a custom popover **title** (heading) distinct from the inline trigger text. |
 
-After designing the SVG, base64-encode it via Bash and paste the resulting `data:image/svg+xml;base64,...` URI as the `image:` (or `url:`) value.
+**Definition tooltips are the high-value feature for educational content.** Use them freely whenever a domain term, acronym, or concept would benefit from an inline definition without breaking reading flow. Examples:
 
-Bash command pattern:
+- `When you send crypto, it's signed by your {{private key | A secret cryptographic key only you control; whoever has it controls your funds}}.`
+- `Most wallets store assets on a {{Layer 1 | Base blockchain | A base-layer blockchain like Bitcoin, Ethereum, or Solana that records all transactions directly}}.`
+- `Phantom supports {{SPL tokens | Solana's token standard, equivalent to Ethereum's ERC-20}} natively.`
 
-```bash
-SVG='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" fill="#FFFFFF"/><circle cx="128" cy="128" r="64" fill="#AB9FF2"/></svg>'
-echo -n "$SVG" | base64
+A few per screen is reasonable for technical content; one or two is fine for friendlier topics. Don't tooltip basic words readers already know (`wallet`, `phone`, `email`). Tooltip the things that would prompt a reader to open a new tab to search.
+
+**Not supported (don't write):**
+
+- **Tables.** `| col | col |` won't render. Use a check-bullet list with bold key + value (`- [ ] **Latency:** sub-second`) instead.
+- **Inline images** inside body Markdown — `![alt](url)` is not rendered. If you need a picture beside the text, use the `image-richtext` block format (image + content side by side).
+- **Underline, spoilers, inline icons, inline buttons, font weight, custom color, text alignment.** These exist in the CMS toolbar for human edits but agent-written content shouldn't reach for them.
+- **Inline SVGs** inside body Markdown. Use the `image-richtext` block (with the SVG approach below) when you need a visual; don't inline SVG markup into prose.
+
+### 5b. Images — placeholder by default, SVG only on opt-in
+
+**Default behavior (do this unless the orchestrator passed `maxImages: true`):**
+
+Image-bearing blocks (`image-richtext`, `image`) ship **without an inline SVG**. Omit the `image:` (or `url:`) field entirely — the assembler stamps the flow-level `mediaPlaceholderUrl` (`/assets/placeholders/media.svg`) at render time and the CMS uses it whenever a block has no image set.
+
+The `caption:` field is still **mandatory** for every image-bearing block. It serves two purposes:
+1. Alt-text / accessible label today.
+2. The prompt for a future image-generation pass (real raster or AI image-gen), which will replace the placeholder later.
+
+So even though you're not drawing anything, write the caption as if briefing an illustrator. Caption format rules in §6 still apply (HEX from theme, no vague color words).
+
+Example (default mode):
+
 ```
-
-The output is the base64 string. Prepend `data:image/svg+xml;base64,` and paste as the value:
-
-```
-## Section 1 · Screen 1 — What is Phantom?
+## Section 1 · Screen 1 — What is Phantom
 type: image-richtext
-image: data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTYgMjU2Ij48cmVjdCB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgZmlsbD0iI0ZGRkZGRiIvPjxjaXJjbGUgY3g9IjEyOCIgY3k9IjEyOCIgcj0iNjQiIGZpbGw9IiNBQjlGRjIiLz48L3N2Zz4=
 position: right
 caption: "Stylised multi-chain wallet icon, flat vector illustration, using palette #AB9FF2 primary, #FFFFFF background, 1:1 aspect ratio"
 
 **Phantom** is a multi-chain self-custodial wallet...
 ```
 
-**Composition hints for what to draw:**
+**Opt-in: "max images" mode** — the orchestrator (or user) explicitly asks for visuals on every image-bearing screen. Only in this mode do you design and inline an SVG illustration:
 
-- Match the topic at a metaphorical level: wallet topic → wallet/coin shape; security topic → shield; networks → connected dots; etc.
-- When unsure, default to abstract geometric composition using the theme palette. Branded color is more important than literal subject.
-- Reuse the same metaphor from the card cover / course icon when sensible — visual coherence across the product.
+- Write each SVG to a sibling file under `<workdir>/images/`, e.g. `images/s1-s1.svg`, `images/s2-s3.svg`.
+- Reference it from content.md by relative path: `image: images/s1-s1.svg`. The assembler inlines it as a base64 data URI at compile time (same `loadInlineSvg()` pattern already used for `logo.svg`).
+- Do **not** base64-encode SVGs inline in content.md — it makes diffs unreadable and bloats the artifact.
 
-**If you genuinely can't design a meaningful SVG** (very abstract screen, no obvious visual), fall back to: `image: /assets/placeholder-image.svg` — the canonical placeholder. Don't ship an empty white square.
+Design rules for opt-in SVGs:
+
+- viewBox `0 0 256 256` for square inline illustrations; `0 0 320 200` for wide hero-style images.
+- Stick to `theme.md` palette — pull verbatim HEX values.
+- Simple, clean shapes. If the concept is too complex, abstract it into a minimalist composition.
+- Match the topic at a metaphorical level when possible (wallet → wallet shape, security → shield, network → connected dots).
+- Visual coherence across the lesson — same style vocabulary across screens in a section.
 
 ### 6. Image captions — HEX from theme, no vague color words
 
@@ -155,88 +208,37 @@ Read the palette from `theme.md`. Every image caption MUST follow this format:
 
 Example: `"Friendly ghost mascot waving from inside a smartphone, flat vector illustration with soft glow, using palette #AB9FF2 primary, #FFFFFF background, 1:1 aspect ratio"`.
 
-### 7. Write `content.md`
+### 7. Artifact layout
 
-Path: `<workdir>/content.md`. Overwrite.
+Final state of `<workdir>` after a complete fill run:
 
-Worked example (Phantom academy with onboarding + 2 sections):
+- `content.md` — all sections concatenated in plan order (the assembler reads this).
+- `recaps/section-1-recap.md`, `recaps/section-2-recap.md`, ... — one per section. Not consumed by the assembler; kept for traceability, per-section retries, and as context fed to the next section.
+- `images/` (only when `maxImages: true`) — per-screen SVG files referenced by relative path from content.md.
 
-```markdown
-## Onboarding · Screen 1 — Welcome
-type: image-richtext
-image: /assets/placeholder-image.svg
-position: left
-caption: "Friendly ghost mascot waving from inside a smartphone, flat vector illustration, using palette #AB9FF2 primary, #FFFFFF background, 1:1 aspect ratio"
+Start with a clean `content.md` (overwrite if a stale one exists from a prior run), then append section by section. On a fresh workdir, the file is created on first append.
 
-Welcome to **Phantom Academy** — your guide to shipping with Phantom across multiple chains.
+### 8. Self-checks before finishing each section
 
----
-
-## Onboarding · Screen 2 — How the academy works
-type: text
-
-Each section is a few short screens. Tap **Next** to move through. Quizzes help the lessons stick.
-
----
-
-## Section 1 · Screen 1 — What is Phantom?
-type: image-richtext
-image: /assets/placeholder-image.svg
-position: right
-caption: "Stylised multi-chain wallet interface with subtle ghost mark, flat vector illustration, using palette #AB9FF2 primary, #FFFFFF background, 1:1 aspect ratio"
-
-**Phantom** is a multi-chain self-custodial wallet — Solana, Ethereum, Bitcoin, Polygon, Base, and Sui all in one app.
-
----
-
-## Section 1 · Screen 2 — Quick check
-type: quiz-text
-text: "Pick the right answer:"
-question: "Which chains does Phantom support?"
-choices:
-  - id: a
-    text: Solana only
-  - id: b
-    text: Solana, Ethereum, Bitcoin and more
-  - id: c
-    text: Ethereum only
-correct: b
-
----
-
-## Section 2 · Screen 1 — Sending crypto
-type: text
-
-To send crypto with Phantom, tap **Send**, paste an address, pick the asset, confirm. Phantom handles the network fee in the background.
-
----
-
-## Section 2 · Screen 2 — Staking
-type: image-richtext
-image: /assets/placeholder-image.svg
-position: left
-caption: "Validator nodes with reward indicator, flat vector illustration, using palette #AB9FF2 primary, #FFFFFF background, 1:1 aspect ratio"
-
-**Staking** lets you earn rewards by locking SOL with a validator. Phantom shows estimated APY before you commit.
-```
-
-### 8. Self-checks before saving
+After each section is appended:
 
 - Every image-bearing block has a `caption` field.
 - Every caption contains at least one HEX color (`#XXXXXX`).
 - No banned vague color words.
 - Quiz `correct` values match a choice ID.
 - Form field types are within the allowed set.
-- Screen count matches plan exactly.
+- Section's screen count roughly matches the plan (off-by-one for split screens is OK).
 - Screens use `---` separator on their own line.
+- The section's recap file exists and is 3 sentences or fewer.
 
 ### 9. Hand off
 
-Tell the user where `content.md` is. Next: assemble (the orchestrator runs the `assemble` script).
+After the final section + recap are written, tell the user where `content.md` is. Next: assemble (the orchestrator runs the `assemble` script).
 
 ## Hard rules
 
-- Single file: `<workdir>/content.md`.
+- Final aggregated artifact: `<workdir>/content.md`.
+- Generated section-by-section, with per-section recap in `<workdir>/recaps/`.
 - Markdown only. Per-screen header is plain key/value lines (YAML-style), not real YAML/JSON.
 - Body content is plain Markdown (will be compiled to TipTap at assemble time — don't pre-compile).
 - Block format names: use the catalog above verbatim. NEVER emit `richtext` as a format name — that's not registered. Use `text`.
