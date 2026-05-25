@@ -19,25 +19,72 @@ The orchestrator passes you the user's one-line request. Pull any URLs they atta
 
 **Trigger:** the prompt names a specific company by brand (e.g. "Phantom academy", "Wallet onboarding", "Base campaign"). Skip entirely for generic / non-branded products.
 
-When triggered, **before writing the file**, extract from the company's actual sources:
+When triggered, **before writing the file**, extract these from the brand's actual sources:
 
-- **Colors as HEX** — find them in CSS variables on the site, important to get background color, logo colors, the primary colors, i.e. the colors they use for CTA, brand colors, you name it, also check for surface colors, text colors,  **Never invent hex codes.** If you can't find a value, omit the key.
-- **Logo URL** — absolute URL to the canonical logo (prefer SVG, transparent background). if you found url logo, especially csv, save it in base64 and pass further as a string to be used in images, icons etc
-- **Fonts** — what they use (from CSS, brand book).
-- **Voice** — one sentence summarizing how they speak.
+- **Colors as HEX** — canvas/background, primary CTA, secondary, accent, text. **Never invent hex codes.**
+- **Logo** — find and save the canonical brand mark. See "Logo discovery" below.
+- **Fonts** — heading and body font-family from CSS or brand book.
+- **Border radius** — typical button / container radius (px) from CSS rules on `button`, `.btn`, or design-system primitives.
+- **Voice** — one sentence on how they speak.
 
-The site's HTML is the most logical source — the brand's own CSS is authoritative in a way that secondary write-ups aren't. Don't give up on the first failed attempt. If one fetch path is blocked, try another (e.g. a real-browser request) before falling back. Other good sources: published brand books, brand kits, design-system pages.
+#### The job is *visual fidelity*, not scrape compliance
+
+The site's HTML and CSS are usually the right starting point, but **every site is structured differently** — there's no single "always do X first" recipe. What matters is ending up with **reasonable assurance that the tokens you write actually represent how the brand's site looks to a human visitor**. Don't ship colors you can't defend.
+
+Useful signals to combine:
+- `<meta name="theme-color">` and `<meta name="background_color">` in the HTML head — explicit declared canvas
+- PWA manifest (`<link rel="manifest">`) → `theme_color` / `background_color`
+- CSS rule on `html` / `body` background — the visible canvas under the content
+- Design-system CSS variables (`--background`, `--primary`, etc. when present)
+- Most-frequent background-color hex across the bundle (only a hint — many of those are dark-mode-variant or modal-specific)
+- Apple-touch-icon, link rel=icon SVG, og:image — often expose the brand color
+- Brand book / press kit / brand assets page when one is published
+- A screenshot of the homepage (last resort — visual reality is the tiebreaker)
+
+If two signals disagree (e.g. `theme-color` says light but a CSS rule says dark), **reconcile**. Don't just pick one. The fix is one of: (a) pull more signals until a clear picture emerges, (b) take a screenshot and let visual reality decide, (c) ask the user.
+
+Don't give up after one failed fetch. If one path is blocked (Cloudflare 403, captcha), try a real-browser User-Agent, a different subdomain, the press/brand page, or a brand-asset aggregator.
+
+#### Logo discovery
+
+The logo is its own search — don't conflate it with color extraction.
+
+Useful signals to combine:
+- `<link rel="icon" ... href="...svg">` — often the cleanest SVG mark, transparent background.
+- `<link rel="apple-touch-icon" ...>` — usually a square PNG.
+- `<meta property="og:image" ...>` — full marketing banner, can be cropped or used as fallback.
+- `<header>` / nav `<img>` or inline `<svg>` — the live brand mark on the page.
+- Press / brand-assets page when one exists.
+
+When you find an SVG that genuinely *is* the brand mark (not a UI icon, not a hero illustration, not a screenshot crop), download the raw SVG and save it to `<workdir>/logo.svg`. The assembler picks that file up automatically and inlines it into the header. If you only have a URL (e.g. PNG-only brand), still record it in intake's `Logo:` field — the assembler will use the URL as a fallback.
+
+Sanity checks before saving:
+- The SVG actually renders as the brand wordmark or symbol (open it, look at it).
+- No external `<image href>` or `<script>` tags inside.
+- Reasonable file size (< 20 KB; if it's huge, it's probably an illustration, not a logo).
+
+If you can't find a real logo at decent quality, **don't save anything**. Header falls back to the Luly mark — that's preferable to a wrong/blurry brand impression.
+
+#### Plausibility check before committing
+
+Before writing the `Colors:` block, do a sanity pass:
+
+- Does the **declared brand canvas** match the dominant impression of the homepage screenshot or main-page rule? A widely-known brand suddenly looking opposite (e.g. all black for a brand whose marketing site is bright cream) is a red flag.
+- Does the **primary** appear in the brand's own buttons, links, or accents — not just in a footer or one component?
+- Are the colors mutually consistent (good contrast, readable, look intentional together)?
+
+If anything fails the sanity pass, treat the extraction as unreliable and ask the user (see below).
 
 Trust user-supplied material over what you scrape.
 
 #### What counts as "reliably identified"
 
-Brand colors are considered reliably identified when **both** of the following come from an authoritative source (the brand's own CSS bundle, manifest, brand book, or material the user pasted):
+Reliable means **you can defend it with at least two converging signals AND it passes the plausibility check**. Examples:
+- `theme-color` meta + body background rule + matching og:image canvas → reliable.
+- One CSS-bundle background hex + nothing else → unreliable.
+- A logo URL alone, a single color, or a guess from the company name → unreliable.
 
-- A verified `primary` HEX
-- A verified `background` HEX
-
-A logo URL alone, a single color, or a guess derived from the company name or category does NOT count. When in doubt, treat it as unreliable.
+When in doubt, treat as unreliable.
 
 #### When brand research fails or is unreliable — ask the user
 
@@ -104,6 +151,8 @@ Colors:
 - text: #HEX          (optional)
 Logo: <absolute url, optional>, base64 coded svg (if found)
 Fonts for Header and paragraph: Header - "Inter", paragraph - Inter Tight (optional)
+ButtonBorderRadius: <e.g. 8px, 12px, 999px — extracted from brand CSS; omit if not found> (optional)
+ContainerBorderRadius: <e.g. 12px, 16px — for cards/panels; omit if not found> (optional)
 Voice: <one line, optional>
 
 ## Materials

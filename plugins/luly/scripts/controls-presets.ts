@@ -116,15 +116,32 @@ function lessonControls(): Control[] {
   }];
 }
 
-function lessonScreenControls(): Control[] {
+function lessonScreenControls(opts: { hasHub: boolean }): Control[] {
+  // Top-right exit:
+  //   - When there's a hub (academy / academy-course / campaign-course):
+  //     a labeled "Back to academy" button that jumps to the hub. Always
+  //     visible, including on the first screen of the first lesson, so
+  //     learners always have a clear exit back to the catalog.
+  //   - When there's no hub: the existing tiny close-icon → parent.
+  const exitControl: Control = opts.hasHub
+    ? {
+        id: 'ctrl.screen.back-to-hub',
+        label: 'Back to academy',
+        position: 'topRight',
+        requires_click: true,
+        style: { variant: 'secondary' },
+        conditionalActions: [{ do: [{ type: 'goto', body: { target: 'hub' } }] }],
+      }
+    : {
+        id: 'ctrl.screen.header-back',
+        position: 'topRight',
+        requires_click: true,
+        style: { variant: 'close-icon' },
+        conditionalActions: [{ do: [{ type: 'goto', body: { target: 'parent' } }] }],
+      };
+
   return [
-    {
-      id: 'ctrl.screen.header-back',
-      position: 'topRight',
-      requires_click: true,
-      style: { variant: 'close-icon' },
-      conditionalActions: [{ do: [{ type: 'goto', body: { target: 'parent' } }] }],
-    },
+    exitControl,
     {
       id: 'ctrl.screen.prev',
       label: 'Previous',
@@ -300,7 +317,7 @@ export function applyControls(productPreset: Preset, plan: Plan): ControlsArtifa
     }
     for (const screen of lesson.screens) {
       const path = `lesson-${lesson.n}.screen-${screen.n}`;
-      controls[path] = lessonShape ? lessonScreenControls() : campaignScreenControls();
+      controls[path] = lessonShape ? lessonScreenControls({ hasHub }) : campaignScreenControls();
     }
   }
 

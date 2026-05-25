@@ -20,6 +20,8 @@ export interface Brand {
   logo?: string;           // absolute URL to logo image
   fonts?: string[];        // e.g. ["Inter"]
   voice?: string;          // 1-line brand voice description
+  buttonBorderRadius?: string;     // e.g. "8px" — extracted from brand CSS button rules
+  containerBorderRadius?: string;  // e.g. "12px" — for cards/panels
 }
 
 export interface Brief {

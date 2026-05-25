@@ -98,7 +98,9 @@ export function validateBlock(raw: unknown, ctx: string, allowed: Set<BlockForma
     case 'image-richtext':
       requiredKeys = ['format', 'imageUrl', 'imagePosition', 'content'];
       optionalKeys = ['caption'];
-      need(isNonEmptyString(b.imageUrl), `${ctx}: "imageUrl" must be non-empty string`);
+      // Empty imageUrl is allowed — the CMS falls back to flow.body.mediaPlaceholderUrl.
+      // Caption stays mandatory in spirit (it doubles as alt-text and image-gen prompt).
+      need(typeof b.imageUrl === 'string', `${ctx}: "imageUrl" must be a string (empty allowed → CMS uses placeholder)`);
       need(b.imagePosition === 'left' || b.imagePosition === 'right', `${ctx}: "imagePosition" must be "left" or "right"`);
       need(isNonEmptyString(b.content), `${ctx}: "content" must be non-empty Markdown string`);
       if (b.caption !== undefined) need(isNonEmptyString(b.caption), `${ctx}: "caption" if present must be non-empty string`);
@@ -106,7 +108,7 @@ export function validateBlock(raw: unknown, ctx: string, allowed: Set<BlockForma
     case 'image':
       requiredKeys = ['format', 'url', 'alt'];
       optionalKeys = ['caption'];
-      need(isNonEmptyString(b.url), `${ctx}: "url" must be non-empty string`);
+      need(typeof b.url === 'string', `${ctx}: "url" must be a string (empty allowed → CMS uses placeholder)`);
       need(isNonEmptyString(b.alt), `${ctx}: "alt" must be non-empty string`);
       if (b.caption !== undefined) need(isNonEmptyString(b.caption), `${ctx}: "caption" if present must be non-empty string`);
       break;

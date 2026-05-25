@@ -29,6 +29,8 @@ If `intake.md` has a `Colors:` block, **anchor the theme to those values verbati
 
 Never override the brand's primary because you think a different color looks better.
 
+If intake also captured `ButtonBorderRadius` / `ContainerBorderRadius`, anchor the corresponding style tokens (`buttonBorderRadius`, `containerBorderRadius`) to those values verbatim. If only `ButtonBorderRadius` is present, derive `containerBorderRadius` as the same value or a slightly larger one (cards usually round a bit more than buttons). If neither is present, use the default Luly value below.
+
 If no brand colors, **use the default Luly palette in step 5 verbatim**. Do not invent a topic-themed palette from the brand name or category — when the brand is unknown, neutral beats confidently-wrong.
 
 ### 3. Pick fonts
@@ -100,19 +102,51 @@ Path: `<workdir>/theme.md`. Overwrite. Every line under `## Palette` and `## Fon
 - heading: "Inter", sans-serif
 - body: "Inter", sans-serif
 - buttonBorderRadius: 12px
+- containerBorderRadius: 16px
 ```
 
 When intake DOES have brand colors, follow the rules in step 2 to override the relevant tokens (primary, background, secondary, text, accent) — keep the rest of this default palette as-is unless contrast targets force a change. All color tokens are required.
 
 
-### 6. Hand off
+### 6. SVG asset dimensions (must match exactly)
+
+When the preset has a hub catalog (`academy`, `academy-course`, `campaign-course`), also write these SVG files to `<workdir>`. **The viewBox dimensions below are not suggestions — the CMS renders each asset in a fixed-aspect frame and a mismatch produces visibly squished or letterboxed content.**
+
+| File | viewBox | Aspect | Used for |
+|---|---|---|---|
+| `card-cover.svg` | `0 0 1600 900` | **16:9** | Course card hero (hub catalog + course header) |
+| `course-icon.svg` | `0 0 256 256` | **1:1** | Course icon next to the author byline |
+| `hub-logo.svg` | `0 0 256 256` | **1:1** | Academy hub logo — **only write when intake authorized real brand logo** (see step 7) |
+| `logo.svg` | typically `0 0 256 64` or whatever matches the brand mark | brand-dependent | Header logo — copied from intake's brand discovery, do NOT redraw |
+
+Other rules for these SVGs:
+- Use the resolved palette HEX from this theme — no invented colors.
+- Keep them small (≤ 4 KB each). Simple shapes, ≤ 1 gradient.
+- No `<script>`, no external `<image href>`, no `xlink:href` to remote URLs.
+
+### 7. Placeholder SVGs (every preset)
+
+Generate three small branded SVGs into `<workdir>/placeholders/`:
+
+| File | viewBox | Used for |
+|---|---|---|
+| `placeholders/media.svg` | `0 0 800 600` (4:3) | Empty image/video/animation blocks anywhere in the product |
+| `placeholders/card.svg` | `0 0 1600 900` (16:9) | Empty course card hero when a course has no `cardImageUrl` |
+| `placeholders/icon.svg` | `0 0 256 256` (1:1) | Empty course icon when a course has no `iconUrl` |
+
+Each placeholder is a soft branded surface: solid `surface` background, a faint watermark (small wordmark, dot pattern, or simple geometric mark) in `primary` at low opacity. Don't put real text content — these are fallback canvases, not posters.
+
+The assembler inlines each as a `data:image/svg+xml;utf8,...` URI on the matching `flow.body.{media,card,icon}PlaceholderUrl` field. If you don't write a file, the field is omitted and the CMS falls back to its built-in generic placeholder.
+
+### 8. Hand off
 
 Tell the user where the artifacts are. Next stage: `/luly-fill`.
 
 ## Hard rules
 
 - Read-only on intake.md and plan.md.
-- Write only to `theme.md` + (for hub presets) `card-cover.svg` + `course-icon.svg`.
+- Write `theme.md` always; SVG assets per the table in step 6 / step 7.
 - All color tokens present and valid hex.
 - Fonts from the closed list, verbatim.
+- SVG viewBox dimensions in step 6 are mandatory — wrong aspect = visible bug.
 - Do not run any other skill in this conversation.

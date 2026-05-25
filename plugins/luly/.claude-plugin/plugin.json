@@ -1,7 +1,7 @@
 {
-  "name": "luly-v0-2-4",
-  "version": "0.2.4",
-  "description": "Author Luly flows (academies, courses, marketing campaigns, waitlists, interactive proposals) end-to-end from a single natural-language prompt. v0.2 collapses the 10-stage JSON pipeline into 5 stages of markdown context-passing. Each run lives in its own subdirectory under tmp/luly-agent/ for isolation. Markdown→TipTap now supports definition tooltips, check-style bullets, and blockquotes — aligned with the luly-app rich-text editor's actual feature set.",
+  "name": "luly-v0-2-5",
+  "version": "0.2.5",
+  "description": "Author Luly flows end-to-end from a single natural-language prompt. v0.2.5: brand-fidelity intake (multi-signal extraction, plausibility check, border-radius), branded placeholder data URIs (replace dead /assets paths), visible 'Back to academy' button on academy lesson screens, asset-state summary at assemble time. Earlier in v0.2: 10-stage pipeline collapsed to 5 (intake → plan → meta → style → fill → validate → assemble), per-section fill with carry-forward recap, validator agent against writing guidelines.",
   "author": {
     "name": "Luly"
   },

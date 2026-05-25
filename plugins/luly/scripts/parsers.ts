@@ -153,6 +153,8 @@ function parseBrandSection(text: string): Brand | undefined {
       case 'docsurl':  brand.docsUrl = v; break;
       case 'logo':     brand.logo = v; break;
       case 'voice':    brand.voice = v; break;
+      case 'buttonborderradius':    brand.buttonBorderRadius = v; break;
+      case 'containerborderradius': brand.containerBorderRadius = v; break;
     }
   }
 
@@ -573,7 +575,8 @@ function buildBlock(hdr: Record<string, unknown>, body: string): LessonBlock {
     case 'image-richtext':
       return {
         format: 'image-richtext',
-        imageUrl: String(hdr.image ?? '/assets/placeholders/media.svg'),
+        // Empty string → CMS falls back to flow.body.mediaPlaceholderUrl.
+        imageUrl: String(hdr.image ?? ''),
         imagePosition: (hdr.position as 'left' | 'right') ?? 'left',
         content: body,
         ...(hdr.caption ? { caption: String(hdr.caption) } : {}),
@@ -581,8 +584,8 @@ function buildBlock(hdr: Record<string, unknown>, body: string): LessonBlock {
     case 'image':
       return {
         format: 'image',
-        url: String(hdr.url ?? '/assets/placeholders/media.svg'),
-        alt: String(hdr.alt ?? ''),
+        url: String(hdr.url ?? ''),
+        alt: String(hdr.alt ?? hdr.caption ?? 'illustration'),
         ...(hdr.caption ? { caption: String(hdr.caption) } : {}),
       };
     case 'video':
