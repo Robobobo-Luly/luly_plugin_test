@@ -12,6 +12,10 @@ The user types one thing. You run the 5-stage pipeline and hand back a JSON file
 
 Before generating any user-facing content (intake, plan, fill, non-section content, validator), read `${CLAUDE_PLUGIN_ROOT}/guidelines/writing-guidelines.md` and follow it. Those guidelines are authoritative — if a per-stage skill rule conflicts with them, the global guidelines win. Keep them in mind for every screen, title, description, quiz, and recap you write.
 
+## Product matrix (per-preset shape, controls, tags, counts)
+
+`${CLAUDE_PLUGIN_ROOT}/guidelines/products.md` is the single reference for how the six presets differ — structural shape, controls per node type, tags policy, quiz/form defaults, recommended counts, asset slots. Each per-stage skill links to relevant sections. When a preset rule changes, update products.md first and let the skills point at it — don't fork rules into individual skill files.
+
 ## When to trigger
 
 Auto-trigger on:

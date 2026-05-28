@@ -17,7 +17,9 @@ export interface Brand {
   website?: string;
   docsUrl?: string;
   colors?: BrandColors;    // HEX values pulled from real brand sources
-  logo?: string;           // absolute URL to logo image
+  logo?: string;           // absolute URL to logo image (lockup preferred — used for header + hub logo)
+  logoIcon?: string;       // absolute URL to icon-only logo variant (no wordmark) — used for course icon slot
+  logoWordmark?: string;   // absolute URL to wordmark-only variant (text, no symbol) — fallback for header
   fonts?: string[];        // e.g. ["Inter"]
   voice?: string;          // 1-line brand voice description
   buttonBorderRadius?: string;     // e.g. "8px" — extracted from brand CSS button rules
@@ -118,7 +120,7 @@ export interface QuizChoice {
 
 export type LessonBlock =
   | { format: 'text'; content: string }
-  | { format: 'image-richtext'; imageUrl: string; imagePosition: 'left' | 'right'; content: string; caption?: string }
+  | { format: 'image-richtext'; imageUrl: string; imagePosition: 'left' | 'right'; imagePositionMobile?: 'top' | 'bottom'; content: string; caption?: string }
   | { format: 'image'; url: string; alt: string; caption?: string }
   | { format: 'video'; url: string; poster?: string; caption?: string }
   | { format: 'quiz-text'; question: string; choices: QuizChoice[]; correctAnswer: string; text?: string }

@@ -152,6 +152,8 @@ function parseBrandSection(text: string): Brand | undefined {
       case 'docs':
       case 'docsurl':  brand.docsUrl = v; break;
       case 'logo':     brand.logo = v; break;
+      case 'logoicon': brand.logoIcon = v; break;
+      case 'logowordmark': brand.logoWordmark = v; break;
       case 'voice':    brand.voice = v; break;
       case 'buttonborderradius':    brand.buttonBorderRadius = v; break;
       case 'containerborderradius': brand.containerBorderRadius = v; break;
@@ -572,15 +574,23 @@ function buildBlock(hdr: Record<string, unknown>, body: string): LessonBlock {
   switch (type) {
     case 'text':
       return { format: 'text', content: body };
-    case 'image-richtext':
+    case 'image-richtext': {
+      const desktopPos = (hdr.position as 'left' | 'right') ?? 'left';
+      // Mobile stack order — explicit `mobile: top|bottom` wins; otherwise
+      // the desktop position maps to top (left) or bottom (right), matching
+      // luly-app's MediaTextBlockRenderer fallback. We always emit the field
+      // explicitly so the renderer doesn't have to guess.
+      const mobilePos = (hdr.mobile as 'top' | 'bottom') ?? (desktopPos === 'right' ? 'bottom' : 'top');
       return {
         format: 'image-richtext',
         // Empty string → CMS falls back to flow.body.mediaPlaceholderUrl.
         imageUrl: String(hdr.image ?? ''),
-        imagePosition: (hdr.position as 'left' | 'right') ?? 'left',
+        imagePosition: desktopPos,
+        imagePositionMobile: mobilePos,
         content: body,
         ...(hdr.caption ? { caption: String(hdr.caption) } : {}),
       };
+    }
     case 'image':
       return {
         format: 'image',

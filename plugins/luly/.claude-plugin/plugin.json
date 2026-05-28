@@ -1,7 +1,7 @@
 {
-  "name": "luly-v0-2-6",
-  "version": "0.2.6",
-  "description": "Author Luly flows end-to-end from a single natural-language prompt. v0.2.6: reverts academy lesson exit to default close-icon (luly-app now hard-enforces icon-only topRight); documents 4 border-radius CSS vars (`buttonBorderRadius{,Mobile}`, `containerBorderRadius{,Mobile}`) the renderer reads; story screens within a section must use a single block shape (all image-richtext or all text) — forms/quizzes exempt. Earlier in v0.2: 5-stage pipeline (intake → plan → style → fill → assemble), per-run subdirectory workdir, inline SVG illustrations, brand-fidelity intake, branded placeholder data URIs.",
+  "name": "luly-v0-2-7",
+  "version": "0.2.7",
+  "description": "Author Luly flows end-to-end from a single natural-language prompt. v0.2.7: (A) per-preset product matrix (`guidelines/products.md`) replaces scattered per-preset rules; (B) marketing tags land on course.body.tags (where HubCourseCard reads them), not flow; (C) post-creation controls audit — every screen must have a goto/finishLesson/externalLink action, every course/lesson must have a navigation control; (D) logo variants — lockup for header+hub-logo, icon-only (`brand-icon.svg`) takes priority over generated course-icon; (E) URL liveness check — http(s) URLs HEAD-tested at assemble, dead ones cleared so renderer falls back to placeholders (skip via LULY_SKIP_URL_CHECK=1); (F) explicit `imagePositionMobile` emitted on image-richtext blocks so mobile stack order is deterministic.",
   "author": {
     "name": "Luly"
   },

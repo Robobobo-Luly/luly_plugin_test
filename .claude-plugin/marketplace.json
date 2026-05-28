@@ -6,9 +6,9 @@
   },
   "plugins": [
     {
-      "name": "luly-v0-2-6",
+      "name": "luly-v0-2-7",
       "source": "./plugins/luly",
-      "description": "Author Luly flows end-to-end from a single natural-language prompt. v0.2.6 reverts the academy lesson exit to the default close-icon (luly-app now hard-enforces icon-only topRight controls so content can't override), documents the four border-radius CSS vars the renderer reads, and adds a block-shape consistency rule to luly-fill so story screens don't toggle between image and text-only mid-arc."
+      "description": "Author Luly flows end-to-end from a single natural-language prompt. v0.2.7 adds: product matrix guideline (per-preset controls/tags/quizzes/forms/counts in one place), tags wired through to academy course cards (not flow), logo variants (lockup for header+hub, icon-only for course icon), explicit mobile image-stack order, post-creation controls audit (every screen must have a forward path), and live URL liveness check at assemble time (dead http URLs cleared so renderer falls back to placeholders)."
     }
   ]
 }

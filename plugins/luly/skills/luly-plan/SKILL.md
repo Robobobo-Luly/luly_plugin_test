@@ -17,18 +17,9 @@ Read `<workdir>/intake.md`. Pay attention to preset, key, intent, audience, tone
 
 ### 2. Decide section + screen counts
 
-Per-preset ranges (pick within based on topic depth + audience + any explicit prompt signal):
+The per-preset ranges (sections, screens-per-section, quiz/form defaults, recommended counts) live in `${CLAUDE_PLUGIN_ROOT}/guidelines/products.md` ("Recommended counts at a glance" + "Structural shape"). Read that table and pick within the listed range based on topic depth, audience, and any explicit count signal from the prompt.
 
-| Preset | Sections | Screens per section |
-|---|---|---------------------|
-| `academy` | 2–8 | 3–8                 |
-| `academy-course` | 2–8 | 3–8                 |
-| `campaign-course` | 2–6 | 3–8                 |
-| `campaign-simple` | 1 | 4–10                |
-| `waitlist` | 1 | 3–8                 |
-| `interactive-proposal` | 1 | 4–10                |
-
-If your plan would have 1 section, the preset must be `campaign-simple`, `waitlist`, or `interactive-proposal`.
+If your plan would have 1 section, the preset must be `campaign-simple`, `waitlist`, or `interactive-proposal` (see products.md "Structural shape").
 
 Onboarding section — for `academy` preset only — typically 1–3 screens, sibling of the hub.
 

@@ -81,7 +81,58 @@ function checkScreen(screen: unknown, ctx: string, counts: Counts): void {
   for (const [i, b] of (screen.blocks as unknown[]).entries()) {
     checkBlock(b, `${ctx} block[${i}]`, counts);
   }
+  // Control-graph audit: every screen must have at least one outgoing path.
+  // Acceptable:
+  //   (a) ≥1 control with requires_click=true whose conditionalActions contain
+  //       at least one goto / finishLesson / externalLink action, OR
+  //   (b) ≥1 control with requires_click=false whose conditionalActions auto-
+  //       progress (rare for screens, but allowed for special flows).
+  // A screen with controls=[] OR with only no-op controls is a dead end.
+  const screenControls = screen.controls as unknown[];
+  const hasExit = screenControls.some(c => controlHasActionPath(c));
+  need(hasExit,
+    `${ctx}: dead-end screen — no control with goto / finishLesson / externalLink action. ` +
+    `Every screen must have a forward path (Next, finish, submit, or close).`);
   counts.screen++;
+}
+
+/**
+ * True iff the control's conditionalActions reference at least one navigation
+ * action (goto / finishLesson / externalLink). Used by the control-graph audit
+ * to confirm a screen has a way out.
+ */
+function controlHasActionPath(c: unknown): boolean {
+  if (!isPlainObject(c)) return false;
+  const conds = c.conditionalActions;
+  if (!Array.isArray(conds)) return false;
+  for (const cond of conds) {
+    if (!isPlainObject(cond)) continue;
+    const actions = cond.do;
+    if (!Array.isArray(actions)) continue;
+    for (const a of actions) {
+      if (!isPlainObject(a)) continue;
+      if (a.type === 'goto' || a.type === 'finishLesson' || a.type === 'externalLink') return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Container-level control-graph audit. Rules per node type:
+ *   - hub:     no visible controls required (entry is via course-card click).
+ *              An invisible auto-click control may be present but isn't required.
+ *   - course:  must have ≥1 control with an action path (Learn button or
+ *              invisible auto-progress to first_lesson).
+ *   - lesson:  must have ≥1 control with an action path (typically invisible
+ *              auto: cameFromChild→parent, else→first_child).
+ */
+function checkContainerControls(node: Record<string, unknown>, ctx: string, expectedType: 'flow' | 'hub' | 'course' | 'lesson'): void {
+  if (expectedType === 'hub' || expectedType === 'flow') return;
+  const controls = node.controls as unknown[];
+  const hasExit = controls.some(c => controlHasActionPath(c));
+  need(hasExit,
+    `${ctx}: ${expectedType} has no control with a navigation action. ` +
+    `Every ${expectedType} must have at least one control with goto / finishLesson / externalLink.`);
 }
 
 function checkContainerNode(node: unknown, ctx: string, expectedType: 'flow' | 'hub' | 'course' | 'lesson', counts: Counts): void {
@@ -106,8 +157,10 @@ function validateCourseOnly(raw: unknown): { root: any; counts: Counts } {
   const body = course.body as Record<string, unknown>;
   need(body.flowType === 'learning', `<course> body.flowType must be "learning" (got ${JSON.stringify(body.flowType)})`);
   need(isNonEmptyString(body.courseKey), `<course> body.courseKey must be a non-empty string`);
+  checkContainerControls(course, '<course>', 'course');
   for (const [k, lessonRaw] of (course.children as unknown[]).entries()) {
     checkContainerNode(lessonRaw, `<course>.children[${k}]`, 'lesson', counts);
+    checkContainerControls(lessonRaw as Record<string, unknown>, `<course>.children[${k}]`, 'lesson');
     const lesson = lessonRaw as any;
     for (const [m, scrRaw] of (lesson.children as unknown[]).entries()) {
       checkScreen(scrRaw, `<course>.children[${k}].children[${m}]`, counts);
@@ -151,11 +204,14 @@ function validate(raw: unknown): { root: any; counts: Counts; kind: 'flow' | 'co
     }
     checkContainerNode(child, `<flow>.children[${i}]`, 'hub', counts);
     const hub = child as any;
+    // Hub itself: no visible-control requirement (entry via card click).
     for (const [j, courseRaw] of (hub.children as unknown[]).entries()) {
       checkContainerNode(courseRaw, `<flow>.children[${i}].children[${j}]`, 'course', counts);
+      checkContainerControls(courseRaw as Record<string, unknown>, `<flow>.children[${i}].children[${j}]`, 'course');
       const course = courseRaw as any;
       for (const [k, lessonRaw] of (course.children as unknown[]).entries()) {
         checkContainerNode(lessonRaw, `<flow>.children[${i}].children[${j}].children[${k}]`, 'lesson', counts);
+        checkContainerControls(lessonRaw as Record<string, unknown>, `<flow>.children[${i}].children[${j}].children[${k}]`, 'lesson');
         const lesson = lessonRaw as any;
         for (const [m, scrRaw] of (lesson.children as unknown[]).entries()) {
           checkScreen(scrRaw, `<flow>.children[${i}].children[${j}].children[${k}].children[${m}]`, counts);

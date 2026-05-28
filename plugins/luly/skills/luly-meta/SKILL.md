@@ -35,6 +35,7 @@ If either is missing, stop and tell the user.
 - Pick from the topic, audience, and category. Examples: `defi`, `wallet-setup`, `beginners`, `base-chain`, `liquidity-pools`.
 - Stay general enough to group with related courses. Avoid hyper-specific tags that no other course would ever share.
 - (Note: there is no fixed taxonomy yet — that's tracked in TODO.md. For now, free-form is fine; consistency comes later.)
+- Tags render on course cards in the hub catalog. They apply to `academy`, `academy-course`, and `campaign-course` presets — for `campaign-simple` / `waitlist` / `interactive-proposal` they're harmless but unused (no card UI renders them). See `${CLAUDE_PLUGIN_ROOT}/guidelines/products.md` for the per-preset breakdown.
 
 **Academy fields (academy preset only).**
 - `academyName` — already present from intake; reuse verbatim. Don't reinvent.

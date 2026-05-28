@@ -67,7 +67,7 @@ The next section's pass reads this recap and respects it: don't redefine terms, 
 | Format | Required header fields | Body |
 |---|---|---|
 | `text` | `type: text` | Markdown content (pure rich text) |
-| `image-richtext` | `type: image-richtext`<br>`image: <see SVG illustration rules below>`<br>`position: left` or `right`<br>`caption: "<see caption rules below>"` | Markdown content |
+| `image-richtext` | `type: image-richtext`<br>`image: <see SVG illustration rules below>`<br>`position: left` or `right`<br>`mobile: top` or `bottom` (optional)<br>`caption: "<see caption rules below>"` | Markdown content |
 | `image` | `type: image`<br>`url: <see SVG illustration rules below>`<br>`alt: <alt text>`<br>`caption: "<…>"` (optional) | (none) |
 | `video` | `type: video`<br>`url: <url>`<br>`poster: <url>` (optional)<br>`caption: "<…>"` (optional) | (none) |
 | `quiz-text` | `type: quiz-text`<br>`text: "<setup copy beside the quiz>"`<br>`question: "<the question>"`<br>`choices:` bulleted list (≥2)<br>`correct: <id>` | (none — copy lives in `text`) |
@@ -77,7 +77,13 @@ The next section's pass reads this recap and respects it: don't redefine terms, 
 | `layout` | `type: layout`<br>`ratio: "50:50"` | (none — responsive mode only) |
 
 **Single-component vs composite:** never emit a composite (`image-richtext`, `quiz-text`, `form-text`) with one half empty. If the body would be empty, use the single-component variant (`image`, `question`, `form`) instead.
-Try to be consistent, if we started with responsive blocks and we have images on the left, keep them on the left, this is usually the preferred setup, media, forms, questions on the right (bottom for mobile), text content on the left (top)
+
+**Responsive layout — desktop position + mobile stack order:**
+- `position: left` (image left of text on desktop) → mobile stacks **image on top**, text below.
+- `position: right` (image right of text on desktop) → mobile stacks **text on top**, image below.
+- This mapping is the luly-app renderer default (`MediaTextBlockRenderer.tsx`). The plugin emits `imagePositionMobile` explicitly so the renderer doesn't have to guess.
+- Override via `mobile: top` or `mobile: bottom` only when the default doesn't read well — e.g. for a story screen where you want desktop-right but mobile-image-first. Don't override casually.
+- **Pick one desktop position and one mobile stack order per story arc and keep them consistent.** Toggling `position: left` / `position: right` within a section reads as visual noise. Recommended default for stories: `position: right` (image trails the text on desktop, text leads on mobile — wallets/landings convention). For onboarding sequences, `position: left` (image-led) often reads better.
 
 **Block-shape consistency across story screens (mandatory):** within a single story arc (onboarding sequence, lesson, or a section's screens), all narrative screens should use the **same block shape** — either every story screen is `image-richtext` (image + text together) or every story screen is `text`. Don't intermix: a story that shows an illustration on screen 1 and then drops to text-only on screen 2 reads as a regression. Default to `image-richtext` for story content unless the user explicitly wants a stripped-down text-only feel, or the topic genuinely doesn't lend itself to per-screen illustration.
 

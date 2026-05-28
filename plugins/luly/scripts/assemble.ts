@@ -94,6 +94,7 @@ function compileBlock(block: LessonBlock, rank: string): BlockExport {
     case 'image-richtext':
       body.imageUrl = block.imageUrl;
       body.imagePosition = block.imagePosition;
+      if (block.imagePositionMobile) body.imagePositionMobile = block.imagePositionMobile;
       body.content = markdownToTipTapString(block.content);
       if (block.caption) body.caption = block.caption;
       break;
@@ -258,12 +259,13 @@ function isSimpleCourse(preset: string): boolean {
 function courseBodyFor(
   preset: string,
   courseKey: string,
-  opts: { courseAuthor?: string; cardImageSvg?: string; iconSvg?: string } = {},
+  opts: { courseAuthor?: string; cardImageSvg?: string; iconSvg?: string; tags?: string[] } = {},
 ): Record<string, unknown> {
   if (isSimpleCourse(preset)) {
     const body: Record<string, unknown> = { flowType: 'simple', courseKey };
     if (opts.cardImageSvg) body.cardImageSvg = opts.cardImageSvg;
     if (opts.iconSvg) body.iconSvg = opts.iconSvg;
+    // tags intentionally omitted for simple presets — no hub catalog UI renders them.
     return body;
   }
   const body: Record<string, unknown> = {
@@ -274,6 +276,10 @@ function courseBodyFor(
   };
   if (opts.cardImageSvg) body.cardImageSvg = opts.cardImageSvg;
   if (opts.iconSvg) body.iconSvg = opts.iconSvg;
+  // Tags render on the hub course card (HubCourseCard reads course.body.tags).
+  // Applies to academy / academy-course / campaign-course. Set even when no hub
+  // exists for the preset — harmless and forward-compatible if a hub is added.
+  if (opts.tags && opts.tags.length > 0) body.tags = opts.tags;
   return body;
 }
 
@@ -355,7 +361,13 @@ function buildCourseOnly(inputs: AssembleInputs): NodeExport {
   // protects against stale SVG artifacts from a previous run polluting a
   // fresh generation of a simple preset.
   const cardImageSvg = isSimpleCourse(preset) ? undefined : loadInlineSvg(inputs.workdir, 'card-cover.svg');
-  const iconSvg = isSimpleCourse(preset) ? undefined : loadInlineSvg(inputs.workdir, 'course-icon.svg');
+  // Prefer an icon-only brand logo (brand-icon.svg from intake) over the
+  // generated course-icon.svg — when the brand publishes an icon-only mark,
+  // it carries instant recognition that a generated abstract icon can't match.
+  const iconSvg = isSimpleCourse(preset)
+    ? undefined
+    : (loadInlineSvg(inputs.workdir, 'brand-icon.svg') ?? loadInlineSvg(inputs.workdir, 'course-icon.svg'));
+  const metaTags = (inputs.meta.tags && inputs.meta.tags.length > 0) ? inputs.meta.tags : undefined;
   const course: NodeExport = {
     type: 'course',
     title: inputs.plan.courseTitle,
@@ -365,6 +377,7 @@ function buildCourseOnly(inputs: AssembleInputs): NodeExport {
       courseAuthor: inputs.productType.courseAuthor,
       cardImageSvg,
       iconSvg,
+      tags: metaTags,
     }),
     controls: instantiateControls(inputs.controlsMap['course']),
     lexoRank: ranksFor(1)[0],
@@ -434,10 +447,11 @@ function buildFlow(inputs: AssembleInputs): NodeExport {
   if (cardPh)  flowBody.cardPlaceholderUrl  = svgToUtf8DataUri(cardPh);
   if (iconPh)  flowBody.iconPlaceholderUrl  = svgToUtf8DataUri(iconPh);
 
-  // Marketing tags from meta.md (if any)
-  if (inputs.meta.tags && inputs.meta.tags.length > 0) {
-    flowBody.tags = inputs.meta.tags;
-  }
+  // Marketing tags from meta.md land on the course node (where HubCourseCard
+  // renders them), not on the flow. See per-preset behavior in courseBodyFor:
+  // - academy / academy-course / campaign-course → tags on course.body.tags
+  // - simple presets (campaign-simple / waitlist / interactive-proposal) → no tags
+  const metaTags = (inputs.meta.tags && inputs.meta.tags.length > 0) ? inputs.meta.tags : undefined;
 
   // Title routing — academy preset uses academyName for the flow + hub title
   // and plan.courseTitle as the FIRST COURSE title. Other presets reuse
@@ -508,7 +522,9 @@ function buildFlow(inputs: AssembleInputs): NodeExport {
   // stale tmp artifacts from a previous run polluting a fresh generation).
   const courseIsSimple = isSimpleCourse(preset);
   const cardImageSvg = courseIsSimple ? undefined : loadInlineSvg(inputs.workdir, 'card-cover.svg');
-  const iconSvg = courseIsSimple ? undefined : loadInlineSvg(inputs.workdir, 'course-icon.svg');
+  const iconSvg = courseIsSimple
+    ? undefined
+    : (loadInlineSvg(inputs.workdir, 'brand-icon.svg') ?? loadInlineSvg(inputs.workdir, 'course-icon.svg'));
   const course: NodeExport = {
     type: 'course',
     title: courseTitle,
@@ -518,6 +534,7 @@ function buildFlow(inputs: AssembleInputs): NodeExport {
       courseAuthor: inputs.productType.courseAuthor,
       cardImageSvg,
       iconSvg,
+      tags: metaTags,
     }),
     controls: instantiateControls(inputs.controlsMap['course']),
     lexoRank: ranksFor(1)[0],
@@ -547,7 +564,110 @@ function readMd(path: string, label: string): string {
   return readFileSync(path, 'utf8');
 }
 
-function main(): void {
+/**
+ * Walk an assembled JSON tree, collecting every http(s) URL it can find and
+ * recording where in the tree the URL lives. Data URIs, relative paths, and
+ * non-string values are skipped. Result is grouped by URL so multi-references
+ * resolve in one HEAD request.
+ */
+function collectUrls(root: unknown): Map<string, Array<{ owner: Record<string, unknown>; key: string; path: string }>> {
+  const out = new Map<string, Array<{ owner: Record<string, unknown>; key: string; path: string }>>();
+  function isHttp(s: string): boolean {
+    return /^https?:\/\//i.test(s);
+  }
+  function visit(node: unknown, path: string): void {
+    if (!node || typeof node !== 'object') return;
+    if (Array.isArray(node)) {
+      node.forEach((v, i) => visit(v, `${path}[${i}]`));
+      return;
+    }
+    const obj = node as Record<string, unknown>;
+    for (const [k, v] of Object.entries(obj)) {
+      if (typeof v === 'string' && isHttp(v)) {
+        const entries = out.get(v) ?? [];
+        entries.push({ owner: obj, key: k, path: `${path}.${k}` });
+        out.set(v, entries);
+      } else if (v && typeof v === 'object') {
+        visit(v, `${path}.${k}`);
+      }
+    }
+  }
+  visit(root, '');
+  return out;
+}
+
+/**
+ * HEAD-check a URL with a 3-second timeout. Returns true iff the response is
+ * 2xx or 3xx. Network errors, timeouts, and 4xx/5xx all count as failure.
+ * Some hosts (notably AWS S3, Cloudflare) reject HEAD with 403 but accept GET
+ * — fall back to a 2-byte ranged GET in that case.
+ */
+async function checkUrlAlive(url: string): Promise<boolean> {
+  const ac = new AbortController();
+  const timer = setTimeout(() => ac.abort(), 3000);
+  try {
+    const headRes = await fetch(url, { method: 'HEAD', signal: ac.signal, redirect: 'follow' });
+    if (headRes.ok || (headRes.status >= 300 && headRes.status < 400)) return true;
+    // Some CDNs return 403/405 on HEAD but serve GET fine.
+    if (headRes.status === 403 || headRes.status === 405) {
+      const getRes = await fetch(url, { method: 'GET', headers: { Range: 'bytes=0-1' }, signal: ac.signal, redirect: 'follow' });
+      return getRes.ok || getRes.status === 206;
+    }
+    return false;
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Walk the assembled tree, HEAD-check every http(s) URL, clear the ones that
+ * fail. Cleared fields fall back to renderer defaults (placeholders for
+ * images, Luly mark for logo). Logs a one-line summary per URL — bad URLs
+ * surface loudly so the user can swap them.
+ *
+ * Skipped via env: LULY_SKIP_URL_CHECK=1 (useful for offline runs).
+ * Returns the number of URLs cleared.
+ */
+async function checkAndStripDeadUrls(root: unknown): Promise<number> {
+  if (process.env.LULY_SKIP_URL_CHECK === '1') {
+    console.log('  url liveness check = SKIPPED (LULY_SKIP_URL_CHECK=1)');
+    return 0;
+  }
+  const urls = collectUrls(root);
+  if (urls.size === 0) {
+    console.log('  url liveness check = no http(s) URLs to verify');
+    return 0;
+  }
+  // Bounded parallel HEAD checks. 8 concurrent is gentle but quick.
+  const uniqueUrls = Array.from(urls.keys());
+  const results = new Map<string, boolean>();
+  const CONCURRENCY = 8;
+  for (let i = 0; i < uniqueUrls.length; i += CONCURRENCY) {
+    const batch = uniqueUrls.slice(i, i + CONCURRENCY);
+    const batchResults = await Promise.all(batch.map(async u => [u, await checkUrlAlive(u)] as const));
+    for (const [u, ok_] of batchResults) results.set(u, ok_);
+  }
+  let cleared = 0;
+  let ok_ = 0;
+  for (const [url, entries] of urls) {
+    if (results.get(url)) {
+      ok_++;
+      continue;
+    }
+    // Dead URL — clear every reference so the renderer falls back to placeholder.
+    for (const { owner, key, path } of entries) {
+      owner[key] = '';
+      cleared++;
+      console.log(`  url dead → cleared  ${path}  (${url})`);
+    }
+  }
+  console.log(`  url liveness check = ${uniqueUrls.length} unique URLs · ${ok_} OK · ${cleared} field(s) cleared`);
+  return cleared;
+}
+
+async function main(): Promise<void> {
   // Workdir = per-run subdirectory passed by the orchestrator (v0.2.2+):
   //   ./bin/luly assemble "tmp/luly-agent/phantom-academy"
   // Falls back to the legacy flat layout (tmp/luly-agent) when no arg given,
@@ -625,6 +745,12 @@ function main(): void {
     ? buildCourseOnly({ workdir, brief, productType, plan, formatProfile, theme, lessons, onboarding, controlsMap: controlsArtifact.controls, overrides: null, meta })
     : buildFlow({ workdir, brief, productType, plan, formatProfile, theme, lessons, onboarding, controlsMap: controlsArtifact.controls, overrides: null, meta });
 
+  // URL liveness pass — HEAD-check every http(s) URL and clear dead ones so
+  // the renderer falls back to placeholders. Runs BEFORE the file is written
+  // so cleared fields are persisted to disk. Data URIs and relative paths
+  // are skipped. Set LULY_SKIP_URL_CHECK=1 to disable (offline runs).
+  await checkAndStripDeadUrls(root);
+
   const outputPath = join(workdir, `${productType.key}.luly.json`);
   writeFileSync(outputPath, JSON.stringify(root, null, 2) + '\n', 'utf8');
 
@@ -674,6 +800,7 @@ function main(): void {
     ? 'workdir/logo.svg (inlined)'
     : (brief.brand?.logo ? `brand URL (${brief.brand.logo})` : 'NONE → header falls back to Luly default');
   const cardSvg  = existsSync(join(workdir, 'card-cover.svg'))   ? 'present' : 'NONE';
+  const brandIcn = existsSync(join(workdir, 'brand-icon.svg'))   ? 'present (brand-icon takes priority over generated course-icon)' : 'NONE';
   const iconSvg  = existsSync(join(workdir, 'course-icon.svg'))  ? 'present' : 'NONE';
   const hubSvg   = existsSync(join(workdir, 'hub-logo.svg'))     ? 'present' : 'NONE';
   const phMedia  = existsSync(join(workdir, 'placeholders/media.svg')) ? 'Y' : 'N';
@@ -682,6 +809,7 @@ function main(): void {
   console.log(`  --- assets ---`);
   console.log(`  header logo        = ${logoState}`);
   console.log(`  card-cover.svg     = ${cardSvg}`);
+  console.log(`  brand-icon.svg     = ${brandIcn}`);
   console.log(`  course-icon.svg    = ${iconSvg}`);
   console.log(`  hub-logo.svg       = ${hubSvg}`);
   console.log(`  placeholders       = media:${phMedia} card:${phCard} icon:${phIcon}` +
@@ -700,4 +828,7 @@ function main(): void {
   }
 }
 
-main();
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

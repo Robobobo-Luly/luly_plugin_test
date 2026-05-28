@@ -47,23 +47,42 @@ Don't give up after one failed fetch. If one path is blocked (Cloudflare 403, ca
 
 #### Logo discovery
 
-The logo is its own search — don't conflate it with color extraction.
+The logo is its own search — don't conflate it with color extraction. Brands publish multiple variants; recognise them and save them to the right slot.
 
-Useful signals to combine:
-- `<link rel="icon" ... href="...svg">` — often the cleanest SVG mark, transparent background.
-- `<link rel="apple-touch-icon" ...>` — usually a square PNG.
-- `<meta property="og:image" ...>` — full marketing banner, can be cropped or used as fallback.
-- `<header>` / nav `<img>` or inline `<svg>` — the live brand mark on the page.
-- Press / brand-assets page when one exists.
+**The three variants you might find:**
 
-When you find an SVG that genuinely *is* the brand mark (not a UI icon, not a hero illustration, not a screenshot crop), download the raw SVG and save it to `<workdir>/logo.svg`. The assembler picks that file up automatically and inlines it into the header. If you only have a URL (e.g. PNG-only brand), still record it in intake's `Logo:` field — the assembler will use the URL as a fallback.
+| Variant | What it looks like | Where the assembler uses it |
+|---|---|---|
+| **Lockup** (preferred) | Icon + wordmark, usually horizontal | Header logo (`headerLogo` / `headerLogoSvg`) and academy hub logo (`hub.body.hubLogo`) |
+| **Wordmark** | Brand text only, no symbol | Header logo / hub logo fallback when no lockup exists |
+| **Icon-only** | Just the symbol (no text) | Course icon (`course.body.iconSvg` / `iconUrl`) — only the icon, never the lockup, fits a 1:1 256×256 frame |
 
-Sanity checks before saving:
-- The SVG actually renders as the brand wordmark or symbol (open it, look at it).
+When a brand offers multiple variants, prefer the lockup for header and hub logo (instant brand recognition), and the icon-only for the course icon (a wordmark squashed into a 1:1 frame is unreadable).
+
+**Where to look:**
+- Press / brand-assets / brand-resources page — usually the cleanest source, often offers all three variants explicitly labeled.
+- `<header>` / nav `<svg>` or `<img>` on the live site — the lockup as actually used.
+- `<link rel="icon" ... href="...svg">` — usually the icon-only mark, transparent background, ideal for the course icon slot.
+- `<link rel="apple-touch-icon" ...>` — square PNG, also icon-only candidate.
+- `<meta property="og:image" ...>` — marketing banner, rarely a clean logo.
+
+**Save to the workdir:**
+
+| File | What goes here |
+|---|---|
+| `<workdir>/logo.svg` | The lockup (or wordmark fallback). Assembler inlines into the header AND uses for hub logo when intake says `hub-logo: brand-logo`. |
+| `<workdir>/brand-icon.svg` | Icon-only variant — used for the course icon slot when intake supplies it. Optional; if absent, the style stage generates a course-icon.svg. |
+
+Sanity checks before saving any file:
+- It renders as the brand mark (open and look at it, don't just trust the filename).
 - No external `<image href>` or `<script>` tags inside.
-- Reasonable file size (< 20 KB; if it's huge, it's probably an illustration, not a logo).
+- File size < 20 KB (larger usually means it's an illustration, not a logo).
+- For `logo.svg`: includes the wordmark when one exists — the header renders at ~32px desktop / 24px mobile so a lockup stays legible.
+- For `brand-icon.svg`: NO wordmark — must render readably at 256×256 with no text.
 
-If you can't find a real logo at decent quality, **don't save anything**. Header falls back to the Luly mark — that's preferable to a wrong/blurry brand impression.
+If you only have URLs (no SVG available), record them in the `Logo:` block instead — the assembler uses URLs as fallback.
+
+If no variant is available at decent quality, **don't save anything**. Header falls back to the Luly mark; course icon falls back to the generated SVG. Both are preferable to a wrong / blurry brand impression.
 
 #### Plausibility check before committing
 
@@ -149,7 +168,10 @@ Colors:
 - secondary: #HEX     (optional)
 - accent: #HEX        (optional)
 - text: #HEX          (optional)
-Logo: <absolute url, optional>, base64 coded svg (if found)
+Logo (lockup, preferred — saved to `<workdir>/logo.svg` when SVG, else URL here): <absolute url or "saved as logo.svg">
+LogoIcon (icon-only variant for course-icon slot — saved to `<workdir>/brand-icon.svg` when SVG, else URL here): <absolute url, "saved as brand-icon.svg", or omit if none>
+LogoWordmark (text-only variant, optional fallback): <absolute url, or omit>
+
 Fonts for Header and paragraph: Header - "Inter", paragraph - Inter Tight (optional)
 ButtonBorderRadius: <e.g. 8px, 12px, 999px — extracted from brand CSS; omit if not found> (optional)
 ContainerBorderRadius: <e.g. 12px, 16px — for cards/panels; omit if not found> (optional)
