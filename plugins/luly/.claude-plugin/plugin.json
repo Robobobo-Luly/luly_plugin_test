@@ -1,7 +1,7 @@
 {
-  "name": "luly-v0-2-7",
-  "version": "0.2.7",
-  "description": "Author Luly flows end-to-end from a single natural-language prompt. v0.2.7: (A) per-preset product matrix (`guidelines/products.md`) replaces scattered per-preset rules; (B) marketing tags land on course.body.tags (where HubCourseCard reads them), not flow; (C) post-creation controls audit — every screen must have a goto/finishLesson/externalLink action, every course/lesson must have a navigation control; (D) logo variants — lockup for header+hub-logo, icon-only (`brand-icon.svg`) takes priority over generated course-icon; (E) URL liveness check — http(s) URLs HEAD-tested at assemble, dead ones cleared so renderer falls back to placeholders (skip via LULY_SKIP_URL_CHECK=1); (F) explicit `imagePositionMobile` emitted on image-richtext blocks so mobile stack order is deterministic.",
+  "name": "luly-v0-2-8",
+  "version": "0.2.8",
+  "description": "Author Luly flows end-to-end from a single natural-language prompt. v0.2.8: optional `tooltipTextColor` + `tooltipBackgroundColor` theme tokens — render the pill behind inline definition terms. Renderer falls back to primary/primaryLight, so the pair is optional and only worth emitting when primary is close to the body background, very exotic, or the brand has a dedicated link/term color.",
   "author": {
     "name": "Luly"
   },

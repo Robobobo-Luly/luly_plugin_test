@@ -6,9 +6,9 @@
   },
   "plugins": [
     {
-      "name": "luly-v0-2-7",
+      "name": "luly-v0-2-8",
       "source": "./plugins/luly",
-      "description": "Author Luly flows end-to-end from a single natural-language prompt. v0.2.7 adds: product matrix guideline (per-preset controls/tags/quizzes/forms/counts in one place), tags wired through to academy course cards (not flow), logo variants (lockup for header+hub, icon-only for course icon), explicit mobile image-stack order, post-creation controls audit (every screen must have a forward path), and live URL liveness check at assemble time (dead http URLs cleared so renderer falls back to placeholders)."
+      "description": "Author Luly flows end-to-end from a single natural-language prompt. v0.2.8 adds optional tooltip color tokens (`tooltipTextColor` + `tooltipBackgroundColor`) — emit explicitly when primary/primaryLight don't read well inline (primary close to background, exotic primary, or dedicated brand link color). Defaults fall back to primary pair."
     }
   ]
 }

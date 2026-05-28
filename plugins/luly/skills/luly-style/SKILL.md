@@ -100,6 +100,20 @@ Path: `<workdir>/theme.md`. Overwrite. Every line under `## Palette` and `## Fon
 - edit: #0000FF
 - shadow: #0000001A
 
+## Inline definition tooltips (optional)
+
+The renderer falls back to `primary` / `primaryLight` when these are absent, so you can usually skip this pair. **Emit explicit values only when**:
+- `primary` is close to the body `background` (low-contrast pill behind the term).
+- `primary` is very saturated or exotic enough that a calmer tinted variant reads better inline (e.g. neon green primary → soft accent for tooltips).
+- The brand has its own dedicated link/term color that differs from the primary.
+
+When emitting, follow contrast targets: `tooltipTextColor` needs ≥ 4.5:1 against `tooltipBackgroundColor` AND against the body `background` (the term sits inside body text). `tooltipBackgroundColor` should be a low-saturation tint of `tooltipTextColor` so the term reads as a pill, not a button.
+
+```
+- tooltipTextColor: #HEX        (defaults to primary)
+- tooltipBackgroundColor: #HEX  (defaults to primaryLight)
+```
+
 ## Fonts
 - heading: "Inter", sans-serif
 - body: "Inter", sans-serif

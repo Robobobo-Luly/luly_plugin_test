@@ -15,7 +15,16 @@ export const REQUIRED_COLOR_TOKENS: readonly string[] = [
   'success', 'successLight', 'failure', 'failureLight', 'warning', 'warningLight',
 ] as const;
 
-export const OPTIONAL_COLOR_TOKENS: readonly string[] = ['edit', 'shadow'] as const;
+export const OPTIONAL_COLOR_TOKENS: readonly string[] = [
+  'edit', 'shadow',
+  // Inline definition tooltips (clickable terms in body text that open a
+  // popup). luly-app defaults these to primary / primaryLight, so omitting
+  // them is fine when the primary pair reads well in body text. Emit
+  // explicit values when primary is close to the background, very low
+  // contrast against text, or exotic enough that a tinted variant works
+  // better for inline highlighting.
+  'tooltipTextColor', 'tooltipBackgroundColor',
+] as const;
 
 export const REQUIRED_STYLE_TOKENS: readonly string[] = [
   'fontHeading', 'fontBody',
