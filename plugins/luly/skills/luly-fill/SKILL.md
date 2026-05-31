@@ -79,11 +79,9 @@ The next section's pass reads this recap and respects it: don't redefine terms, 
 **Single-component vs composite:** never emit a composite (`image-richtext`, `quiz-text`, `form-text`) with one half empty. If the body would be empty, use the single-component variant (`image`, `question`, `form`) instead.
 
 **Responsive layout — desktop position + mobile stack order:**
-- `position: left` (image left of text on desktop) → mobile stacks **image on top**, text below.
-- `position: right` (image right of text on desktop) → mobile stacks **text on top**, image below.
-- This mapping is the luly-app renderer default (`MediaTextBlockRenderer.tsx`). The plugin emits `imagePositionMobile` explicitly so the renderer doesn't have to guess.
-- Override via `mobile: top` or `mobile: bottom` only when the default doesn't read well — e.g. for a story screen where you want desktop-right but mobile-image-first. Don't override casually.
-- **Pick one desktop position and one mobile stack order per story arc and keep them consistent.** Toggling `position: left` / `position: right` within a section reads as visual noise. Recommended default for stories: `position: right` (image trails the text on desktop, text leads on mobile — wallets/landings convention). For onboarding sequences, `position: left` (image-led) often reads better.
+- **Mobile always stacks image on top by default.** The screen's identity sits above the text on mobile, not below it — that's the read most users expect from learning + marketing flows on phones, and matches the convention across wallets, landings, and academies. The plugin emits `imagePositionMobile: top` automatically when the `mobile:` header is absent.
+- `position: left` / `position: right` controls the **desktop** orientation only. Pick one per story arc and keep it consistent — toggling within a section reads as visual noise. Recommended default for stories: `position: right` (text leads on desktop — calmer reading rhythm). Combined with the mobile default, that gives text-first desktop and image-first mobile.
+- Override the mobile default with `mobile: bottom` only when there's a specific reason text should lead on mobile (rare — usually a screen where the visual is decorative rather than identity-carrying). Don't override casually.
 
 **Block-shape consistency across story screens (mandatory):** within a single story arc (onboarding sequence, lesson, or a section's screens), all narrative screens should use the **same block shape** — either every story screen is `image-richtext` (image + text together) or every story screen is `text`. Don't intermix: a story that shows an illustration on screen 1 and then drops to text-only on screen 2 reads as a regression. Default to `image-richtext` for story content unless the user explicitly wants a stripped-down text-only feel, or the topic genuinely doesn't lend itself to per-screen illustration.
 

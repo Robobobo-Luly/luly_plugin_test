@@ -259,12 +259,13 @@ function isSimpleCourse(preset: string): boolean {
 function courseBodyFor(
   preset: string,
   courseKey: string,
-  opts: { courseAuthor?: string; cardImageSvg?: string; iconSvg?: string; tags?: string[] } = {},
+  opts: { courseAuthor?: string; cardImageSvg?: string; iconSvg?: string; iconUrl?: string; tags?: string[] } = {},
 ): Record<string, unknown> {
   if (isSimpleCourse(preset)) {
     const body: Record<string, unknown> = { flowType: 'simple', courseKey };
     if (opts.cardImageSvg) body.cardImageSvg = opts.cardImageSvg;
     if (opts.iconSvg) body.iconSvg = opts.iconSvg;
+    if (opts.iconUrl) body.iconUrl = opts.iconUrl;
     // tags intentionally omitted for simple presets — no hub catalog UI renders them.
     return body;
   }
@@ -276,6 +277,7 @@ function courseBodyFor(
   };
   if (opts.cardImageSvg) body.cardImageSvg = opts.cardImageSvg;
   if (opts.iconSvg) body.iconSvg = opts.iconSvg;
+  if (opts.iconUrl) body.iconUrl = opts.iconUrl;
   // Tags render on the hub course card (HubCourseCard reads course.body.tags).
   // Applies to academy / academy-course / campaign-course. Set even when no hub
   // exists for the preset — harmless and forward-compatible if a hub is added.
@@ -289,6 +291,27 @@ function courseBodyFor(
  * <svg — assemble then proceeds without that field and the renderer falls
  * back to its default.
  */
+/**
+ * Brand icon discovery — prefer SVG (renders as inline iconSvg), fall back to
+ * PNG (inlined as base64 iconUrl data URI). Intake saves whichever variant
+ * the brand's favicon chain returned: `/favicon.svg` → brand-icon.svg,
+ * `/apple-touch-icon.png` or `.ico→png` → brand-icon.png. Used when the
+ * preset has a course-icon slot (academy / academy-course / campaign-course).
+ */
+function loadBrandIcon(workdir: string): { kind: 'svg'; svg: string } | { kind: 'png-url'; url: string } | undefined {
+  const svgPath = join(workdir, 'brand-icon.svg');
+  if (existsSync(svgPath)) {
+    const raw = readFileSync(svgPath, 'utf8').trim();
+    if (raw.startsWith('<svg')) return { kind: 'svg', svg: raw };
+  }
+  const pngPath = join(workdir, 'brand-icon.png');
+  if (existsSync(pngPath)) {
+    const b64 = readFileSync(pngPath).toString('base64');
+    return { kind: 'png-url', url: `data:image/png;base64,${b64}` };
+  }
+  return undefined;
+}
+
 function loadInlineSvg(workdir: string, name: string): string | undefined {
   const path = join(workdir, name);
   if (!existsSync(path)) return undefined;
@@ -361,12 +384,15 @@ function buildCourseOnly(inputs: AssembleInputs): NodeExport {
   // protects against stale SVG artifacts from a previous run polluting a
   // fresh generation of a simple preset.
   const cardImageSvg = isSimpleCourse(preset) ? undefined : loadInlineSvg(inputs.workdir, 'card-cover.svg');
-  // Prefer an icon-only brand logo (brand-icon.svg from intake) over the
-  // generated course-icon.svg — when the brand publishes an icon-only mark,
-  // it carries instant recognition that a generated abstract icon can't match.
+  // Prefer the brand icon (SVG or PNG from intake's favicon fallback or
+  // press-kit search) over the generated course-icon.svg — when the brand
+  // publishes any usable icon-only mark, it carries instant recognition that
+  // a generated abstract icon can't match.
+  const brandIcon = isSimpleCourse(preset) ? undefined : loadBrandIcon(inputs.workdir);
   const iconSvg = isSimpleCourse(preset)
     ? undefined
-    : (loadInlineSvg(inputs.workdir, 'brand-icon.svg') ?? loadInlineSvg(inputs.workdir, 'course-icon.svg'));
+    : (brandIcon?.kind === 'svg' ? brandIcon.svg : loadInlineSvg(inputs.workdir, 'course-icon.svg'));
+  const iconUrl = brandIcon?.kind === 'png-url' ? brandIcon.url : undefined;
   const metaTags = (inputs.meta.tags && inputs.meta.tags.length > 0) ? inputs.meta.tags : undefined;
   const course: NodeExport = {
     type: 'course',
@@ -377,6 +403,7 @@ function buildCourseOnly(inputs: AssembleInputs): NodeExport {
       courseAuthor: inputs.productType.courseAuthor,
       cardImageSvg,
       iconSvg,
+      iconUrl,
       tags: metaTags,
     }),
     controls: instantiateControls(inputs.controlsMap['course']),
@@ -522,9 +549,11 @@ function buildFlow(inputs: AssembleInputs): NodeExport {
   // stale tmp artifacts from a previous run polluting a fresh generation).
   const courseIsSimple = isSimpleCourse(preset);
   const cardImageSvg = courseIsSimple ? undefined : loadInlineSvg(inputs.workdir, 'card-cover.svg');
+  const brandIcon = courseIsSimple ? undefined : loadBrandIcon(inputs.workdir);
   const iconSvg = courseIsSimple
     ? undefined
-    : (loadInlineSvg(inputs.workdir, 'brand-icon.svg') ?? loadInlineSvg(inputs.workdir, 'course-icon.svg'));
+    : (brandIcon?.kind === 'svg' ? brandIcon.svg : loadInlineSvg(inputs.workdir, 'course-icon.svg'));
+  const iconUrl = brandIcon?.kind === 'png-url' ? brandIcon.url : undefined;
   const course: NodeExport = {
     type: 'course',
     title: courseTitle,
@@ -534,6 +563,7 @@ function buildFlow(inputs: AssembleInputs): NodeExport {
       courseAuthor: inputs.productType.courseAuthor,
       cardImageSvg,
       iconSvg,
+      iconUrl,
       tags: metaTags,
     }),
     controls: instantiateControls(inputs.controlsMap['course']),
@@ -800,7 +830,8 @@ async function main(): Promise<void> {
     ? 'workdir/logo.svg (inlined)'
     : (brief.brand?.logo ? `brand URL (${brief.brand.logo})` : 'NONE → header falls back to Luly default');
   const cardSvg  = existsSync(join(workdir, 'card-cover.svg'))   ? 'present' : 'NONE';
-  const brandIcn = existsSync(join(workdir, 'brand-icon.svg'))   ? 'present (brand-icon takes priority over generated course-icon)' : 'NONE';
+  const brandIcnSvg = existsSync(join(workdir, 'brand-icon.svg'))? 'present (SVG — takes priority over generated course-icon)' : 'NONE';
+  const brandIcnPng = existsSync(join(workdir, 'brand-icon.png'))? 'present (PNG — inlined as iconUrl data URI)' : 'NONE';
   const iconSvg  = existsSync(join(workdir, 'course-icon.svg'))  ? 'present' : 'NONE';
   const hubSvg   = existsSync(join(workdir, 'hub-logo.svg'))     ? 'present' : 'NONE';
   const phMedia  = existsSync(join(workdir, 'placeholders/media.svg')) ? 'Y' : 'N';
@@ -809,7 +840,8 @@ async function main(): Promise<void> {
   console.log(`  --- assets ---`);
   console.log(`  header logo        = ${logoState}`);
   console.log(`  card-cover.svg     = ${cardSvg}`);
-  console.log(`  brand-icon.svg     = ${brandIcn}`);
+  console.log(`  brand-icon.svg     = ${brandIcnSvg}`);
+  console.log(`  brand-icon.png     = ${brandIcnPng}`);
   console.log(`  course-icon.svg    = ${iconSvg}`);
   console.log(`  hub-logo.svg       = ${hubSvg}`);
   console.log(`  placeholders       = media:${phMedia} card:${phCard} icon:${phIcon}` +

@@ -1,7 +1,7 @@
 {
-  "name": "luly-v0-2-8",
-  "version": "0.2.8",
-  "description": "Author Luly flows end-to-end from a single natural-language prompt. v0.2.8: optional `tooltipTextColor` + `tooltipBackgroundColor` theme tokens — render the pill behind inline definition terms. Renderer falls back to primary/primaryLight, so the pair is optional and only worth emitting when primary is close to the body background, very exotic, or the brand has a dedicated link/term color.",
+  "name": "luly-v0-2-9",
+  "version": "0.2.9",
+  "description": "Author Luly flows end-to-end from a single natural-language prompt. v0.2.9: (1) image-first mobile default — `image-richtext` blocks always emit `imagePositionMobile: top` unless the screen explicitly overrides via `mobile: bottom`. Desktop `position: left|right` decoupled from mobile order. (2) Brand research persistence — luly-intake now codifies Tier 1 (homepage + brand pages + favicon chain + PWA manifest), Tier 2 (brand.fetch, Google cache, Wayback, GitHub, npm), Tier 3 (search + social) escalation ladder. Required `## Brand research log` section with ≥6 attempts before `default-luly` is allowed. (3) Favicon as course-icon fallback — when no clean press-kit icon exists, the brand's favicon (PNG or SVG) lands as the course iconSvg/iconUrl. PNG support added to assemble: `brand-icon.png` becomes `course.body.iconUrl` data URI.",
   "author": {
     "name": "Luly"
   },

@@ -576,11 +576,12 @@ function buildBlock(hdr: Record<string, unknown>, body: string): LessonBlock {
       return { format: 'text', content: body };
     case 'image-richtext': {
       const desktopPos = (hdr.position as 'left' | 'right') ?? 'left';
-      // Mobile stack order — explicit `mobile: top|bottom` wins; otherwise
-      // the desktop position maps to top (left) or bottom (right), matching
-      // luly-app's MediaTextBlockRenderer fallback. We always emit the field
-      // explicitly so the renderer doesn't have to guess.
-      const mobilePos = (hdr.mobile as 'top' | 'bottom') ?? (desktopPos === 'right' ? 'bottom' : 'top');
+      // Mobile stack order — image-first by default. The screen's visual
+      // is the screen's identity; readers should see it before reading text
+      // on small viewports. Override only via explicit `mobile: bottom` in
+      // the header (rare — decorative-only visuals). This decouples mobile
+      // order from the desktop `position` choice.
+      const mobilePos: 'top' | 'bottom' = (hdr.mobile as 'top' | 'bottom') ?? 'top';
       return {
         format: 'image-richtext',
         // Empty string → CMS falls back to flow.body.mediaPlaceholderUrl.

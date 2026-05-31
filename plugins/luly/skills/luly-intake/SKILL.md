@@ -43,7 +43,27 @@ Useful signals to combine:
 
 If two signals disagree (e.g. `theme-color` says light but a CSS rule says dark), **reconcile**. Don't just pick one. The fix is one of: (a) pull more signals until a clear picture emerges, (b) take a screenshot and let visual reality decide, (c) ask the user.
 
-Don't give up after one failed fetch. If one path is blocked (Cloudflare 403, captcha), try a real-browser User-Agent, a different subdomain, the press/brand page, or a brand-asset aggregator.
+**Persistence rule.** When the prompt names a brand AND a website exists, you do NOT return `Brand research result: default-luly` without working the ladder below. A single failed fetch is not "research." Try each tier in order, log every attempt, and only fall back when Tier 1 + Tier 2 are exhausted.
+
+**Tier 1 — always (this is the floor):**
+- The homepage itself.
+- Standard brand pages: `/brand`, `/press`, `/brand-assets`, `/about`, `/media-kit`, `/resources`.
+- Favicon chain: `/favicon.svg` → `/apple-touch-icon.png` → `/apple-touch-icon-precomposed.png` → `/favicon.ico`.
+- PWA manifest: `/manifest.json`, `/site.webmanifest`. Pull `theme_color`, `background_color`, and the icon list.
+
+**Tier 2 — when Tier 1 leaves gaps:**
+- Brand-asset aggregator: `https://api.brandfetch.io/v2/brands/{domain}` — public preview JSON often returns colors + logo URLs in one shot.
+- Google cache: `https://webcache.googleusercontent.com/search?q=cache:{url}` — bypasses some captchas.
+- Wayback Machine: `https://web.archive.org/web/2y_/{url}` — works when the live site blocks fetches.
+- GitHub avatar + README for open-source projects — logo is usually a clean SVG on the repo page.
+- npm / PyPI / crates.io page for SDK companies — package metadata almost always carries the logo URL.
+
+**Tier 3 — when there is no clean website at all:**
+- WebSearch for `"{company} press kit"`, `"{company} brand guidelines"`, `"{company} media kit"`.
+- The brand's Twitter/X profile avatar and header banner.
+- LinkedIn company page logo.
+
+The principle: if a company has a public website, you can almost always extract a defensible palette + logo with enough persistence. Cloudflare 403 means try the brand subpages or Tier 2, not give up. A captcha on the homepage means try Tier 2.
 
 #### Logo discovery
 
@@ -83,6 +103,13 @@ Sanity checks before saving any file:
 If you only have URLs (no SVG available), record them in the `Logo:` block instead — the assembler uses URLs as fallback.
 
 If no variant is available at decent quality, **don't save anything**. Header falls back to the Luly mark; course icon falls back to the generated SVG. Both are preferable to a wrong / blurry brand impression.
+
+**Favicon as a fallback option for the course icon** (academy / academy-course / campaign-course presets only): if the brand discovery above didn't find a clean icon-only variant (no press-kit icon, no SVG icon mark, no apple-touch-icon labeled as the brand mark) BUT the favicon chain in Tier 1 of the persistence ladder returned something usable, save the favicon as `<workdir>/brand-icon.svg` (when SVG) or `<workdir>/brand-icon.png` (when raster). Favicons are designed for small surfaces and often render well at 256×256.
+
+- `/favicon.svg` → `<workdir>/brand-icon.svg`
+- `/apple-touch-icon.png` (or `.ico` converted to PNG) → `<workdir>/brand-icon.png`
+
+The assembler picks either up as the course icon (`iconSvg` for SVG, `iconUrl` data URI for PNG). Only do this when no better icon-only variant exists — a press-kit icon beats a favicon when both are available. Skip for `campaign-simple` / `waitlist` / `interactive-proposal` (no course-icon UI renders).
 
 #### Plausibility check before committing
 
@@ -177,6 +204,14 @@ ButtonBorderRadius: <e.g. 8px, 12px, 999px — extracted from brand CSS; omit if
 ContainerBorderRadius: <e.g. 12px, 16px — for cards/panels; omit if not found> (optional)
 Voice: <one line, optional>
 
+## Brand research log (required when ## Brand is present)
+- Tried: <url> — <one-line result: got primary HEX / got logo SVG / 404 / Cloudflare 403 / nothing useful>
+- Tried: <url> — <result>
+- Tried: <url> — <result>
+- Sources used for colors: <list of URLs that contributed>
+- Sources used for logo: <list of URLs that contributed>
+- Sources used for fonts: <list of URLs that contributed, or "default Luly fonts">
+
 ## Materials
 - <url> — <one-line digest>
 - <url> — <one-line digest>
@@ -196,6 +231,8 @@ Voice: <one line, optional>
 - For `academy` preset: an `## Academy name` section is present.
 - For `academy-course` / `campaign-course`: `## Course author` may be omitted (it's optional).
 - Do not invent any HEX you didn't actually find in sources.
+- **If `## Brand` is present, `## Brand research log` is also present** with at least one `Tried:` line.
+- **Before writing `Brand research result: default-luly`, the research log must contain ≥ 6 `Tried:` entries** covering Tier 1 + at least some of Tier 2 from the persistence ladder. Anything less is premature surrender.
 
 ### 7. Hand off
 
