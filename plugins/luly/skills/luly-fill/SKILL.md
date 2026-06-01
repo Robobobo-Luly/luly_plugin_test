@@ -44,7 +44,7 @@ For each section:
 1. Pick **one** block format from the allowlist that fits the screen synopsis.
 2. Write a `## Onboarding · Screen N — title` or `## Section M · Screen N — title` header.
 3. Below the header, write a YAML-style block of structured fields (type, image, choices, etc.).
-4. After a blank line, write the Markdown body. Do not use tables. Pattern: title → intro sentence → optional bullets → optional closing line. No emojis. Each story 3–4 sentences (per writing-guidelines.md §3); split into two screens if longer.
+4. After a blank line, write the Markdown body. Do not use tables. Pattern: a single `# H1` title → intro sentence → optional bullets → optional closing line. Stick to one H1 + paragraphs; reserve `##`+ for long-form, article-like products only (writing-guidelines.md §8). No emojis. Each story 3–4 sentences (per writing-guidelines.md §3); split into two screens if longer.
 5. End the screen with `---` on its own line.
 
 Screen count can deviate slightly — if a story would be too long, split into two screens rather than cramming.

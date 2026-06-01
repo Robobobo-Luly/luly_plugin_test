@@ -6,9 +6,9 @@
   },
   "plugins": [
     {
-      "name": "luly-v0-2-9",
+      "name": "luly-v0-3-0",
       "source": "./plugins/luly",
-      "description": "Author Luly flows end-to-end from a single natural-language prompt. v0.2.9: image-first mobile default (image always stacks on top of mobile slides unless overridden); brand research persistence — explicit Tier 1/2/3 escalation ladder with a research-log floor of 6 attempts before falling back to default styling; favicon fallback for academy course-icon — PNG brand-icon.png supported as iconUrl data URI when SVG isn't available."
+      "description": "Author Luly flows end-to-end from a single natural-language prompt. v0.3.0: open font selection — fontHeading/fontBody may be any Google Fonts family (loaded at render time), brand font used verbatim when captured, bundled families render instantly, SF Pro/Matter retired; heading discipline — simple products use a single H1 + paragraphs, deeper hierarchy reserved for article-like products (writing-guidelines §8)."
     }
   ]
 }

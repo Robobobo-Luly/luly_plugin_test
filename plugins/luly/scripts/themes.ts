@@ -42,21 +42,24 @@ export const OPTIONAL_LAYOUT_TOKENS: readonly string[] = [
 ] as const;
 
 /**
- * Closed list of CSS font-family strings the CMS actually supports.
- * Source: `src/services/fonts/fontService.ts` (BUNDLED_FONTS + GOOGLE_FONTS).
- * `fontHeading` and `fontBody` MUST be one of these strings verbatim.
+ * Font contract — NOT an allow-list.
+ *
+ * The CMS has no closed font list. `src/services/fonts/fontService.ts` resolves
+ * ANY family by name: anything not bundled is fetched from Google Fonts at
+ * render time (`ensureFlowFontsLoaded` → `loadGoogleFamily`). So `fontHeading` /
+ * `fontBody` may be ANY Google Fonts family, written as the CSS string
+ * `"<Family>", sans-serif` (use `serif` for serif faces) — the renderer extracts
+ * the quoted family and loads it. Pick by brand/tone; do NOT maintain a curated
+ * catalog here — it only goes stale against Google's.
+ *
+ * The one finite fact worth pinning: these families are BUNDLED in the app and
+ * render with no network round-trip. Everything else is an open Google choice.
+ * SF Pro Display and Matter still resolve for legacy flows but are retired
+ * (`hidden: true`) — don't anchor new products to them.
  */
-export const SUPPORTED_FONTS: readonly string[] = [
-  '"Inter", sans-serif',
-  '"Inter Tight", sans-serif',
-  '"SF Pro Display", -apple-system, sans-serif',
-  '"Roboto", sans-serif',
-  '"Matter", sans-serif',
-  '"Nunito", sans-serif',
-  '"Poppins", sans-serif',
-  '"Open Sans", sans-serif',
-  '"Montserrat", sans-serif',
-  '"Lato", sans-serif',
+export const BUNDLED_FONTS: readonly string[] = [
+  'Inter', 'Inter Tight', 'Roboto', 'Satoshi',
+  'Nunito', 'Poppins', 'Open Sans', 'Montserrat', 'Lato',
 ] as const;
 
 export interface ThemeArtifact {

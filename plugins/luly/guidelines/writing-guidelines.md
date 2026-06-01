@@ -40,3 +40,7 @@ These rules keep lessons readable, consistent, and screen-friendly. All content-
 ## 7. Course information
 - **Course title** should not contain the name of the project. **3–4 words.**
 - **Course description** is one short sentence capturing the course overview.
+
+## 8. Heading levels
+- For simple products — stories, onboarding, most flows — use a **single `# H1`** as the screen heading and **paragraphs (`p`)** for the body. Don't reach for `##`/`###`/`####`.
+- Deeper heading hierarchy (`##`+) is only for **long-form, article-like products** where a screen genuinely needs sub-sections. If a story needs sub-headings, it's probably too long — split it into more screens instead (see §3).

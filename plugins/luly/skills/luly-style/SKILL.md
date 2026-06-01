@@ -37,22 +37,12 @@ If no brand colors, **use the default Luly palette in step 5 verbatim**. Do not 
 
 ### 3. Pick fonts
 
-`fontHeading` and `fontBody` MUST come from this closed list (verbatim CSS family strings):
+`fontHeading` and `fontBody` are CSS family strings: `"<Family>", sans-serif` (use `serif` for serif faces). The CMS loads **any** Google Fonts family by name at render time, so pick whatever fits — there is no list to choose from.
 
-```
-"Inter", sans-serif
-"Inter Tight", sans-serif
-"SF Pro Display", -apple-system, sans-serif
-"Roboto", sans-serif
-"Matter", sans-serif
-"Nunito", sans-serif
-"Poppins", sans-serif
-"Open Sans", sans-serif
-"Montserrat", sans-serif
-"Lato", sans-serif
-```
+- **Brand font first.** If `intake.md` captured the brand's fonts, use them verbatim (heading → `fontHeading`, body → `fontBody`). If only one was found, use it for headings and pair a neutral body. This is the biggest lever for a product that feels "made by the brand."
+- **Otherwise** pick any Google Fonts family that fits the tone (a clean grotesk for product/SaaS, a warm rounded sans for consumer, a serif for editorial/article-like products). Pair a distinctive heading with a neutral body when you want character.
+- When there's no reason to reach further, prefer a **bundled** family — these render instantly, no network round-trip: Inter, Inter Tight, Roboto, Satoshi, Nunito, Poppins, Open Sans, Montserrat, Lato.
 
-Same-font pairs (Inter/Inter) are fine. For more character: Montserrat/Inter, Nunito/Open Sans, Poppins/Lato.
 
 ### 4. Contrast targets (mandatory)
 
@@ -163,6 +153,6 @@ Tell the user where the artifacts are. Next stage: `/luly-fill`.
 - Read-only on intake.md and plan.md.
 - Write `theme.md` always; SVG assets per the table in step 6 / step 7.
 - All color tokens present and valid hex.
-- Fonts from the closed list, verbatim.
+- Fonts written as `"<Family>", sans-serif` (`serif` for serif faces): brand font first, else any Google Fonts family that fits. Never SF Pro Display or Matter.
 - SVG viewBox dimensions in step 6 are mandatory — wrong aspect = visible bug.
 - Do not run any other skill in this conversation.
