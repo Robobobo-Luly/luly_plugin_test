@@ -37,8 +37,14 @@ export const OPTIONAL_STYLE_TOKENS: readonly string[] = [
   'progressBarHeight',
 ] as const;
 
+// Flow-level layout overrides, stored under `theme.layout`. The renderer reads
+// per-viewport keys with explicit `Desktop` / `Mobile` suffixes (see
+// `ThemeLayoutOverrides` + `buildDefaultBaseContainer` in luly-app's
+// contentStyles.ts) — there is NO bare `maxWidth` / `padding` key; a bare key is
+// silently ignored. Omit entirely to inherit the app defaults
+// (desktop maxWidth 1480px); emit only to deliberately override.
 export const OPTIONAL_LAYOUT_TOKENS: readonly string[] = [
-  'maxWidth', 'maxWidthMobile', 'padding', 'paddingMobile',
+  'maxWidthDesktop', 'maxWidthMobile', 'paddingDesktop', 'paddingMobile',
 ] as const;
 
 /**

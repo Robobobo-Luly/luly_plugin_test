@@ -1,7 +1,7 @@
 {
-  "name": "luly-v0-3-0",
-  "version": "0.3.0",
-  "description": "Author Luly flows end-to-end from a single natural-language prompt. v0.3.0: (1) Open font selection — `fontHeading` / `fontBody` may be ANY Google Fonts family (the app's `fontService` loads arbitrary families at render time), so luly-style no longer picks from a closed list. Brand font is used verbatim when intake captured one (the biggest brand-fidelity lever); otherwise any family that fits the tone. Bundled families (Inter, Inter Tight, Roboto, Satoshi, Nunito, Poppins, Open Sans, Montserrat, Lato) render with no network round-trip. SF Pro Display and Matter are retired (`hidden` in the app) and no longer recommended. (2) Heading discipline — new writing-guidelines §8: simple products (stories, onboarding, most flows) use a single `# H1` + paragraphs; deeper `##`+ hierarchy is reserved for long-form, article-like products. Enforced in the luly-fill body pattern.",
+  "name": "luly-v0-3-1",
+  "version": "0.3.1",
+  "description": "Author Luly flows end-to-end from a single natural-language prompt. v0.3.1 (minor — schema accuracy, mobile/desktop, color application): (1) Layout-token fix — flow-level layout overrides use the renderer's suffixed keys `maxWidthDesktop` / `paddingDesktop` (+ `*Mobile`); the old bare `maxWidth` default was silently ignored and is dropped, so flows keep the app default desktop width (1480px) unless deliberately overridden. (2) Color application — luly-style now documents where key tokens actually render (quiz answer cards: `onSurface` unselected, `primaryLight` selected, `successLight` correct, `failureLight` wrong; `secondary` dark callouts with `textOnPrimary` text) and adds mandatory contrast targets for those answer-card and dark-callout pairs. (3) Per-viewport awareness — skills now reference the `*Mobile` style tokens and per-block margin model (`margin*` / `margin*Mobile`, defaults top 16 / bottom 0) as polishing levers for the future agentic-edit scope, explicitly NOT emitted during simple generation.",
   "author": {
     "name": "Luly"
   },

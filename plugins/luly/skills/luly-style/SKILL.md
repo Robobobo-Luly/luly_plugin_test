@@ -33,6 +33,19 @@ If intake also captured `ButtonBorderRadius` / `ContainerBorderRadius`, anchor t
 
 The luly-app renderer reads four border-radius tokens via CSS vars (`buttonBorderRadius`, `buttonBorderRadiusMobile`, `containerBorderRadius`, `containerBorderRadiusMobile`). If you only emit the desktop pair (`buttonBorderRadius` / `containerBorderRadius`), the mobile variants silently fall back to renderer defaults — usually fine, but if the brand has a distinct mobile radius, emit the `*Mobile` counterparts too with the brand's mobile value.
 
+> **Per-viewport tokens & block spacing (reference — not for simple generation).** The renderer
+> supports more per-viewport knobs than a generated flow needs. Don't emit these for normal
+> flows — they're levers for the later agentic-edit / fine-tuning scope, and the renderer defaults
+> are already correct:
+> - **Style** `theme.style`: desktop keys are bare (`buttonBorderRadius`, `containerBorderRadius`,
+>   `buttonHeight`); each has a `*Mobile` counterpart. `progressBarHeight` is shared (no mobile variant).
+> - **Layout** `theme.layout`: keys are explicitly suffixed — `maxWidthDesktop` / `maxWidthMobile`,
+>   `paddingDesktop` / `paddingMobile`. There is **no bare `maxWidth` / `padding`** — a bare key is
+>   silently ignored. Omit `theme.layout` entirely to inherit app defaults (desktop maxWidth 1480px).
+> - **Per-block margins** (block body, not theme): `marginTop/Bottom/Left/Right` plus `*Mobile`
+>   overrides. Defaults are top 16 / bottom 0 / sides 0. **Leave these unset during generation** and
+>   rely on the renderer default; only set them when deliberately polishing spacing.
+
 If no brand colors, **use the default Luly palette in step 5 verbatim**. Do not invent a topic-themed palette from the brand name or category — when the brand is unknown, neutral beats confidently-wrong.
 
 ### 3. Pick fonts
@@ -44,18 +57,36 @@ If no brand colors, **use the default Luly palette in step 5 verbatim**. Do not 
 - When there's no reason to reach further, prefer a **bundled** family — these render instantly, no network round-trip: Inter, Inter Tight, Roboto, Satoshi, Nunito, Poppins, Open Sans, Montserrat, Lato.
 
 
-### 4. Contrast targets (mandatory)
+### 4. Where each token actually shows up
 
-| Pair | Target |
-|---|---|
-| `textColor` vs `background` | ≥ 7:1 (AAA) |
-| `textOnPrimary` vs `primary` | ≥ 4.5:1 (AA) |
-| `mutedTextColor` vs `background` | ≥ 4.5:1 (AA) |
-| `surface` vs `background` | 5–15% lightness shift (distinguishable) |
-| `headerText` vs `headerBackground` | ≥ 4.5:1 |
-| `footerText` vs `footerBackground` | ≥ 4.5:1 |
+Several tokens drive specific UI surfaces, not just abstract "accents." Pick their values with the
+surface in mind — most are backgrounds that body text (`textColor` / `mutedTextColor`) sits on, so
+they have to stay legible:
 
-A perfectly tonal palette that fails contrast is worse than a slightly less elegant palette that passes.
+- `onSurface` — **unselected quiz answer card** + tag chips. Body text reads on top of it.
+- `primaryLight` — **selected quiz answer card** (and inline tooltip pill default).
+- `successLight` — **correct answer card** after grading.
+- `failureLight` — **wrong answer card** after grading.
+- `secondary` — **dark callouts, sticky bars, the connect/CTA pill.** Its text is `textOnPrimary`.
+- `textOnPrimary` — text on filled `primary`/`secondary` buttons **and** the active lesson tile.
+- `surface` — card and panel backgrounds.
+
+### 4a. Contrast targets (mandatory)
+
+| Pair | Target | Why |
+|---|---|---|
+| `textColor` vs `background` | ≥ 7:1 (AAA) | body copy |
+| `textOnPrimary` vs `primary` | ≥ 4.5:1 (AA) | primary button label |
+| `textOnPrimary` vs `secondary` | ≥ 4.5:1 (AA) | text on dark callouts / sticky bar |
+| `mutedTextColor` vs `background` | ≥ 4.5:1 (AA) | descriptions, subtitles |
+| `textColor` vs `onSurface` | ≥ 4.5:1 | unselected answer legible |
+| `textColor` vs `primaryLight` | ≥ 4.5:1 | selected answer legible |
+| `textColor` vs `successLight` / `failureLight` | ≥ 4.5:1 | graded answers legible |
+| `surface` vs `background` | 5–15% lightness shift (distinguishable) | cards stand off the page |
+| `headerText` vs `headerBackground` | ≥ 4.5:1 | header |
+| `footerText` vs `footerBackground` | ≥ 4.5:1 | footer |
+
+A perfectly tonal palette that fails contrast is worse than a slightly less elegant palette that passes. The answer-card pairs matter most for quiz-heavy products: a `successLight` / `failureLight` that's too saturated makes the answer text disappear.
 
 ### 5. Write `theme.md`
 

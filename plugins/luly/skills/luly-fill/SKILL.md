@@ -7,7 +7,9 @@ description: Stage 4 of the Luly authoring pipeline. Write all screen content (o
 
 One file. All screens. Per-screen YAML-style header for structured fields (block type, image, quiz choices, form fields, etc.), Markdown body for prose. Screens separated by `---`. Onboarding and sections are uniform — both are just "ordered groups of screens" in this doc.
 
-**Before writing any screen body**, read `${CLAUDE_PLUGIN_ROOT}/guidelines/writing-guidelines.md` and apply it. Key non-negotiables: stories are 3–4 sentences, fit one mobile screen, never end bullets or headings with punctuation, American English, no emojis, no rhetorical questions, no long compound sentences. Quizzes: one per lesson, 2–3 questions, three options, only one correct, shuffle correct-answer position across questions.
+**Before writing any screen body**, read `${CLAUDE_PLUGIN_ROOT}/guidelines/writing-guidelines.md` and apply it. 
+Key non-negotiables: stories are 3–4 sentences, fit one mobile screen, never end bullets or headings with punctuation, American English, no emojis, no rhetorical questions, no long compound sentences. 
+Quizzes: one per lesson, 2–3 questions, three options, only one correct, shuffle correct-answer position across questions.
 
 ## Process
 
@@ -74,14 +76,13 @@ The next section's pass reads this recap and respects it: don't redefine terms, 
 | `question` | `type: question`<br>`question: "<the question>"`<br>`choices:` bulleted list (≥2)<br>`correct: <id>` | (none) |
 | `form-text` | `type: form-text`<br>`fields:` bulleted list (≥1)<br>`submitLabel: <text>`<br>`successContent: "<markdown thank-you>"` | Markdown headline + body before form |
 | `form` / `email-form` | `type: form` (or `email-form`)<br>`fields:` bulleted list (≥1)<br>`submitLabel: <text>` (optional)<br>`successMessage: <text>` (optional) | (none) |
-| `layout` | `type: layout`<br>`ratio: "50:50"` | (none — responsive mode only) |
-
 **Single-component vs composite:** never emit a composite (`image-richtext`, `quiz-text`, `form-text`) with one half empty. If the body would be empty, use the single-component variant (`image`, `question`, `form`) instead.
 
 **Responsive layout — desktop position + mobile stack order:**
 - **Mobile always stacks image on top by default.** The screen's identity sits above the text on mobile, not below it — that's the read most users expect from learning + marketing flows on phones, and matches the convention across wallets, landings, and academies. The plugin emits `imagePositionMobile: top` automatically when the `mobile:` header is absent.
 - `position: left` / `position: right` controls the **desktop** orientation only. Pick one per story arc and keep it consistent — toggling within a section reads as visual noise. Recommended default for stories: `position: right` (text leads on desktop — calmer reading rhythm). Combined with the mobile default, that gives text-first desktop and image-first mobile.
 - Override the mobile default with `mobile: bottom` only when there's a specific reason text should lead on mobile (rare — usually a screen where the visual is decorative rather than identity-carrying). Don't override casually.
+- **Don't hand-author block margins/spacing.** The renderer applies consistent per-block spacing by default (top 16 / bottom 0); the per-block `margin*` / `margin*Mobile` fields are a polishing lever for the agentic-edit scope, not for generation. Leave them unset so screens space uniformly.
 
 **Block-shape consistency across story screens (mandatory):** within a single story arc (onboarding sequence, lesson, or a section's screens), all narrative screens should use the **same block shape** — either every story screen is `image-richtext` (image + text together) or every story screen is `text`. Don't intermix: a story that shows an illustration on screen 1 and then drops to text-only on screen 2 reads as a regression. Default to `image-richtext` for story content unless the user explicitly wants a stripped-down text-only feel, or the topic genuinely doesn't lend itself to per-screen illustration.
 

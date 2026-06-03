@@ -429,7 +429,14 @@ function buildFlow(inputs: AssembleInputs): NodeExport {
     colors: inputs.theme.colors,
     style: inputs.theme.style,
   };
-  themeBlock.layout = inputs.theme.layout ?? { maxWidth: '1200px' };
+  // Only attach `layout` when the theme actually carries overrides. The old
+  // `{ maxWidth: '1200px' }` default used a key the renderer ignores (it expects
+  // `maxWidthDesktop` / `paddingDesktop`), so it never applied — flows render at
+  // the app default (desktop 1480px). Omitting the key keeps that behavior and
+  // avoids shipping a dead override.
+  if (inputs.theme.layout && Object.keys(inputs.theme.layout).length > 0) {
+    themeBlock.layout = inputs.theme.layout;
+  }
 
   const flowBody: Record<string, unknown> = {
     product: spec.product,
