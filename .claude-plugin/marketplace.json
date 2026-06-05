@@ -6,9 +6,9 @@
   },
   "plugins": [
     {
-      "name": "luly-v0-3-1",
+      "name": "luly-v0-3-2",
       "source": "./plugins/luly",
-      "description": "Author Luly flows end-to-end from a single natural-language prompt. v0.3.1 (minor): layout-token fix — flow layout overrides use the renderer's maxWidthDesktop/paddingDesktop (+ *Mobile) keys; the dead bare maxWidth default is dropped (flows keep the app default 1480px width). Color application — luly-style documents quiz answer-card token roles (onSurface/primaryLight/successLight/failureLight) and dark-callout secondary, with contrast targets for legible answer text. Per-viewport awareness — *Mobile style tokens and per-block margins documented as agentic-edit polishing levers, not emitted in simple generation."
+      "description": "Author Luly flows end-to-end from a single natural-language prompt. v0.3.2 (patch): fix a v0.3.1 regression — the validator required body.theme.layout, but the assembler now omits it for default flows, so every flow without layout overrides failed validation. Validator now treats layout as optional (shape-checked only when present), matching assembler + renderer. v0.3.1 (minor): layout-token fix — flow layout overrides use the renderer's maxWidthDesktop/paddingDesktop (+ *Mobile) keys; the dead bare maxWidth default is dropped (flows keep the app default 1480px width). Color application — luly-style documents quiz answer-card token roles (onSurface/primaryLight/successLight/failureLight) and dark-callout secondary, with contrast targets for legible answer text. Per-viewport awareness — *Mobile style tokens and per-block margins documented as agentic-edit polishing levers, not emitted in simple generation."
     }
   ]
 }

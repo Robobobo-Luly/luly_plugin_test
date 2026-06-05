@@ -189,7 +189,12 @@ function validate(raw: unknown): { root: any; counts: Counts; kind: 'flow' | 'co
     need(isNonEmptyString((colors as any)[token]), `<flow> body.theme.colors missing required token "${token}"`);
   }
   need(isPlainObject((theme as any).style), '<flow> body.theme.style missing');
-  need(isPlainObject((theme as any).layout), '<flow> body.theme.layout missing');
+  // layout is OPTIONAL — the assembler omits it when the flow has no layout
+  // overrides (the common case), and the app renderer falls back to its
+  // defaults (desktop maxWidth 1480px). Only validate the shape when present.
+  if ((theme as any).layout !== undefined) {
+    need(isPlainObject((theme as any).layout), '<flow> body.theme.layout must be an object when present');
+  }
 
   const counts: Counts = { hub: 0, course: 0, lesson: 0, screen: 0, block: 0 };
 
