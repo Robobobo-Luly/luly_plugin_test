@@ -315,9 +315,15 @@ function loadBrandIcon(workdir: string): { kind: 'svg'; svg: string } | { kind: 
 function loadInlineSvg(workdir: string, name: string): string | undefined {
   const path = join(workdir, name);
   if (!existsSync(path)) return undefined;
-  const raw = readFileSync(path, 'utf8').trim();
-  if (!raw.startsWith('<svg')) return undefined;
-  return raw;
+  const raw = readFileSync(path, 'utf8');
+  // Real-world brand SVGs (Wikipedia, CDNs, design-tool exporters) routinely
+  // lead with a UTF-8 BOM, an `<?xml …?>` prolog, a `<!DOCTYPE …>`, or XML
+  // comments BEFORE the `<svg>` tag. The old `startsWith('<svg')` check rejected
+  // all of those silently, so a downloaded brand logo never reached the flow.
+  // Slice from the first `<svg` so any leading preamble is dropped.
+  const idx = raw.indexOf('<svg');
+  if (idx === -1) return undefined;
+  return raw.slice(idx).trim();
 }
 
 /**
@@ -447,20 +453,23 @@ function buildFlow(inputs: AssembleInputs): NodeExport {
   };
   if (spec.campaignType) flowBody.campaignType = spec.campaignType;
 
-  // Propagate brand logo from the brief to the flow's headerLogo so the
-  // app header + hub fall back to it when no per-hub logo is set.
-  // Header logo + link. Priority:
-  //   1. Clean SVG at <workdir>/logo.svg (written by /luly-style when brand exists)
-  //      — inlined as base64 data URI; sets headerLogoLink to "/" so the logo
-  //      links to the product's published root.
-  //   2. brand.logo URL from intake — falls back to whatever the brand exposed.
-  //   3. Neither — header falls back to default Luly mark.
+  // Brand marks saved by intake:
+  //   logo.svg     = lockup / wordmark (has the company name) — best for the hub.
+  //   brand-icon.* = icon-only mark (no text) — best for the compact header bar
+  //                  and the course icon. loadBrandIcon returns SVG or PNG-data-URI.
   const logoSvg = loadInlineSvg(inputs.workdir, 'logo.svg');
-  if (logoSvg) {
-    flowBody.headerLogo = svgToDataUri(logoSvg);
-    flowBody.headerLogoLink = '/';
-  } else if (inputs.brief.brand?.logo) {
-    flowBody.headerLogo = inputs.brief.brand.logo;
+  const brandIcon = loadBrandIcon(inputs.workdir);
+  const brandIconDataUri =
+    brandIcon?.kind === 'svg' ? svgToDataUri(brandIcon.svg)
+    : brandIcon?.kind === 'png-url' ? brandIcon.url
+    : undefined;
+
+  // Header logo — SHORT (icon-only) is preferred for the narrow header bar
+  // (~20px tall); fall back to the lockup, then any brand-exposed URL, then the
+  // default Luly mark. Sets headerLogoLink to "/" so the logo links to root.
+  const headerLogo = brandIconDataUri ?? (logoSvg ? svgToDataUri(logoSvg) : undefined) ?? inputs.brief.brand?.logo;
+  if (headerLogo) {
+    flowBody.headerLogo = headerLogo;
     flowBody.headerLogoLink = '/';
   }
 
@@ -531,9 +540,12 @@ function buildFlow(inputs: AssembleInputs): NodeExport {
   // Hub logo decision — meta.md `hub-logo: placeholder` forces empty (the CMS
   // falls back to flow.body.iconPlaceholderUrl). Default (or 'brand-logo') uses
   // the workdir logo.svg / brand.logo URL chain.
+  // Hub logo — LONG (lockup with the company name) reads best above the hub
+  // title; fall back to the icon-only mark, then any brand URL. `placeholder`
+  // forces empty so the CMS uses flow.body.iconPlaceholderUrl instead.
   const hubLogoUrl = inputs.meta.hubLogoDecision === 'placeholder'
     ? ''
-    : (logoSvg ? svgToDataUri(logoSvg) : (inputs.brief.brand?.logo ?? ''));
+    : ((logoSvg ? svgToDataUri(logoSvg) : undefined) ?? brandIconDataUri ?? (inputs.brief.brand?.logo ?? ''));
   const hub: NodeExport = {
     type: 'hub',
     title: isAcademy ? flowTitle : 'Hub',
@@ -550,17 +562,20 @@ function buildFlow(inputs: AssembleInputs): NodeExport {
   //   simple courses  → { flowType: 'simple', courseKey } (no SVG fields)
   //   learning courses → { author, flowType: 'learning', courseKey, sequentialLessons, cardImageSvg?, iconSvg? }
   // Both SVGs are authored by /luly-icon and stored inline as text:
-  //   - cardImageSvg = wide 16:9 card cover (card-cover.svg)
+  //   - cardImageSvg = wide fixed-height banner card cover (~10:3, cover-cropped)
   //   - iconSvg      = square 1:1 course icon (course-icon.svg)
   // Simple presets have no hub catalog → skip loading SVGs (defensive against
   // stale tmp artifacts from a previous run polluting a fresh generation).
   const courseIsSimple = isSimpleCourse(preset);
   const cardImageSvg = courseIsSimple ? undefined : loadInlineSvg(inputs.workdir, 'card-cover.svg');
-  const brandIcon = courseIsSimple ? undefined : loadBrandIcon(inputs.workdir);
+  // Course icon — real icon-only mark (brandIcon, loaded above) wins; else the
+  // generated course-icon.svg (only written when the user approved a drawn
+  // stand-in — see luly-style). Simple presets have no hub catalog → skip.
+  const courseBrandIcon = courseIsSimple ? undefined : brandIcon;
   const iconSvg = courseIsSimple
     ? undefined
-    : (brandIcon?.kind === 'svg' ? brandIcon.svg : loadInlineSvg(inputs.workdir, 'course-icon.svg'));
-  const iconUrl = brandIcon?.kind === 'png-url' ? brandIcon.url : undefined;
+    : (courseBrandIcon?.kind === 'svg' ? courseBrandIcon.svg : loadInlineSvg(inputs.workdir, 'course-icon.svg'));
+  const iconUrl = courseBrandIcon?.kind === 'png-url' ? courseBrandIcon.url : undefined;
   const course: NodeExport = {
     type: 'course',
     title: courseTitle,

@@ -98,8 +98,9 @@ Ask only if all three are true:
 Examples worth asking:
 - Two preset candidates equally plausible ("make a sales pitch for X" → `interactive-proposal` or `campaign-simple`?).
 - Topic missing entirely.
+- **No real brand logo/icon found** after intake worked its full research ladder — ask whether to draw a simple abstract stand-in or use the neutral placeholder. Never silently fabricate a brand mark (see luly-style step 6).
 
-Don't ask: tone, count, theme, locale, form copy specifics, image choices.
+Don't ask: tone, count, theme, locale, form copy specifics, decorative image choices. (A missing *real brand logo* is not a decorative choice — that one you DO ask, per above.)
 
 One question per pause, then resume.
 

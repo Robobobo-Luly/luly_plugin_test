@@ -145,33 +145,43 @@ When emitting, follow contrast targets: `tooltipTextColor` needs ≥ 4.5:1 again
 When intake DOES have brand colors, follow the rules in step 2 to override the relevant tokens (primary, background, secondary, text, accent) — keep the rest of this default palette as-is unless contrast targets force a change. All color tokens are required.
 
 
-### 6. SVG asset dimensions (must match exactly)
+### 6. Brand logos & SVG assets
 
-When the preset has a hub catalog (`academy`, `academy-course`, `campaign-course`), also write these SVG files to `<workdir>`. **The viewBox dimensions below are not suggestions — the CMS renders each asset in a fixed-aspect frame and a mismatch produces visibly squished or letterboxed content.**
+**Logos are REAL or ASKED — never fabricated.** The hub logo, header logo, and course icon must come from the brand assets intake saved (`logo.svg`, `brand-icon.svg`/`.png`) — not a drawing of your own. A convincing-but-wrong invented brand mark is worse than none. The assembler wires the real files automatically:
+- **Hub logo** = the lockup/wordmark **with the company name** (`logo.svg`). **Do not write a `hub-logo.svg`** — there is no such slot; the hub renders the real lockup. (The header bar prefers the icon-only mark when one exists, else the lockup — also automatic.)
+- **Course icon** = the **icon-only** mark (`brand-icon.svg`/`.png`) when intake saved one.
+
+**When intake found no usable real logo/icon for a needed slot** (after working its full research ladder — don't give up early), STOP and ask the user before drawing anything:
+> "I couldn't find a real \<brand\> {logo / icon-only mark}. Want me to (a) draw a simple abstract stand-in in the brand colors, or (b) leave it out and use the neutral placeholder?"
+
+Only draw a stand-in after the user picks (a). A drawn course-icon stand-in is saved as `course-icon.svg` (1:1, `0 0 256 256`) and must be **abstract** — no wordmark text, no literal product replica, palette HEX only, calm not aggressive.
+
+**Card cover** (`card-cover.svg`) is decorative, not a logo — always generate it for hub-catalog presets (`academy`, `academy-course`, `campaign-course`). The app renders it into a **full-width, fixed-height banner** and crops with `object-fit: cover` — it is NOT a 16:9 or square frame. Match the app's own default card image (`public/assets/placeholders/card.png`, 503×151 ≈ **10:3**): use a wide, short canvas and **keep all important shapes centered** — the top and bottom edges get trimmed.
+- Hub card height: 120px mobile / 151px desktop (`contentStyles.ts` `imageHeight`). Course-header card: 150px. Width fills the column, so on-screen ratio is ≈ 2:1–3.3:1.
 
 | File | viewBox | Aspect | Used for |
 |---|---|---|---|
-| `card-cover.svg` | `0 0 1600 900` | **16:9** | Course card hero (hub catalog + course header) |
-| `course-icon.svg` | `0 0 256 256` | **1:1** | Course icon next to the author byline |
-| `hub-logo.svg` | `0 0 256 256` | **1:1** | Academy hub logo — **only write when intake authorized real brand logo** (see step 7) |
-| `logo.svg` | typically `0 0 256 64` or whatever matches the brand mark | brand-dependent | Header logo — copied from intake's brand discovery, do NOT redraw |
+| `card-cover.svg` | `0 0 1600 480` | **≈10:3 (wide banner)** | Course card hero (hub catalog + course header). Cover-cropped — center the content. |
+| `course-icon.svg` | `0 0 256 256` | **1:1** | Course icon — ONLY when no real `brand-icon` AND the user approved a stand-in |
+| `logo.svg` | brand-dependent | brand mark | Header/hub logo — saved by intake, **never redrawn here** |
 
-Other rules for these SVGs:
-- Use the resolved palette HEX from this theme — no invented colors.
-- Keep them small (≤ 4 KB each). Simple shapes, ≤ 1 gradient.
+Card-cover rules:
+- **Abstract only — NO text, no wordmark, no literal product drawings.** Soft geometric shapes / a single gentle gradient that evoke the brand, in the palette HEX.
+- Calm and simple, **not aggressive** — gentle curves and brand color, not sharp/loud/busy motifs.
+- Use the resolved palette HEX — no invented colors. Keep it ≤ 4 KB, ≤ 1 gradient.
 - No `<script>`, no external `<image href>`, no `xlink:href` to remote URLs.
 
 ### 7. Placeholder SVGs (every preset)
 
-Generate three small branded SVGs into `<workdir>/placeholders/`:
+Generate three small branded SVGs into `<workdir>/placeholders/`. **Dimensions must match the frame the app renders each into** (verified against luly-app — a mismatch squishes or letterboxes):
 
-| File | viewBox | Used for |
-|---|---|---|
-| `placeholders/media.svg` | `0 0 800 600` (4:3) | Empty image/video/animation blocks anywhere in the product |
-| `placeholders/card.svg` | `0 0 1600 900` (16:9) | Empty course card hero when a course has no `cardImageUrl` |
-| `placeholders/icon.svg` | `0 0 256 256` (1:1) | Empty course icon when a course has no `iconUrl` |
+| File | viewBox | Aspect | Used for |
+|---|---|---|---|
+| `placeholders/media.svg` | `0 0 800 800` | **1:1 (square)** | Empty image/video/animation blocks. The app's media block defaults to a **square** frame, so this MUST be 1:1 — a 4:3 or 16:9 canvas gets cropped/letterboxed. |
+| `placeholders/card.svg` | `0 0 1600 480` | **≈10:3 (wide banner)** | Empty course card hero — matches the app default `card.png` (503×151); cover-cropped, center the content |
+| `placeholders/icon.svg` | `0 0 256 256` | **1:1** | Empty course icon when a course has no `iconUrl` |
 
-Each placeholder is a soft branded surface: solid `surface` background, a faint watermark (small wordmark, dot pattern, or simple geometric mark) in `primary` at low opacity. Don't put real text content — these are fallback canvases, not posters.
+Each placeholder is a soft branded surface: solid `surface` background, a faint watermark (dot pattern or simple geometric mark) in `primary` at low opacity. **No text** — these are fallback canvases, not posters.
 
 The assembler inlines each as a `data:image/svg+xml;utf8,...` URI on the matching `flow.body.{media,card,icon}PlaceholderUrl` field. If you don't write a file, the field is omitted and the CMS falls back to its built-in generic placeholder.
 

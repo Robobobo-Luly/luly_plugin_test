@@ -100,7 +100,15 @@ Sanity checks before saving any file:
 - For `logo.svg`: includes the wordmark when one exists — the header renders at ~32px desktop / 24px mobile so a lockup stays legible.
 - For `brand-icon.svg`: NO wordmark — must render readably at 256×256 with no text.
 
-If you only have URLs (no SVG available), record them in the `Logo:` block instead — the assembler uses URLs as fallback.
+If you only have URLs (no SVG available), record them in the `Logo:` block instead — the assembler uses URLs as fallback. A PNG/JPEG URL to the **actual** brand logo is acceptable; an SVG is preferred but not required.
+
+**Saving an SVG you downloaded:** save the file's bytes exactly as fetched. A leading `<?xml …?>` prolog, `<!DOCTYPE>`, or comments are fine — the assembler strips them. Do NOT hand-edit or "clean up" the markup, and do NOT redraw the logo.
+
+**If no real logo/icon can be found** after working the full ladder (homepage → brand pages → favicon/manifest chain → Tier 2/3): do **not** invent one. Record it explicitly so the style stage asks the user, e.g.:
+```
+Logo: NONE FOUND — research ladder exhausted; style stage must ask user (abstract stand-in vs neutral placeholder)
+```
+Same for the icon-only mark when none exists. Never write a fabricated brand mark to disk.
 
 If no variant is available at decent quality, **don't save anything**. Header falls back to the Luly mark; course icon falls back to the generated SVG. Both are preferable to a wrong / blurry brand impression.
 
