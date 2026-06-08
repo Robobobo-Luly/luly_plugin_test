@@ -32,6 +32,27 @@
       ]
     },
     {
+      "id": "stub-course-control-back",
+      "label": "Back",
+      "styleName": "secondary",
+      "position": "bottomCenter",
+      "is_enabled": null,
+      "is_visible": null,
+      "requires_click": true,
+      "conditionalActions": [
+        {
+          "do": [
+            {
+              "body": {
+                "target": "parent"
+              },
+              "type": "goto"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "b319f572-66e1-44ca-9a6c-4f906bd621e6-control-learn",
       "label": "Learn",
       "style": {

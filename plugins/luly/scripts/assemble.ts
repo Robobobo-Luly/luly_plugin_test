@@ -373,13 +373,26 @@ function loadStubTemplate(): NodeExport {
   return _stubTemplate;
 }
 
-/** Assign a fresh uuid slug to every course/lesson/screen/block node in a tree. */
+/**
+ * Give every node and control in a cloned stub a fresh identity: a uuid `slug`
+ * on each course/lesson/screen/block node, and a fresh `id` on each control.
+ * Controls navigate by RELATIVE targets, so no reference rewrite is needed —
+ * this just prevents repeated stubs (built from the same fixture) from sharing
+ * node slugs or control ids.
+ */
 function reslug(node: unknown): void {
   if (!node || typeof node !== 'object') return;
   if (Array.isArray(node)) { node.forEach(reslug); return; }
   const obj = node as Record<string, unknown>;
   if (typeof obj.type === 'string' && ['course', 'lesson', 'screen', 'block'].includes(obj.type)) {
     obj.slug = uuidv4();
+  }
+  if (Array.isArray(obj.controls)) {
+    for (const c of obj.controls) {
+      if (c && typeof c === 'object' && 'id' in (c as Record<string, unknown>)) {
+        (c as Record<string, unknown>).id = uuidv4();
+      }
+    }
   }
   for (const v of Object.values(obj)) {
     if (v && typeof v === 'object') reslug(v);

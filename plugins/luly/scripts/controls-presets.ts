@@ -93,6 +93,20 @@ function courseControls(): Control[] {
         { guard: { name: 'contentClicked' }, do: [{ type: 'goto', body: { target: 'clicked_content' } }] },
       ],
     },
+    // Back to the hub. The course's parent IS the academy hub, so `parent`
+    // returns the learner to the course catalog. Without this the course
+    // landing only offers "Learn" and there's no way back to the hub.
+    // Mirrors the canonical academy template (Back → parent, bottomCenter).
+    {
+      id: 'ctrl.course.back',
+      label: 'Back',
+      position: 'bottomCenter',
+      requires_click: true,
+      styleName: 'secondary',
+      conditionalActions: [
+        { do: [{ type: 'goto', body: { target: 'parent' } }] },
+      ],
+    },
     {
       id: 'ctrl.course.learn',
       label: 'Learn',
