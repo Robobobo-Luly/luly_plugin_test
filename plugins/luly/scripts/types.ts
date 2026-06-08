@@ -61,12 +61,26 @@ export interface PlanLesson {
   screens: PlanScreen[];
 }
 
+/**
+ * A content-less "template" / stub course added to an academy hub on top of
+ * the authored content. Carries only a card identity (title + description);
+ * the assembler fills its body from the bundled default-course template so the
+ * user can author it later in the CMS. Opt-in — populated by /luly-plan only
+ * when the user asks for multiple / placeholder courses.
+ */
+export interface TemplateCourse {
+  title: string;
+  description: string;
+}
+
 export interface Plan {
   shape: PlanShape;
   courseTitle: string;
   intro: string | null;
   onboarding: PlanScreen[];
   lessons: PlanLesson[];
+  /** Optional stub courses appended to the hub. Default: none. */
+  templateCourses?: TemplateCourse[];
 }
 
 export type ScreenMode = 'story' | 'responsive';

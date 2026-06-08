@@ -1,0 +1,1795 @@
+{
+  "type": "course",
+  "title": "Enter course title",
+  "description": "Briefly describe what this course covers and why it matters",
+  "body": {
+    "author": "Add author's name",
+    "flowType": "learning",
+    "courseKey": "new-course-2",
+    "sequentialLessons": true
+  },
+  "controls": [
+    {
+      "id": "72d4b835-9de4-46f7-8938-1a6a08e5024e-control-nav",
+      "position": "bottomLeft",
+      "is_enabled": null,
+      "is_visible": null,
+      "requires_click": false,
+      "conditionalActions": [
+        {
+          "do": [
+            {
+              "body": {
+                "target": "clicked_content"
+              },
+              "type": "goto"
+            }
+          ],
+          "guard": {
+            "name": "contentClicked"
+          }
+        }
+      ]
+    },
+    {
+      "id": "b319f572-66e1-44ca-9a6c-4f906bd621e6-control-learn",
+      "label": "Learn",
+      "style": {
+        "borderRadius": {
+          "mobile": "5px",
+          "desktop": "5px"
+        }
+      },
+      "position": "bottomCenter",
+      "requires_click": true,
+      "conditionalActions": [
+        {
+          "do": [
+            {
+              "body": {
+                "target": "first_lesson"
+              },
+              "type": "goto"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "style": {
+    "container": {
+      "bottomControlsSticked": {
+        "mobile": true,
+        "desktop": false
+      }
+    }
+  },
+  "controlStyle": {
+    "bottomStyle": {
+      "borderTop": {
+        "mobile": "0px solid #eeeeee",
+        "desktop": "0px solid #eeeeee"
+      },
+      "backdropBlur": {
+        "mobile": "0px",
+        "desktop": "0px"
+      },
+      "flexDirection": {
+        "mobile": "row",
+        "desktop": "row"
+      },
+      "justifyContent": {
+        "mobile": "flex-end",
+        "desktop": "flex-end"
+      },
+      "backgroundColor": {
+        "mobile": "transparent",
+        "desktop": "transparent"
+      },
+      "buttonStretched": {
+        "mobile": true,
+        "desktop": false
+      },
+      "showFadeGradient": {
+        "mobile": true,
+        "desktop": true
+      },
+      "backgroundOpacity": {
+        "mobile": 1,
+        "desktop": 1
+      }
+    }
+  },
+  "lexoRank": "0|hzzzzz:",
+  "children": [
+    {
+      "type": "lesson",
+      "title": "01. Lesson title",
+      "description": "",
+      "body": {
+        "sectionType": "lesson"
+      },
+      "controls": [
+        {
+          "id": "89ac5188-09ec-445d-a8f7-35b569458f1a-control-nav",
+          "position": "bottomLeft",
+          "is_enabled": null,
+          "is_visible": null,
+          "requires_click": false,
+          "conditionalActions": [
+            {
+              "do": [
+                {
+                  "body": {
+                    "target": "parent"
+                  },
+                  "type": "goto"
+                }
+              ],
+              "guard": {
+                "name": "cameFromChild"
+              }
+            },
+            {
+              "do": [
+                {
+                  "body": {
+                    "target": "first_child"
+                  },
+                  "type": "goto"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "lexoRank": "0|i00007:",
+      "children": [
+        {
+          "type": "screen",
+          "title": null,
+          "description": null,
+          "body": {
+            "isStory": true
+          },
+          "controls": [
+            {
+              "id": "e0605967-f717-4e0a-a0e3-d71adfa9290b-control-close",
+              "style": {
+                "variant": "close-icon"
+              },
+              "position": "topRight",
+              "is_enabled": null,
+              "is_visible": null,
+              "requires_click": true,
+              "conditionalActions": [
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "parent"
+                      },
+                      "type": "goto"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "e0605967-f717-4e0a-a0e3-d71adfa9290b-control-previous",
+              "label": "Previous",
+              "style": {},
+              "position": "bottomLeft",
+              "requires_click": true,
+              "conditionalActions": [
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "previous_sibling"
+                      },
+                      "type": "goto"
+                    }
+                  ],
+                  "guard": {
+                    "name": "isNotFirstScreen"
+                  }
+                },
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "parent"
+                      },
+                      "type": "goto"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "e0605967-f717-4e0a-a0e3-d71adfa9290b-control-next",
+              "label": "Next",
+              "style": {},
+              "position": "bottomRight",
+              "requires_click": true,
+              "conditionalActions": [
+                {
+                  "do": [
+                    {
+                      "body": {},
+                      "type": "finishLesson"
+                    },
+                    {
+                      "body": {
+                        "target": "parent_next_sibling"
+                      },
+                      "type": "goto"
+                    }
+                  ],
+                  "guard": {
+                    "name": "isLastScreen"
+                  }
+                },
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "next_sibling"
+                      },
+                      "type": "goto"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "style": {
+            "container": {
+              "bottomControlsSticked": {
+                "mobile": true,
+                "desktop": true
+              }
+            }
+          },
+          "controlStyle": {
+            "bottomStyle": {
+              "borderTop": {
+                "mobile": "0px solid #eeeeee",
+                "desktop": "0px solid #eeeeee"
+              },
+              "backdropBlur": {
+                "mobile": "0px",
+                "desktop": "0px"
+              },
+              "flexDirection": {
+                "mobile": "row",
+                "desktop": "row"
+              },
+              "justifyContent": {
+                "mobile": "flex-end",
+                "desktop": "flex-end"
+              },
+              "backgroundColor": {
+                "mobile": "transparent",
+                "desktop": "transparent"
+              },
+              "buttonStretched": {
+                "mobile": true,
+                "desktop": false
+              },
+              "showFadeGradient": {
+                "mobile": true,
+                "desktop": true
+              },
+              "backgroundOpacity": {
+                "mobile": 1,
+                "desktop": 1
+              }
+            }
+          },
+          "lexoRank": "0|hzzzzz:",
+          "blocks": [
+            {
+              "type": "block",
+              "body": {
+                "i18n": {
+                  "en": {
+                    "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Story title\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Enter story title (there can be multiple \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"stories in one lesson)\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional media block\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Add an image or illustration\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Text block\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Write the main explanation for the lesson, \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"keep paragraphs short and easy to read\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional helper text \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Focus on one idea per screen\"}]}]}]}]}"
+                  }
+                },
+                "width": "100%",
+                "format": "image-richtext",
+                "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Story title\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Enter story title (there can be multiple \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"stories in one lesson)\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional media block\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Add an image or illustration\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Text block\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Write the main explanation for the lesson, \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"keep paragraphs short and easy to read\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional helper text \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Focus on one idea per screen\"}]}]}]}]}",
+                "imageUrl": "",
+                "mediaType": "image",
+                "objectFit": "cover",
+                "aspectRatio": "1/1",
+                "borderRadius": "8px",
+                "loadingStyle": "shimmer",
+                "imagePosition": "left",
+                "objectPosition": "center"
+              },
+              "lexoRank": "0|hzzzzz:"
+            }
+          ]
+        },
+        {
+          "type": "screen",
+          "title": null,
+          "description": null,
+          "body": {
+            "isStory": true
+          },
+          "controls": [
+            {
+              "id": "39213470-95c9-491c-a0c4-87bffa92904f-control-close",
+              "style": {
+                "variant": "close-icon"
+              },
+              "position": "topRight",
+              "is_enabled": null,
+              "is_visible": null,
+              "requires_click": true,
+              "conditionalActions": [
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "parent"
+                      },
+                      "type": "goto"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "39213470-95c9-491c-a0c4-87bffa92904f-control-previous",
+              "label": "Previous",
+              "style": {},
+              "position": "bottomLeft",
+              "requires_click": true,
+              "conditionalActions": [
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "previous_sibling"
+                      },
+                      "type": "goto"
+                    }
+                  ],
+                  "guard": {
+                    "name": "isNotFirstScreen"
+                  }
+                },
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "parent"
+                      },
+                      "type": "goto"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "39213470-95c9-491c-a0c4-87bffa92904f-control-next",
+              "label": "Next",
+              "style": {},
+              "position": "bottomRight",
+              "requires_click": true,
+              "conditionalActions": [
+                {
+                  "do": [
+                    {
+                      "body": {},
+                      "type": "finishLesson"
+                    },
+                    {
+                      "body": {
+                        "target": "parent_next_sibling"
+                      },
+                      "type": "goto"
+                    }
+                  ],
+                  "guard": {
+                    "name": "isLastScreen"
+                  }
+                },
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "next_sibling"
+                      },
+                      "type": "goto"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "style": {
+            "container": {
+              "bottomControlsSticked": {
+                "mobile": true,
+                "desktop": true
+              }
+            }
+          },
+          "controlStyle": {
+            "bottomStyle": {
+              "borderTop": {
+                "mobile": "0px solid #eeeeee",
+                "desktop": "0px solid #eeeeee"
+              },
+              "backdropBlur": {
+                "mobile": "0px",
+                "desktop": "0px"
+              },
+              "flexDirection": {
+                "mobile": "row",
+                "desktop": "row"
+              },
+              "justifyContent": {
+                "mobile": "flex-end",
+                "desktop": "flex-end"
+              },
+              "backgroundColor": {
+                "mobile": "transparent",
+                "desktop": "transparent"
+              },
+              "buttonStretched": {
+                "mobile": true,
+                "desktop": false
+              },
+              "showFadeGradient": {
+                "mobile": true,
+                "desktop": true
+              },
+              "backgroundOpacity": {
+                "mobile": 1,
+                "desktop": 1
+              }
+            }
+          },
+          "lexoRank": "0|i00007:",
+          "blocks": [
+            {
+              "type": "block",
+              "body": {
+                "i18n": {
+                  "en": {
+                    "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Add video title\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Review what happens in the video\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Video description \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Explain what users will learn or see in this video or state the reason why we need a video\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Extra tip\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Keep it concise: users should understand \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"the value before pressing play\"}]}]}]}]}"
+                  }
+                },
+                "width": "100%",
+                "format": "image-richtext",
+                "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Add video title\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Review what happens in the video\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Video description \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Explain what users will learn or see in this video or state the reason why we need a video\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Extra tip\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Keep it concise: users should understand \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"the value before pressing play\"}]}]}]}]}",
+                "imageUrl": "",
+                "mediaType": "image",
+                "objectFit": "cover",
+                "aspectRatio": "1/1",
+                "borderRadius": "8px",
+                "loadingStyle": "shimmer",
+                "imagePosition": "left",
+                "objectPosition": "center"
+              },
+              "lexoRank": "0|hzzzzz:"
+            }
+          ]
+        },
+        {
+          "type": "screen",
+          "title": null,
+          "description": null,
+          "body": {
+            "isStory": true
+          },
+          "controls": [
+            {
+              "id": "041b78fe-7a16-4847-a9ee-afc23bbca77f-control-close",
+              "style": {
+                "variant": "close-icon"
+              },
+              "position": "topRight",
+              "is_enabled": null,
+              "is_visible": null,
+              "requires_click": true,
+              "conditionalActions": [
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "parent"
+                      },
+                      "type": "goto"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "041b78fe-7a16-4847-a9ee-afc23bbca77f-control-previous",
+              "label": "Previous",
+              "style": {},
+              "position": "bottomLeft",
+              "requires_click": true,
+              "conditionalActions": [
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "previous_sibling"
+                      },
+                      "type": "goto"
+                    }
+                  ],
+                  "guard": {
+                    "name": "isNotFirstScreen"
+                  }
+                },
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "parent"
+                      },
+                      "type": "goto"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "041b78fe-7a16-4847-a9ee-afc23bbca77f-control-next",
+              "label": "Next",
+              "style": {},
+              "position": "bottomRight",
+              "requires_click": true,
+              "conditionalActions": [
+                {
+                  "do": [
+                    {
+                      "body": {},
+                      "type": "finishLesson"
+                    },
+                    {
+                      "body": {
+                        "target": "parent_next_sibling"
+                      },
+                      "type": "goto"
+                    }
+                  ],
+                  "guard": {
+                    "name": "isLastScreen"
+                  }
+                },
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "next_sibling"
+                      },
+                      "type": "goto"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "style": {
+            "container": {
+              "bottomControlsSticked": {
+                "mobile": true,
+                "desktop": true
+              }
+            }
+          },
+          "controlStyle": {
+            "bottomStyle": {
+              "borderTop": {
+                "mobile": "0px solid #eeeeee",
+                "desktop": "0px solid #eeeeee"
+              },
+              "backdropBlur": {
+                "mobile": "0px",
+                "desktop": "0px"
+              },
+              "flexDirection": {
+                "mobile": "row",
+                "desktop": "row"
+              },
+              "justifyContent": {
+                "mobile": "flex-end",
+                "desktop": "flex-end"
+              },
+              "backgroundColor": {
+                "mobile": "transparent",
+                "desktop": "transparent"
+              },
+              "buttonStretched": {
+                "mobile": true,
+                "desktop": false
+              },
+              "showFadeGradient": {
+                "mobile": true,
+                "desktop": true
+              },
+              "backgroundOpacity": {
+                "mobile": 1,
+                "desktop": 1
+              }
+            }
+          },
+          "lexoRank": "0|i0000f:",
+          "blocks": [
+            {
+              "type": "block",
+              "body": {
+                "i18n": {
+                  "en": {
+                    "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Question\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Write a clear question based \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"on the lesson\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"textStyle\",\"attrs\":{\"color\":null,\"fontFamily\":null,\"fontSize\":null,\"letterSpacing\":null,\"fontWeight\":\"600\"}},{\"type\":\"bold\"}],\"text\":\"Optional helper text\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Include one correct answer and 2–3 plausible alternatives\"}]}]}]}]}"
+                  }
+                },
+                "format": "quiz-text",
+                "choices": [
+                  {
+                    "id": "choice-d12fa6c0-904b-41a1-b2da-34ab910e20d9",
+                    "text": "Answer A"
+                  },
+                  {
+                    "id": "choice-5a307573-fecd-45ae-a2a9-a19762edecd1",
+                    "text": "Answer B"
+                  },
+                  {
+                    "id": "choice-474b930c-3ecb-4bbc-adf8-eaaeca6b2294",
+                    "text": "Answer C"
+                  }
+                ],
+                "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Question\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Write a clear question based \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"on the lesson\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"textStyle\",\"attrs\":{\"color\":null,\"fontFamily\":null,\"fontSize\":null,\"letterSpacing\":null,\"fontWeight\":\"600\"}},{\"type\":\"bold\"}],\"text\":\"Optional helper text\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Include one correct answer and 2–3 plausible alternatives\"}]}]}]}]}",
+                "autoSubmit": false,
+                "question_md": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Your question here\"}]}]}",
+                "quizPosition": "left",
+                "correctAnswer": "choice-5a307573-fecd-45ae-a2a9-a19762edecd1",
+                "shuffleChoices": false,
+                "showCorrectAnswer": true
+              },
+              "lexoRank": "0|hzzzzz:"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "lesson",
+      "title": "02. Lesson title",
+      "description": "",
+      "body": {
+        "sectionType": "lesson"
+      },
+      "controls": [
+        {
+          "id": "89ac5188-09ec-445d-a8f7-35b569458f1a-control-nav",
+          "position": "bottomLeft",
+          "is_enabled": null,
+          "is_visible": null,
+          "requires_click": false,
+          "conditionalActions": [
+            {
+              "do": [
+                {
+                  "body": {
+                    "target": "parent"
+                  },
+                  "type": "goto"
+                }
+              ],
+              "guard": {
+                "name": "cameFromChild"
+              }
+            },
+            {
+              "do": [
+                {
+                  "body": {
+                    "target": "first_child"
+                  },
+                  "type": "goto"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "lexoRank": "0|i00009:",
+      "children": [
+        {
+          "type": "screen",
+          "title": null,
+          "description": null,
+          "body": {
+            "isStory": true
+          },
+          "controls": [
+            {
+              "id": "e0605967-f717-4e0a-a0e3-d71adfa9290b-control-close",
+              "style": {
+                "variant": "close-icon"
+              },
+              "position": "topRight",
+              "is_enabled": null,
+              "is_visible": null,
+              "requires_click": true,
+              "conditionalActions": [
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "parent"
+                      },
+                      "type": "goto"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "e0605967-f717-4e0a-a0e3-d71adfa9290b-control-previous",
+              "label": "Previous",
+              "style": {},
+              "position": "bottomLeft",
+              "requires_click": true,
+              "conditionalActions": [
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "previous_sibling"
+                      },
+                      "type": "goto"
+                    }
+                  ],
+                  "guard": {
+                    "name": "isNotFirstScreen"
+                  }
+                },
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "parent"
+                      },
+                      "type": "goto"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "e0605967-f717-4e0a-a0e3-d71adfa9290b-control-next",
+              "label": "Next",
+              "style": {},
+              "position": "bottomRight",
+              "requires_click": true,
+              "conditionalActions": [
+                {
+                  "do": [
+                    {
+                      "body": {},
+                      "type": "finishLesson"
+                    },
+                    {
+                      "body": {
+                        "target": "parent_next_sibling"
+                      },
+                      "type": "goto"
+                    }
+                  ],
+                  "guard": {
+                    "name": "isLastScreen"
+                  }
+                },
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "next_sibling"
+                      },
+                      "type": "goto"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "style": {
+            "container": {
+              "bottomControlsSticked": {
+                "mobile": true,
+                "desktop": true
+              }
+            }
+          },
+          "controlStyle": {
+            "bottomStyle": {
+              "borderTop": {
+                "mobile": "0px solid #eeeeee",
+                "desktop": "0px solid #eeeeee"
+              },
+              "backdropBlur": {
+                "mobile": "0px",
+                "desktop": "0px"
+              },
+              "flexDirection": {
+                "mobile": "row",
+                "desktop": "row"
+              },
+              "justifyContent": {
+                "mobile": "flex-end",
+                "desktop": "flex-end"
+              },
+              "backgroundColor": {
+                "mobile": "transparent",
+                "desktop": "transparent"
+              },
+              "buttonStretched": {
+                "mobile": true,
+                "desktop": false
+              },
+              "showFadeGradient": {
+                "mobile": true,
+                "desktop": true
+              },
+              "backgroundOpacity": {
+                "mobile": 1,
+                "desktop": 1
+              }
+            }
+          },
+          "lexoRank": "0|hzzzzz:",
+          "blocks": [
+            {
+              "type": "block",
+              "body": {
+                "i18n": {
+                  "en": {
+                    "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Story title\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Enter story title (there can be multiple \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"stories in one lesson)\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional media block\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Add an image or illustration\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Text block\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Write the main explanation for the lesson, \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"keep paragraphs short and easy to read\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional helper text \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Focus on one idea per screen\"}]}]}]}]}"
+                  }
+                },
+                "width": "100%",
+                "format": "image-richtext",
+                "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Story title\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Enter story title (there can be multiple \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"stories in one lesson)\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional media block\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Add an image or illustration\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Text block\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Write the main explanation for the lesson, \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"keep paragraphs short and easy to read\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional helper text \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Focus on one idea per screen\"}]}]}]}]}",
+                "imageUrl": "",
+                "mediaType": "image",
+                "objectFit": "cover",
+                "aspectRatio": "1/1",
+                "borderRadius": "8px",
+                "loadingStyle": "shimmer",
+                "imagePosition": "left",
+                "objectPosition": "center"
+              },
+              "lexoRank": "0|hzzzzz:"
+            }
+          ]
+        },
+        {
+          "type": "screen",
+          "title": null,
+          "description": null,
+          "body": {
+            "isStory": true
+          },
+          "controls": [
+            {
+              "id": "39213470-95c9-491c-a0c4-87bffa92904f-control-close",
+              "style": {
+                "variant": "close-icon"
+              },
+              "position": "topRight",
+              "is_enabled": null,
+              "is_visible": null,
+              "requires_click": true,
+              "conditionalActions": [
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "parent"
+                      },
+                      "type": "goto"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "39213470-95c9-491c-a0c4-87bffa92904f-control-previous",
+              "label": "Previous",
+              "style": {},
+              "position": "bottomLeft",
+              "requires_click": true,
+              "conditionalActions": [
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "previous_sibling"
+                      },
+                      "type": "goto"
+                    }
+                  ],
+                  "guard": {
+                    "name": "isNotFirstScreen"
+                  }
+                },
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "parent"
+                      },
+                      "type": "goto"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "39213470-95c9-491c-a0c4-87bffa92904f-control-next",
+              "label": "Next",
+              "style": {},
+              "position": "bottomRight",
+              "requires_click": true,
+              "conditionalActions": [
+                {
+                  "do": [
+                    {
+                      "body": {},
+                      "type": "finishLesson"
+                    },
+                    {
+                      "body": {
+                        "target": "parent_next_sibling"
+                      },
+                      "type": "goto"
+                    }
+                  ],
+                  "guard": {
+                    "name": "isLastScreen"
+                  }
+                },
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "next_sibling"
+                      },
+                      "type": "goto"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "style": {
+            "container": {
+              "bottomControlsSticked": {
+                "mobile": true,
+                "desktop": true
+              }
+            }
+          },
+          "controlStyle": {
+            "bottomStyle": {
+              "borderTop": {
+                "mobile": "0px solid #eeeeee",
+                "desktop": "0px solid #eeeeee"
+              },
+              "backdropBlur": {
+                "mobile": "0px",
+                "desktop": "0px"
+              },
+              "flexDirection": {
+                "mobile": "row",
+                "desktop": "row"
+              },
+              "justifyContent": {
+                "mobile": "flex-end",
+                "desktop": "flex-end"
+              },
+              "backgroundColor": {
+                "mobile": "transparent",
+                "desktop": "transparent"
+              },
+              "buttonStretched": {
+                "mobile": true,
+                "desktop": false
+              },
+              "showFadeGradient": {
+                "mobile": true,
+                "desktop": true
+              },
+              "backgroundOpacity": {
+                "mobile": 1,
+                "desktop": 1
+              }
+            }
+          },
+          "lexoRank": "0|i00007:",
+          "blocks": [
+            {
+              "type": "block",
+              "body": {
+                "i18n": {
+                  "en": {
+                    "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Add video title\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Review what happens in the video\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Video description \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Explain what users will learn or see in this video or state the reason why we need a video\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Extra tip\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Keep it concise: users should understand \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"the value before pressing play\"}]}]}]}]}"
+                  }
+                },
+                "width": "100%",
+                "format": "image-richtext",
+                "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Add video title\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Review what happens in the video\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Video description \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Explain what users will learn or see in this video or state the reason why we need a video\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Extra tip\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Keep it concise: users should understand \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"the value before pressing play\"}]}]}]}]}",
+                "imageUrl": "",
+                "mediaType": "image",
+                "objectFit": "cover",
+                "aspectRatio": "1/1",
+                "borderRadius": "8px",
+                "loadingStyle": "shimmer",
+                "imagePosition": "left",
+                "objectPosition": "center"
+              },
+              "lexoRank": "0|hzzzzz:"
+            }
+          ]
+        },
+        {
+          "type": "screen",
+          "title": null,
+          "description": null,
+          "body": {
+            "isStory": true
+          },
+          "controls": [
+            {
+              "id": "041b78fe-7a16-4847-a9ee-afc23bbca77f-control-close",
+              "style": {
+                "variant": "close-icon"
+              },
+              "position": "topRight",
+              "is_enabled": null,
+              "is_visible": null,
+              "requires_click": true,
+              "conditionalActions": [
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "parent"
+                      },
+                      "type": "goto"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "041b78fe-7a16-4847-a9ee-afc23bbca77f-control-previous",
+              "label": "Previous",
+              "style": {},
+              "position": "bottomLeft",
+              "requires_click": true,
+              "conditionalActions": [
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "previous_sibling"
+                      },
+                      "type": "goto"
+                    }
+                  ],
+                  "guard": {
+                    "name": "isNotFirstScreen"
+                  }
+                },
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "parent"
+                      },
+                      "type": "goto"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "041b78fe-7a16-4847-a9ee-afc23bbca77f-control-next",
+              "label": "Next",
+              "style": {},
+              "position": "bottomRight",
+              "requires_click": true,
+              "conditionalActions": [
+                {
+                  "do": [
+                    {
+                      "body": {},
+                      "type": "finishLesson"
+                    },
+                    {
+                      "body": {
+                        "target": "parent_next_sibling"
+                      },
+                      "type": "goto"
+                    }
+                  ],
+                  "guard": {
+                    "name": "isLastScreen"
+                  }
+                },
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "next_sibling"
+                      },
+                      "type": "goto"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "style": {
+            "container": {
+              "bottomControlsSticked": {
+                "mobile": true,
+                "desktop": true
+              }
+            }
+          },
+          "controlStyle": {
+            "bottomStyle": {
+              "borderTop": {
+                "mobile": "0px solid #eeeeee",
+                "desktop": "0px solid #eeeeee"
+              },
+              "backdropBlur": {
+                "mobile": "0px",
+                "desktop": "0px"
+              },
+              "flexDirection": {
+                "mobile": "row",
+                "desktop": "row"
+              },
+              "justifyContent": {
+                "mobile": "flex-end",
+                "desktop": "flex-end"
+              },
+              "backgroundColor": {
+                "mobile": "transparent",
+                "desktop": "transparent"
+              },
+              "buttonStretched": {
+                "mobile": true,
+                "desktop": false
+              },
+              "showFadeGradient": {
+                "mobile": true,
+                "desktop": true
+              },
+              "backgroundOpacity": {
+                "mobile": 1,
+                "desktop": 1
+              }
+            }
+          },
+          "lexoRank": "0|i0000f:",
+          "blocks": [
+            {
+              "type": "block",
+              "body": {
+                "i18n": {
+                  "en": {
+                    "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Question\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Write a clear question based \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"on the lesson\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional helper text\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Include one correct answer and 2–3 plausible alternatives\"}]}]}]}]}"
+                  }
+                },
+                "format": "quiz-text",
+                "choices": [
+                  {
+                    "id": "choice-d12fa6c0-904b-41a1-b2da-34ab910e20d9",
+                    "text": "Answer A"
+                  },
+                  {
+                    "id": "choice-5a307573-fecd-45ae-a2a9-a19762edecd1",
+                    "text": "Answer B"
+                  },
+                  {
+                    "id": "choice-474b930c-3ecb-4bbc-adf8-eaaeca6b2294",
+                    "text": "Answer C"
+                  }
+                ],
+                "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Question\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Write a clear question based \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"on the lesson\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional helper text\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Include one correct answer and 2–3 plausible alternatives\"}]}]}]}]}",
+                "autoSubmit": false,
+                "question_md": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Your question here\"}]}]}",
+                "quizPosition": "left",
+                "correctAnswer": "choice-5a307573-fecd-45ae-a2a9-a19762edecd1",
+                "shuffleChoices": false,
+                "showCorrectAnswer": true
+              },
+              "lexoRank": "0|hzzzzz:"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "lesson",
+      "title": "03. Lesson title",
+      "description": "",
+      "body": {
+        "sectionType": "lesson"
+      },
+      "controls": [
+        {
+          "id": "89ac5188-09ec-445d-a8f7-35b569458f1a-control-nav",
+          "position": "bottomLeft",
+          "is_enabled": null,
+          "is_visible": null,
+          "requires_click": false,
+          "conditionalActions": [
+            {
+              "do": [
+                {
+                  "body": {
+                    "target": "parent"
+                  },
+                  "type": "goto"
+                }
+              ],
+              "guard": {
+                "name": "cameFromChild"
+              }
+            },
+            {
+              "do": [
+                {
+                  "body": {
+                    "target": "first_child"
+                  },
+                  "type": "goto"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "lexoRank": "0|i0000b:",
+      "children": [
+        {
+          "type": "screen",
+          "title": null,
+          "description": null,
+          "body": {
+            "isStory": true
+          },
+          "controls": [
+            {
+              "id": "e0605967-f717-4e0a-a0e3-d71adfa9290b-control-close",
+              "style": {
+                "variant": "close-icon"
+              },
+              "position": "topRight",
+              "is_enabled": null,
+              "is_visible": null,
+              "requires_click": true,
+              "conditionalActions": [
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "parent"
+                      },
+                      "type": "goto"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "e0605967-f717-4e0a-a0e3-d71adfa9290b-control-previous",
+              "label": "Previous",
+              "style": {},
+              "position": "bottomLeft",
+              "requires_click": true,
+              "conditionalActions": [
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "previous_sibling"
+                      },
+                      "type": "goto"
+                    }
+                  ],
+                  "guard": {
+                    "name": "isNotFirstScreen"
+                  }
+                },
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "parent"
+                      },
+                      "type": "goto"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "e0605967-f717-4e0a-a0e3-d71adfa9290b-control-next",
+              "label": "Next",
+              "style": {},
+              "position": "bottomRight",
+              "requires_click": true,
+              "conditionalActions": [
+                {
+                  "do": [
+                    {
+                      "body": {},
+                      "type": "finishLesson"
+                    },
+                    {
+                      "body": {
+                        "target": "parent_next_sibling"
+                      },
+                      "type": "goto"
+                    }
+                  ],
+                  "guard": {
+                    "name": "isLastScreen"
+                  }
+                },
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "next_sibling"
+                      },
+                      "type": "goto"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "style": {
+            "container": {
+              "bottomControlsSticked": {
+                "mobile": true,
+                "desktop": true
+              }
+            }
+          },
+          "controlStyle": {
+            "bottomStyle": {
+              "borderTop": {
+                "mobile": "0px solid #eeeeee",
+                "desktop": "0px solid #eeeeee"
+              },
+              "backdropBlur": {
+                "mobile": "0px",
+                "desktop": "0px"
+              },
+              "flexDirection": {
+                "mobile": "row",
+                "desktop": "row"
+              },
+              "justifyContent": {
+                "mobile": "flex-end",
+                "desktop": "flex-end"
+              },
+              "backgroundColor": {
+                "mobile": "transparent",
+                "desktop": "transparent"
+              },
+              "buttonStretched": {
+                "mobile": true,
+                "desktop": false
+              },
+              "showFadeGradient": {
+                "mobile": true,
+                "desktop": true
+              },
+              "backgroundOpacity": {
+                "mobile": 1,
+                "desktop": 1
+              }
+            }
+          },
+          "lexoRank": "0|hzzzzz:",
+          "blocks": [
+            {
+              "type": "block",
+              "body": {
+                "i18n": {
+                  "en": {
+                    "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Story title\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Enter story title (there can be multiple \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"stories in one lesson)\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional media block\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Add an image or illustration\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Text block\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Write the main explanation for the lesson, \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"keep paragraphs short and easy to read\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional helper text \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Focus on one idea per screen\"},{\"type\":\"hardBreak\"}]}]}]}]}"
+                  }
+                },
+                "width": "100%",
+                "format": "image-richtext",
+                "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Story title\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Enter story title (there can be multiple \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"stories in one lesson)\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional media block\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Add an image or illustration\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Text block\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Write the main explanation for the lesson, \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"keep paragraphs short and easy to read\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional helper text \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Focus on one idea per screen\"},{\"type\":\"hardBreak\"}]}]}]}]}",
+                "imageUrl": "",
+                "mediaType": "image",
+                "objectFit": "cover",
+                "aspectRatio": "1/1",
+                "borderRadius": "8px",
+                "loadingStyle": "shimmer",
+                "imagePosition": "left",
+                "objectPosition": "center"
+              },
+              "lexoRank": "0|hzzzzz:"
+            }
+          ]
+        },
+        {
+          "type": "screen",
+          "title": null,
+          "description": null,
+          "body": {
+            "isStory": true
+          },
+          "controls": [
+            {
+              "id": "39213470-95c9-491c-a0c4-87bffa92904f-control-close",
+              "style": {
+                "variant": "close-icon"
+              },
+              "position": "topRight",
+              "is_enabled": null,
+              "is_visible": null,
+              "requires_click": true,
+              "conditionalActions": [
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "parent"
+                      },
+                      "type": "goto"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "39213470-95c9-491c-a0c4-87bffa92904f-control-previous",
+              "label": "Previous",
+              "style": {},
+              "position": "bottomLeft",
+              "requires_click": true,
+              "conditionalActions": [
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "previous_sibling"
+                      },
+                      "type": "goto"
+                    }
+                  ],
+                  "guard": {
+                    "name": "isNotFirstScreen"
+                  }
+                },
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "parent"
+                      },
+                      "type": "goto"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "39213470-95c9-491c-a0c4-87bffa92904f-control-next",
+              "label": "Next",
+              "style": {},
+              "position": "bottomRight",
+              "requires_click": true,
+              "conditionalActions": [
+                {
+                  "do": [
+                    {
+                      "body": {},
+                      "type": "finishLesson"
+                    },
+                    {
+                      "body": {
+                        "target": "parent_next_sibling"
+                      },
+                      "type": "goto"
+                    }
+                  ],
+                  "guard": {
+                    "name": "isLastScreen"
+                  }
+                },
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "next_sibling"
+                      },
+                      "type": "goto"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "style": {
+            "container": {
+              "bottomControlsSticked": {
+                "mobile": true,
+                "desktop": true
+              }
+            }
+          },
+          "controlStyle": {
+            "bottomStyle": {
+              "borderTop": {
+                "mobile": "0px solid #eeeeee",
+                "desktop": "0px solid #eeeeee"
+              },
+              "backdropBlur": {
+                "mobile": "0px",
+                "desktop": "0px"
+              },
+              "flexDirection": {
+                "mobile": "row",
+                "desktop": "row"
+              },
+              "justifyContent": {
+                "mobile": "flex-end",
+                "desktop": "flex-end"
+              },
+              "backgroundColor": {
+                "mobile": "transparent",
+                "desktop": "transparent"
+              },
+              "buttonStretched": {
+                "mobile": true,
+                "desktop": false
+              },
+              "showFadeGradient": {
+                "mobile": true,
+                "desktop": true
+              },
+              "backgroundOpacity": {
+                "mobile": 1,
+                "desktop": 1
+              }
+            }
+          },
+          "lexoRank": "0|i00007:",
+          "blocks": [
+            {
+              "type": "block",
+              "body": {
+                "i18n": {
+                  "en": {
+                    "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Add video title\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Review what happens in the video\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Video description \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Explain what users will learn or see in this video or state the reason why we need a video\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Extra tip\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Keep it concise: users should understand \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"the value before pressing play\"}]}]}]}]}"
+                  }
+                },
+                "width": "100%",
+                "format": "image-richtext",
+                "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Add video title\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Review what happens in the video\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Video description \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Explain what users will learn or see in this video or state the reason why we need a video\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Extra tip\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Keep it concise: users should understand \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"the value before pressing play\"}]}]}]}]}",
+                "imageUrl": "",
+                "mediaType": "image",
+                "objectFit": "cover",
+                "aspectRatio": "1/1",
+                "borderRadius": "8px",
+                "loadingStyle": "shimmer",
+                "imagePosition": "left",
+                "objectPosition": "center"
+              },
+              "lexoRank": "0|hzzzzz:"
+            }
+          ]
+        },
+        {
+          "type": "screen",
+          "title": null,
+          "description": null,
+          "body": {
+            "isStory": true
+          },
+          "controls": [
+            {
+              "id": "041b78fe-7a16-4847-a9ee-afc23bbca77f-control-close",
+              "style": {
+                "variant": "close-icon"
+              },
+              "position": "topRight",
+              "is_enabled": null,
+              "is_visible": null,
+              "requires_click": true,
+              "conditionalActions": [
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "parent"
+                      },
+                      "type": "goto"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "041b78fe-7a16-4847-a9ee-afc23bbca77f-control-previous",
+              "label": "Previous",
+              "style": {},
+              "position": "bottomLeft",
+              "requires_click": true,
+              "conditionalActions": [
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "previous_sibling"
+                      },
+                      "type": "goto"
+                    }
+                  ],
+                  "guard": {
+                    "name": "isNotFirstScreen"
+                  }
+                },
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "parent"
+                      },
+                      "type": "goto"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "041b78fe-7a16-4847-a9ee-afc23bbca77f-control-next",
+              "label": "Next",
+              "style": {},
+              "position": "bottomRight",
+              "requires_click": true,
+              "conditionalActions": [
+                {
+                  "do": [
+                    {
+                      "body": {},
+                      "type": "finishLesson"
+                    },
+                    {
+                      "body": {
+                        "target": "parent_next_sibling"
+                      },
+                      "type": "goto"
+                    }
+                  ],
+                  "guard": {
+                    "name": "isLastScreen"
+                  }
+                },
+                {
+                  "do": [
+                    {
+                      "body": {
+                        "target": "next_sibling"
+                      },
+                      "type": "goto"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "style": {
+            "container": {
+              "bottomControlsSticked": {
+                "mobile": true,
+                "desktop": true
+              }
+            }
+          },
+          "controlStyle": {
+            "bottomStyle": {
+              "borderTop": {
+                "mobile": "0px solid #eeeeee",
+                "desktop": "0px solid #eeeeee"
+              },
+              "backdropBlur": {
+                "mobile": "0px",
+                "desktop": "0px"
+              },
+              "flexDirection": {
+                "mobile": "row",
+                "desktop": "row"
+              },
+              "justifyContent": {
+                "mobile": "flex-end",
+                "desktop": "flex-end"
+              },
+              "backgroundColor": {
+                "mobile": "transparent",
+                "desktop": "transparent"
+              },
+              "buttonStretched": {
+                "mobile": true,
+                "desktop": false
+              },
+              "showFadeGradient": {
+                "mobile": true,
+                "desktop": true
+              },
+              "backgroundOpacity": {
+                "mobile": 1,
+                "desktop": 1
+              }
+            }
+          },
+          "lexoRank": "0|i0000f:",
+          "blocks": [
+            {
+              "type": "block",
+              "body": {
+                "i18n": {
+                  "en": {
+                    "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Question\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Write a clear question based \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"on the lesson\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional helper text\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Include one correct answer and 2–3 plausible alternatives\"}]}]}]}]}"
+                  }
+                },
+                "format": "quiz-text",
+                "choices": [
+                  {
+                    "id": "choice-d12fa6c0-904b-41a1-b2da-34ab910e20d9",
+                    "text": "Answer A"
+                  },
+                  {
+                    "id": "choice-5a307573-fecd-45ae-a2a9-a19762edecd1",
+                    "text": "Answer B"
+                  },
+                  {
+                    "id": "choice-474b930c-3ecb-4bbc-adf8-eaaeca6b2294",
+                    "text": "Answer C"
+                  }
+                ],
+                "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Question\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Write a clear question based \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"on the lesson\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional helper text\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Include one correct answer and 2–3 plausible alternatives\"}]}]}]}]}",
+                "autoSubmit": false,
+                "question_md": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Your question here\"}]}]}",
+                "quizPosition": "left",
+                "correctAnswer": "choice-5a307573-fecd-45ae-a2a9-a19762edecd1",
+                "shuffleChoices": false,
+                "showCorrectAnswer": true
+              },
+              "lexoRank": "0|hzzzzz:"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

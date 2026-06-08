@@ -84,6 +84,7 @@ Extract from the prompt if present; otherwise default. **Don't ask about a slot 
 | has-quizzes | "quizzes / questions" → on; "no quiz" → off | preset default |
 | has-form | "form / signup / waitlist / capture emails" → on; "no form" → off | preset default |
 | form copy hints | "first 50 users discount", "early access" — preserve verbatim for stage 4 | use generic copy |
+| template courses | (academy only) "with 3-4 template/placeholder courses", or a clear list of several course topics → pass to luly-plan as a `## Template courses` list | none — single authored course |
 | locales | "in german, english, spanish" | `[en]` |
 | maxImages | "with illustrations / with visuals / draw images / illustrated / max images" → on | off — image blocks ship caption-only and use the flow-level `mediaPlaceholderUrl` placeholder |
 

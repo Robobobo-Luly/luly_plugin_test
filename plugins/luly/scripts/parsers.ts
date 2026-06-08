@@ -211,6 +211,8 @@ export function parsePlan(md: string): { plan: Plan; formatProfile: FormatProfil
   // Sections (## Onboarding or ## Section N — title)
   const onboarding: PlanScreen[] = [];
   const lessons: PlanLesson[] = [];
+  // Optional content-less stub courses appended to the hub (## Template courses).
+  const templateCourses: { title: string; description: string }[] = [];
 
   while (i < lines.length) {
     if (!lines[i].startsWith('## ')) { i++; continue; }
@@ -233,7 +235,15 @@ export function parsePlan(md: string): { plan: Plan; formatProfile: FormatProfil
       i++;
     }
 
-    if (/^onboarding$/i.test(heading)) {
+    if (/^template courses?$/i.test(heading)) {
+      // Each bullet is `Title | one-line description`.
+      for (const s of screens) {
+        const [t, ...rest] = s.synopsis.split('|');
+        const title = t.trim();
+        if (!title) continue;
+        templateCourses.push({ title, description: rest.join('|').trim() });
+      }
+    } else if (/^onboarding$/i.test(heading)) {
       for (const s of screens) onboarding.push(s);
     } else {
       // "Section N — title" or "Lesson N — title" (legacy)
@@ -254,6 +264,7 @@ export function parsePlan(md: string): { plan: Plan; formatProfile: FormatProfil
     intro,
     onboarding,
     lessons,
+    ...(templateCourses.length > 0 ? { templateCourses } : {}),
   };
 
   const formatProfile: FormatProfile = {

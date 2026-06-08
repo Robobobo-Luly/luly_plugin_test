@@ -355,6 +355,77 @@ function svgToUtf8DataUri(svg: string): string {
   return `data:image/svg+xml;utf8,${encoded}`;
 }
 
+/** Lowercase kebab key fragment from a title (for unique stub courseKeys). */
+function slugifyKey(s: string): string {
+  return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+}
+
+// Bundled default-course template (sanitized copy of luly-app's
+// public/product-templates/default-course.json: Onboarding lesson removed,
+// screen backgrounds + control color overrides stripped so the product theme
+// applies). Cached after first read.
+let _stubTemplate: NodeExport | null = null;
+function loadStubTemplate(): NodeExport {
+  if (_stubTemplate === null) {
+    const p = join(__dirname, 'templates', 'stub-course.json');
+    _stubTemplate = JSON.parse(readFileSync(p, 'utf8')) as NodeExport;
+  }
+  return _stubTemplate;
+}
+
+/** Assign a fresh uuid slug to every course/lesson/screen/block node in a tree. */
+function reslug(node: unknown): void {
+  if (!node || typeof node !== 'object') return;
+  if (Array.isArray(node)) { node.forEach(reslug); return; }
+  const obj = node as Record<string, unknown>;
+  if (typeof obj.type === 'string' && ['course', 'lesson', 'screen', 'block'].includes(obj.type)) {
+    obj.slug = uuidv4();
+  }
+  for (const v of Object.values(obj)) {
+    if (v && typeof v === 'object') reslug(v);
+  }
+}
+
+/**
+ * Build a content-less stub course from the bundled default-course template.
+ * Clones the template, gives every node a fresh slug (controls navigate by
+ * RELATIVE targets, so no reference rewrite is needed), injects the card
+ * identity (title + description + courseKey + author), and clears any per-course
+ * card/icon so the flow's shared branded placeholder is used.
+ */
+function buildStubCourse(
+  entry: { title: string; description: string },
+  courseKey: string,
+  rank: string,
+  author: string,
+): NodeExport {
+  const node = JSON.parse(JSON.stringify(loadStubTemplate())) as NodeExport;
+  node.title = entry.title;
+  node.description = entry.description ?? '';
+  node.lexoRank = rank;
+  const body = (node.body ?? {}) as Record<string, unknown>;
+  body.courseKey = courseKey;
+  body.author = author ?? '';
+  body.flowType = 'learning';
+  body.sequentialLessons = true;
+  // Shared branded placeholder: drop any per-course card/icon so the flow-level
+  // placeholderUrl applies.
+  delete body.cardImageSvg; delete body.cardImageUrl; delete body.cardImageMobileUrl;
+  delete body.iconSvg; delete body.iconUrl;
+  node.body = body;
+  // The app's default-course template leaves lesson/screen titles blank; the
+  // plugin validator requires a non-empty title on every lesson and screen.
+  // Backfill placeholder titles (the user renames them when authoring).
+  (node.children ?? []).forEach((lesson, li) => {
+    if (typeof lesson.title !== 'string' || !lesson.title.trim()) lesson.title = `Lesson ${li + 1}`;
+    (lesson.children ?? []).forEach((screen, si) => {
+      if (typeof screen.title !== 'string' || !screen.title.trim()) screen.title = `Screen ${si + 1}`;
+    });
+  });
+  reslug(node);
+  return node;
+}
+
 function buildLessonNode(
   lesson: Lesson,
   lessonRank: string,
@@ -567,41 +638,64 @@ function buildFlow(inputs: AssembleInputs): NodeExport {
   // Simple presets have no hub catalog → skip loading SVGs (defensive against
   // stale tmp artifacts from a previous run polluting a fresh generation).
   const courseIsSimple = isSimpleCourse(preset);
-  const cardImageSvg = courseIsSimple ? undefined : loadInlineSvg(inputs.workdir, 'card-cover.svg');
-  // Course icon — real icon-only mark (brandIcon, loaded above) wins; else the
-  // generated course-icon.svg (only written when the user approved a drawn
-  // stand-in — see luly-style). Simple presets have no hub catalog → skip.
-  const courseBrandIcon = courseIsSimple ? undefined : brandIcon;
-  const iconSvg = courseIsSimple
-    ? undefined
-    : (courseBrandIcon?.kind === 'svg' ? courseBrandIcon.svg : loadInlineSvg(inputs.workdir, 'course-icon.svg'));
-  const iconUrl = courseBrandIcon?.kind === 'png-url' ? courseBrandIcon.url : undefined;
-  const course: NodeExport = {
-    type: 'course',
-    title: courseTitle,
-    description: courseDescription,
-    slug: uuidv4(),
-    body: courseBodyFor(preset, inputs.productType.key, {
-      courseAuthor: inputs.productType.courseAuthor,
-      cardImageSvg,
-      iconSvg,
-      iconUrl,
-      tags: metaTags,
-    }),
-    controls: instantiateControls(inputs.controlsMap['course']),
-    lexoRank: ranksFor(1)[0],
-    children: [],
-  };
-  hub.children!.push(course);
 
-  // Lessons — sectionType depends on course shape:
-  //   simple course: single wrapper lesson, sectionType='default'
-  //     (CMS opens directly inside the lesson editor)
-  //   learning course: lessons are TOC entries, sectionType='lesson'
-  const lessonRanks = ranksFor(inputs.lessons.length);
-  inputs.lessons.forEach((lesson, lessonIdx) => {
-    const sectionType = courseIsSimple ? 'default' : 'lesson';
-    course.children!.push(buildLessonNode(lesson, lessonRanks[lessonIdx], inputs, sectionType));
+  // Optional content-less "template" courses appended to the hub (opt-in, set by
+  // /luly-plan only when the user asks for multiple/placeholder courses). They
+  // never apply to simple presets (no hub catalog).
+  const templateCourses = (!courseIsSimple && inputs.plan.templateCourses) ? inputs.plan.templateCourses : [];
+  const hasStubs = templateCourses.length > 0;
+  // Authored course: always built when there are no stubs (preserves the default
+  // single-course behavior). When stubs ARE present, build it only if there's
+  // authored content — so an "onboarding + only stubs" academy skips it.
+  const buildAuthored = !hasStubs || inputs.lessons.length > 0;
+  const courseCount = (buildAuthored ? 1 : 0) + templateCourses.length;
+  const courseRanks = ranksFor(Math.max(courseCount, 1));
+  let courseIdx = 0;
+
+  if (buildAuthored) {
+    // SVGs only apply to hub-catalog presets; stale-artifact-safe for simple.
+    const cardImageSvg = courseIsSimple ? undefined : loadInlineSvg(inputs.workdir, 'card-cover.svg');
+    const courseBrandIcon = courseIsSimple ? undefined : brandIcon;
+    const iconSvg = courseIsSimple
+      ? undefined
+      : (courseBrandIcon?.kind === 'svg' ? courseBrandIcon.svg : loadInlineSvg(inputs.workdir, 'course-icon.svg'));
+    const iconUrl = courseBrandIcon?.kind === 'png-url' ? courseBrandIcon.url : undefined;
+    const course: NodeExport = {
+      type: 'course',
+      title: courseTitle,
+      description: courseDescription,
+      slug: uuidv4(),
+      body: courseBodyFor(preset, inputs.productType.key, {
+        courseAuthor: inputs.productType.courseAuthor,
+        cardImageSvg,
+        iconSvg,
+        iconUrl,
+        tags: metaTags,
+      }),
+      controls: instantiateControls(inputs.controlsMap['course']),
+      lexoRank: courseRanks[courseIdx++],
+      children: [],
+    };
+    hub.children!.push(course);
+
+    // Lessons — sectionType depends on course shape:
+    //   simple course: single wrapper lesson, sectionType='default'
+    //   learning course: lessons are TOC entries, sectionType='lesson'
+    const lessonRanks = ranksFor(inputs.lessons.length);
+    inputs.lessons.forEach((lesson, lessonIdx) => {
+      const sectionType = courseIsSimple ? 'default' : 'lesson';
+      course.children!.push(buildLessonNode(lesson, lessonRanks[lessonIdx], inputs, sectionType));
+    });
+  }
+
+  // Template / stub courses — content-less catalog entries built from the
+  // bundled default-course template (theme applies; shared branded placeholder
+  // for card + icon). The user authors them later in the CMS.
+  const stubAuthor = inputs.productType.courseAuthor ?? '';
+  templateCourses.forEach((tc) => {
+    const slugPart = slugifyKey(tc.title) || `course-${courseIdx + 1}`;
+    const key = `${inputs.productType.key}-${slugPart}`;
+    hub.children!.push(buildStubCourse(tc, key, courseRanks[courseIdx++], stubAuthor));
   });
 
   return flow;

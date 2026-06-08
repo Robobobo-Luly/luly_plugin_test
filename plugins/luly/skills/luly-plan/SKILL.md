@@ -57,7 +57,13 @@ locales: [en]
 ## Section 2 — <title>
 - Screen 1 — <synopsis>
 ...
+
+## Template courses        (optional — see below)
+- <Course title> | <one-line description>
+- <Course title> | <one-line description>
 ```
+
+**Template courses (opt-in, academy only).** Default: don't emit this section — the academy gets one authored course as usual. Add `## Template courses` ONLY when the user asks for several / placeholder / template courses, or clearly lists multiple course topics for the academy. Each line is `Title | one-line description`; these become content-less course shells (the user fills them later in the CMS — they use a default lesson scaffold and the product theme, no custom backgrounds). If the user wants onboarding + only template courses (no authored course), write the `## Onboarding` section and the `## Template courses` list but **omit the `## Section N` blocks** — the authored course is then skipped.
 
 **H1 meaning:**
 - `academy` → H1 is the **first course's** title (e.g. "What is Phantom?"). The academy name itself goes in the `academyName` frontmatter field.

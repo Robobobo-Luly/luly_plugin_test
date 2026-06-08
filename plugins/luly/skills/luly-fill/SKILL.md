@@ -36,6 +36,8 @@ Don't emit a block whose format is outside this set.
 
 ### 3. Generate one section at a time, with carry-forward recap
 
+A `## Template courses` block in plan.md (if present) is NOT a section — skip it entirely. Those are content-less course shells the assembler builds from a default scaffold; never write content for them.
+
 The plan is processed in order: onboarding first (if present), then Section 1, Section 2, ... in plan order. Each section is generated as **its own focused pass** rather than streamed alongside the others. This keeps tone consistent, makes per-section retries cheap, and lets each pass enforce its own per-lesson rules (one quiz per lesson, 2–3 questions, etc.).
 
 For each section:
