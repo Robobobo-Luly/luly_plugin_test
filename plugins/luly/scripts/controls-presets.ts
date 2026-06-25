@@ -1,5 +1,5 @@
 import type { Preset } from './presets';
-import type { Lesson, LessonScreen } from './types';
+import type { Lesson, LessonScreen, FlowCourseContent } from './types';
 
 export type GuardName =
   | 'isFirstScreen' | 'isLastScreen' | 'isNotFirstScreen' | 'isNotLastScreen'
@@ -306,6 +306,46 @@ function campaignScreenControls(): Control[] {
   ];
 }
 
+/**
+ * Screen controls for an academy FLOW COURSE (a flowType:'simple' course living
+ * in an academy hub). Position-baked (no guards). Unlike a campaign screen, the
+ * top-right close icon goes straight back to the HUB (the flow course is one card
+ * in a catalog), and the last screen has no Next — its content (e.g. a form's
+ * submit) is the terminal action, while close→hub keeps a valid exit for the
+ * validator.
+ */
+export function academyFlowScreenControls(opts: { isFirst: boolean; isLast: boolean }): Control[] {
+  const { isFirst, isLast } = opts;
+  const controls: Control[] = [
+    {
+      id: 'ctrl.screen.header-back',
+      position: 'topRight',
+      requires_click: true,
+      style: { variant: 'close-icon' },
+      conditionalActions: [{ do: [{ type: 'goto', body: { target: 'hub' } }] }],
+    },
+  ];
+  if (!isFirst) {
+    controls.push({
+      id: 'ctrl.screen.prev',
+      label: 'Back',
+      position: 'bottomLeft',
+      requires_click: true,
+      conditionalActions: [{ do: [{ type: 'goto', body: { target: 'previous_sibling' } }] }],
+    });
+  }
+  if (!isLast) {
+    controls.push({
+      id: 'ctrl.screen.next',
+      label: 'Next',
+      position: 'bottomRight',
+      requires_click: true,
+      conditionalActions: [{ do: [{ type: 'goto', body: { target: 'next_sibling' } }] }],
+    });
+  }
+  return controls;
+}
+
 // ============================================================================
 // Apply controls per preset
 // ============================================================================
@@ -324,7 +364,7 @@ const SIMPLE_PRESETS: ReadonlySet<Preset> = new Set<Preset>([
  */
 export function applyControls(
   productPreset: Preset,
-  content: { lessons: Lesson[]; onboarding: LessonScreen[] },
+  content: { lessons: Lesson[]; onboarding: LessonScreen[]; flowCourses?: FlowCourseContent[] },
 ): ControlsArtifact {
   const controls: Record<string, Control[]> = {};
 
@@ -368,6 +408,23 @@ export function applyControls(
       controls[path] = lessonShape
         ? lessonScreenControls({ isFirst: i === 0, isLast: i === screens.length - 1 })
         : campaignScreenControls();
+    }
+  }
+
+  // Flow courses (academy only) — each is a flowType:'simple' course in the hub:
+  // course auto-nav + wrapper-lesson auto-nav + position-baked screens whose
+  // close icon returns to the hub. Keyed by `flow-<k>` / `flow-<k>.lesson` /
+  // `flow-<k>.screen-<n>` so buildFlow can look them up.
+  for (const fc of content.flowCourses ?? []) {
+    controls[`flow-${fc.index}`] = simpleCourseControls();
+    controls[`flow-${fc.index}.lesson`] = lessonControls();
+    const screens = fc.screens;
+    for (let i = 0; i < screens.length; i++) {
+      const screen = screens[i];
+      controls[`flow-${fc.index}.screen-${screen.n}`] = academyFlowScreenControls({
+        isFirst: i === 0,
+        isLast: i === screens.length - 1,
+      });
     }
   }
 

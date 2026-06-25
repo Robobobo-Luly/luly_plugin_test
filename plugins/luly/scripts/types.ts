@@ -73,6 +73,21 @@ export interface TemplateCourse {
   description: string;
 }
 
+/**
+ * An authored "flow course" appended to an academy hub: a course rendered as a
+ * linear simple flow (flowType:'simple') — a hub card that opens its screens
+ * directly with NO course-details landing, and whose screens exit back to the
+ * hub. Used for short lead-gen / mini-flow cards (e.g. "leave a request") that
+ * sit alongside full learning courses. Academy preset only.
+ */
+export interface FlowCoursePlan {
+  title: string;
+  description?: string;
+  /** True when the flow ends in a form screen (last screen carries a form block). */
+  hasForm?: boolean;
+  screens: PlanScreen[];
+}
+
 export interface Plan {
   shape: PlanShape;
   courseTitle: string;
@@ -81,6 +96,8 @@ export interface Plan {
   lessons: PlanLesson[];
   /** Optional stub courses appended to the hub. Default: none. */
   templateCourses?: TemplateCourse[];
+  /** Optional authored simple-flow courses appended to the hub. Default: none. */
+  flowCourses?: FlowCoursePlan[];
 }
 
 export type ScreenMode = 'story' | 'responsive';
@@ -214,6 +231,12 @@ export interface Lesson {
 }
 
 export interface OnboardingArtifact {
+  screens: LessonScreen[];
+}
+
+/** Filled screens for one flow course, keyed by its 1-based index in plan order. */
+export interface FlowCourseContent {
+  index: number;
   screens: LessonScreen[];
 }
 

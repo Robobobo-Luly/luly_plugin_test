@@ -12,6 +12,8 @@ import type {
   BlockExport,
   Brief,
   Control,
+  FlowCoursePlan,
+  FlowCourseContent,
   FormatProfile,
   Lesson,
   LessonScreen,
@@ -282,6 +284,8 @@ interface AssembleInputs {
   theme: ThemeArtifact;
   lessons: Lesson[];
   onboarding: OnboardingArtifact | null;
+  /** Filled screens for authored flow courses (academy hub), keyed by index. */
+  flowCourses: FlowCourseContent[];
   controlsMap: Record<string, Control[]>;
   overrides: OverridesArtifact | null;
   meta: MetaArtifact;
@@ -632,6 +636,50 @@ function buildCourseOnly(inputs: AssembleInputs): NodeExport {
   return course;
 }
 
+/**
+ * Build an authored FLOW COURSE for an academy hub: a flowType:'simple' course
+ * (no details landing — the app renders nothing for the course node and
+ * auto-enters) wrapping a single default-section lesson that holds the linear
+ * screens. Controls (course auto-nav, wrapper-lesson auto-nav, per-screen
+ * close→hub) come from the `flow-<k>` control-map keys.
+ */
+function buildFlowCourse(
+  planFc: FlowCoursePlan,
+  contentFc: FlowCourseContent,
+  index: number,
+  rank: string,
+  inputs: AssembleInputs,
+): NodeExport {
+  const courseKey = `${inputs.productType.key}-${slugifyKey(planFc.title) || `flow-${index}`}`;
+  const course: NodeExport = {
+    type: 'course',
+    title: planFc.title,
+    description: planFc.description ?? '',
+    slug: uuidv4(),
+    body: { flowType: 'simple', courseKey },
+    controls: instantiateControls(inputs.controlsMap[`flow-${index}`]),
+    lexoRank: rank,
+    children: [],
+  };
+  const lesson: NodeExport = {
+    type: 'lesson',
+    title: planFc.title,
+    description: '',
+    slug: uuidv4(),
+    body: { sectionType: 'default' },
+    controls: instantiateControls(inputs.controlsMap[`flow-${index}.lesson`]),
+    lexoRank: ranksFor(1)[0],
+    children: [],
+  };
+  const screenRanks = ranksFor(contentFc.screens.length);
+  contentFc.screens.forEach((screen, si) => {
+    const pathKey = `flow-${index}.screen-${screen.n}`;
+    lesson.children!.push(buildScreenNode(screen, pathKey, screenRanks[si], inputs));
+  });
+  course.children!.push(lesson);
+  return course;
+}
+
 function buildFlow(inputs: AssembleInputs): NodeExport {
   const spec = PRESETS[inputs.productType.preset];
 
@@ -779,11 +827,15 @@ function buildFlow(inputs: AssembleInputs): NodeExport {
   // never apply to simple presets (no hub catalog).
   const templateCourses = (!courseIsSimple && inputs.plan.templateCourses) ? inputs.plan.templateCourses : [];
   const hasStubs = templateCourses.length > 0;
+  // Authored simple-flow courses appended to the hub (academy only) — each a
+  // flowType:'simple' card opening a linear flow with back→hub. Paired with their
+  // filled screens by 1-based index.
+  const flowCoursesPlan = isAcademy ? (inputs.plan.flowCourses ?? []) : [];
   // Authored course: always built when there are no stubs (preserves the default
   // single-course behavior). When stubs ARE present, build it only if there's
   // authored content — so an "onboarding + only stubs" academy skips it.
   const buildAuthored = !hasStubs || inputs.lessons.length > 0;
-  const courseCount = (buildAuthored ? 1 : 0) + templateCourses.length;
+  const courseCount = (buildAuthored ? 1 : 0) + templateCourses.length + flowCoursesPlan.length;
   const courseRanks = ranksFor(Math.max(courseCount, 1));
   let courseIdx = 0;
 
@@ -831,6 +883,15 @@ function buildFlow(inputs: AssembleInputs): NodeExport {
     const slugPart = slugifyKey(tc.title) || `course-${courseIdx + 1}`;
     const key = `${inputs.productType.key}-${slugPart}`;
     hub.children!.push(buildStubCourse(tc, key, courseRanks[courseIdx++], stubAuthor));
+  });
+
+  // Authored flow courses — simple-flow cards appended to the hub. Paired with
+  // their filled screens by 1-based plan index (validated in main()).
+  flowCoursesPlan.forEach((planFc, i) => {
+    const k = i + 1;
+    const contentFc = inputs.flowCourses.find((f) => f.index === k);
+    if (!contentFc || contentFc.screens.length === 0) return;
+    hub.children!.push(buildFlowCourse(planFc, contentFc, k, courseRanks[courseIdx++], inputs));
   });
 
   return flow;
@@ -990,6 +1051,7 @@ async function main(): Promise<void> {
     return { ...l, title: planLesson?.title ?? l.title };
   });
   const onboarding = parsed.onboarding;
+  const flowCourses = parsed.flowCourses;
 
   // Cross-checks (one final gate replaces all per-stage validators)
   if (productType.preset === 'academy-course' && plan.onboarding.length > 0) {
@@ -997,6 +1059,25 @@ async function main(): Promise<void> {
       'academy-course preset does not support onboarding screens — onboarding lives on the parent academy. ' +
       'Remove the "## Onboarding" section from plan.md.'
     );
+  }
+
+  // Flow courses are an academy-only hub feature.
+  const planFlowCourses = plan.flowCourses ?? [];
+  if (planFlowCourses.length > 0 && productType.preset !== 'academy') {
+    fail(
+      `"## Flow course" is only supported by the academy preset (got "${productType.preset}"). ` +
+      'Author it as a separate flow, or switch the preset to academy.'
+    );
+  }
+  // Every planned flow course needs its filled screens in content.md.
+  for (let k = 1; k <= planFlowCourses.length; k++) {
+    const fc = flowCourses.find((f) => f.index === k);
+    if (!fc || fc.screens.length === 0) {
+      fail(
+        `plan declares flow course #${k} ("${planFlowCourses[k - 1].title}") but content.md has no ` +
+        `"## Flow ${k} · Screen N" screens — re-fill content.md`
+      );
+    }
   }
 
   const planSectionNs = plan.lessons.map((l) => l.n);
@@ -1023,13 +1104,14 @@ async function main(): Promise<void> {
   const controlsArtifact = applyControls(productType.preset, {
     lessons,
     onboarding: onboarding?.screens ?? [],
+    flowCourses,
   });
 
   const isCourseOnly = productType.preset === 'academy-course';
 
   const root = isCourseOnly
-    ? buildCourseOnly({ workdir, brief, productType, plan, formatProfile, theme, lessons, onboarding, controlsMap: controlsArtifact.controls, overrides: null, meta })
-    : buildFlow({ workdir, brief, productType, plan, formatProfile, theme, lessons, onboarding, controlsMap: controlsArtifact.controls, overrides: null, meta });
+    ? buildCourseOnly({ workdir, brief, productType, plan, formatProfile, theme, lessons, onboarding, flowCourses, controlsMap: controlsArtifact.controls, overrides: null, meta })
+    : buildFlow({ workdir, brief, productType, plan, formatProfile, theme, lessons, onboarding, flowCourses, controlsMap: controlsArtifact.controls, overrides: null, meta });
 
   // URL liveness pass — HEAD-check every http(s) URL and clear dead ones so
   // the renderer falls back to placeholders. Runs BEFORE the file is written

@@ -6,7 +6,7 @@ Single reference for what each of the six presets is, what shape it takes, and w
 
 | Preset | One-line purpose |
 |---|---|
-| `academy` | Multi-course learning hub. Top-level hub → onboarding (optional) → courses → lessons → screens. |
+| `academy` | Multi-course learning hub. Top-level hub → onboarding (optional) → courses → lessons → screens. A hub course can be a full **learning course** (details landing → lessons) OR a **flow course** (a `## Flow course` in plan.md — a linear `flowType:'simple'` card: no details landing, screens play in sequence, close → hub; ideal for a short lead-gen / "leave your details" mini-flow alongside learning courses). |
 | `academy-course` | One additional course attached to an existing academy hub. Same shape as one branch of `academy`. |
 | `campaign-course` | Lesson-driven marketing flow (course wrapper, no hub). Single course → lessons → screens. |
 | `campaign-simple` | Linear marketing flow — sequence of screens, no course/lesson grouping. |

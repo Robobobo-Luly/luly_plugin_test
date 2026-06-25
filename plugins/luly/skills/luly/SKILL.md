@@ -85,6 +85,7 @@ Extract from the prompt if present; otherwise default. **Don't ask about a slot 
 | has-form | "form / signup / waitlist / capture emails" → on; "no form" → off | preset default |
 | form copy hints | "first 50 users discount", "early access" — preserve verbatim for stage 4 | use generic copy |
 | template courses | (academy only) "with 3-4 template/placeholder courses", or a clear list of several course topics → pass to luly-plan as a `## Template courses` list | none — single authored course |
+| flow courses | (academy only) a request for a short linear sub-flow inside the academy — "a single flow with 4-5 screens and a form at the end", "a quick lead-gen / leave-a-request card", "not a full course, just a mini flow" → pass to luly-plan as a `## Flow course — <title>` block (with `form: yes` when it ends in a form). Becomes a `flowType:'simple'` hub card: no course-details, screens play linearly, close → hub | none |
 | locales | "in german, english, spanish" | `[en]` |
 | maxImages | "with illustrations / with visuals / draw images / illustrated / max images" → on | off — image blocks ship caption-only and use the flow-level `mediaPlaceholderUrl` placeholder |
 

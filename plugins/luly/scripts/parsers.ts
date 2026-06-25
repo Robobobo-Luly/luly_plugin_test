@@ -18,6 +18,8 @@ import type {
   ContainerBlock,
   LeafBlock,
   OnboardingArtifact,
+  FlowCoursePlan,
+  FlowCourseContent,
   FormField,
   FormFieldLink,
   QuizChoice,
@@ -215,6 +217,8 @@ export function parsePlan(md: string): { plan: Plan; formatProfile: FormatProfil
   const lessons: PlanLesson[] = [];
   // Optional content-less stub courses appended to the hub (## Template courses).
   const templateCourses: { title: string; description: string }[] = [];
+  // Optional authored simple-flow courses appended to the hub (## Flow course — title).
+  const flowCourses: FlowCoursePlan[] = [];
 
   while (i < lines.length) {
     if (!lines[i].startsWith('## ')) { i++; continue; }
@@ -223,7 +227,14 @@ export function parsePlan(md: string): { plan: Plan; formatProfile: FormatProfil
 
     const screens: PlanScreen[] = [];
     let screenN = 0;
+    let hasForm = false;
+    let descLine = '';
     while (i < lines.length && !lines[i].startsWith('## ')) {
+      // `form: yes` / `description: ...` lines (flow course metadata, not screens).
+      const fm = lines[i].match(/^\s*form\s*:\s*(\w+)\s*$/i);
+      if (fm) { hasForm = /^(yes|true|on)$/i.test(fm[1]); i++; continue; }
+      const dm = lines[i].match(/^\s*description\s*:\s*(.+)$/i);
+      if (dm) { descLine = dm[1].trim(); i++; continue; }
       const m = lines[i].match(/^\s*-\s+Screen\s+(\d+)\s*[—–-]\s*(.+?)\s*$/);
       if (m) {
         screenN = parseInt(m[1], 10);
@@ -237,6 +248,7 @@ export function parsePlan(md: string): { plan: Plan; formatProfile: FormatProfil
       i++;
     }
 
+    const flowM = heading.match(/^Flow course\s*[—–-]\s*(.+)$/i);
     if (/^template courses?$/i.test(heading)) {
       // Each bullet is `Title | one-line description`.
       for (const s of screens) {
@@ -247,6 +259,14 @@ export function parsePlan(md: string): { plan: Plan; formatProfile: FormatProfil
       }
     } else if (/^onboarding$/i.test(heading)) {
       for (const s of screens) onboarding.push(s);
+    } else if (flowM) {
+      // A simple-flow course card appended to the hub.
+      flowCourses.push({
+        title: flowM[1].trim(),
+        ...(descLine ? { description: descLine } : {}),
+        ...(hasForm ? { hasForm: true } : {}),
+        screens,
+      });
     } else {
       // "Section N — title" or "Lesson N — title" (legacy)
       const m = heading.match(/^(?:Section|Lesson)\s+(\d+)\s*[—–-]\s*(.+)$/i);
@@ -267,6 +287,7 @@ export function parsePlan(md: string): { plan: Plan; formatProfile: FormatProfil
     onboarding,
     lessons,
     ...(templateCourses.length > 0 ? { templateCourses } : {}),
+    ...(flowCourses.length > 0 ? { flowCourses } : {}),
   };
 
   const formatProfile: FormatProfile = {
@@ -413,17 +434,20 @@ export function parseMeta(md: string): MetaArtifact {
 // ============================================================================
 
 interface ScreenHeaderInfo {
-  kind: 'onboarding' | 'section';
+  kind: 'onboarding' | 'section' | 'flow';
+  // For 'section' this is the section number; for 'flow' it's the flow-course
+  // index (1-based, matching the k-th `## Flow course` in plan order).
   sectionN: number;
   screenN: number;
   title: string;
 }
 
-export function parseContent(md: string): { lessons: Lesson[]; onboarding: OnboardingArtifact | null } {
+export function parseContent(md: string): { lessons: Lesson[]; onboarding: OnboardingArtifact | null; flowCourses: FlowCourseContent[] } {
   const screenBlocks = md.split(/^---\s*$/m).map(s => s.trim()).filter(Boolean);
 
   const onboardingScreens: LessonScreen[] = [];
   const sectionScreens = new Map<number, { title: string; screens: LessonScreen[] }>();
+  const flowScreens = new Map<number, LessonScreen[]>();
 
   for (const blk of screenBlocks) {
     const lines = blk.split('\n');
@@ -451,6 +475,9 @@ export function parseContent(md: string): { lessons: Lesson[]; onboarding: Onboa
 
     if (info.kind === 'onboarding') {
       onboardingScreens.push(screen);
+    } else if (info.kind === 'flow') {
+      const list = flowScreens.get(info.sectionN);
+      if (list) list.push(screen); else flowScreens.set(info.sectionN, [screen]);
     } else {
       let entry = sectionScreens.get(info.sectionN);
       if (!entry) {
@@ -473,7 +500,11 @@ export function parseContent(md: string): { lessons: Lesson[]; onboarding: Onboa
     ? { screens: onboardingScreens.sort((a, b) => a.n - b.n) }
     : null;
 
-  return { lessons, onboarding };
+  const flowCourses: FlowCourseContent[] = Array.from(flowScreens.entries())
+    .sort(([a], [b]) => a - b)
+    .map(([index, screens]) => ({ index, screens: screens.sort((a, b) => a.n - b.n) }));
+
+  return { lessons, onboarding, flowCourses };
 }
 
 function parseScreenHeading(h: string): ScreenHeaderInfo | null {
@@ -486,6 +517,11 @@ function parseScreenHeading(h: string): ScreenHeaderInfo | null {
   m = h.match(/^Section\s+(\d+)\s*[·•]\s*Screen\s+(\d+)\s*[—–-]\s*(.+)$/i);
   if (m) {
     return { kind: 'section', sectionN: parseInt(m[1], 10), screenN: parseInt(m[2], 10), title: m[3].trim() };
+  }
+  // "Flow K · Screen M — title" (K = the k-th `## Flow course` in plan order)
+  m = h.match(/^Flow\s+(\d+)\s*[·•]\s*Screen\s+(\d+)\s*[—–-]\s*(.+)$/i);
+  if (m) {
+    return { kind: 'flow', sectionN: parseInt(m[1], 10), screenN: parseInt(m[2], 10), title: m[3].trim() };
   }
   return null;
 }

@@ -61,9 +61,18 @@ locales: [en]
 ## Template courses        (optional — see below)
 - <Course title> | <one-line description>
 - <Course title> | <one-line description>
+
+## Flow course — <title>     (optional — academy only — see below)
+description: <one-line card description>
+form: yes
+- Screen 1 — <synopsis>
+- Screen 2 — <synopsis>
+- Screen 3 — <synopsis>
 ```
 
 **Template courses (opt-in, academy only).** Default: don't emit this section — the academy gets one authored course as usual. Add `## Template courses` ONLY when the user asks for several / placeholder / template courses, or clearly lists multiple course topics for the academy. Each line is `Title | one-line description`; these become content-less course shells (the user fills them later in the CMS — they use a default lesson scaffold and the product theme, no custom backgrounds). If the user wants onboarding + only template courses (no authored course), write the `## Onboarding` section and the `## Template courses` list but **omit the `## Section N` blocks** — the authored course is then skipped.
+
+**Flow courses (opt-in, academy only).** A `## Flow course — <title>` is a hub card that opens a SHORT LINEAR FLOW (a `flowType:'simple'` course) — no course-details landing, no lessons; the screens play in sequence and a close (×) returns to the hub. Use it for a lead-gen / mini-flow card alongside full learning courses (e.g. "see how X works, then leave your details") — exactly the "single flow with 4–5 screens and a form at the end" shape. Repeatable (multiple `## Flow course` blocks). Optional `description:` (card text) and `form: yes` (when the last screen captures a form). Distinct from `## Section N` (learning lessons in the authored course) and `## Template courses` (empty stubs). The flow course's content is authored in content.md under `## Flow K · Screen N — <title>` (K = the k-th `## Flow course` in plan order); its last screen typically holds a `form` / `form-text` block whose submit ends the flow.
 
 **H1 meaning:**
 - `academy` → H1 is the **first course's** title (e.g. "What is Phantom?"). The academy name itself goes in the `academyName` frontmatter field.
@@ -80,6 +89,7 @@ Synopses are ONE LINE each — what the screen is about, not the actual copy.
 - Each section has ≥ 1 screen.
 - Screen bullets use the exact form `- Screen N — <synopsis>` (em-dash or hyphen).
 - `## Onboarding` appears ONLY for the `academy` preset, before the first `## Section`.
+- `## Flow course` blocks appear ONLY for the `academy` preset; each is filled in content.md as `## Flow K · Screen N`.
 - Single-section plans use one of `campaign-simple` / `waitlist` / `interactive-proposal`.
 
 ### 5. Show and iterate (optional)

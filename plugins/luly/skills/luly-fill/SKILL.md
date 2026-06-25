@@ -77,7 +77,9 @@ Don't emit a block whose format is outside this set. (`container` / `section` / 
 
 A `## Template courses` block in plan.md (if present) is NOT a section — skip it entirely. Those are content-less course shells the assembler builds from a default scaffold; never write content for them.
 
-The plan is processed in order: onboarding first (if present), then Section 1, Section 2, ... in plan order. Each section is generated as **its own focused pass** rather than streamed alongside the others. This keeps tone consistent, makes per-section retries cheap, and lets each pass enforce its own per-lesson rules (one quiz per lesson, 2–3 questions, etc.).
+A `## Flow course — <title>` block in plan.md (academy only) IS authored — but as a separate linear flow, not a section. Write its screens under `## Flow K · Screen N — <title>` headers, where **K is the 1-based position of the `## Flow course` in plan order** (first flow course = `Flow 1`, second = `Flow 2`). A flow course is a short linear sequence (no quizzes needed); when its plan block has `form: yes`, the LAST screen holds a `form` / `form-text` block (its submit ends the flow). Otherwise author flow-course screens with the same block syntax as any screen.
+
+The plan is processed in order: onboarding first (if present), then Section 1, Section 2, ... then any flow courses, in plan order. Each section is generated as **its own focused pass** rather than streamed alongside the others. This keeps tone consistent, makes per-section retries cheap, and lets each pass enforce its own per-lesson rules (one quiz per lesson, 2–3 questions, etc.).
 
 For each section:
 
@@ -85,7 +87,7 @@ For each section:
 
 **(b) Generate the section's screens.** For each screen in this section's plan entry:
 1. Decide the screen's block shape. Default to **one** block: a `text` leaf for prose, or a `media-text` preset when the screen carries a visual. Use an explicit `container` / `section` / `slider` only when the design needs it.
-2. Write a `## Onboarding · Screen N — title` or `## Section M · Screen N — title` header.
+2. Write a `## Onboarding · Screen N — title`, `## Section M · Screen N — title`, or (for a flow course) `## Flow K · Screen N — title` header.
 3. Below it, write the block(s). Each block is a YAML-style header (`type:` + fields) and, for `text`, a blank line then the Markdown body. Separate multiple blocks with `+++`; nest with `as:` / `parent:`.
 4. Markdown body pattern: a single `# H1` title → intro sentence → optional bullets → optional closing line. No tables. Reserve `##`+ for long-form, article-like products only (writing-guidelines.md §8). No emojis. Each story 3–4 sentences (writing-guidelines.md §3); split into two screens if longer.
 5. End the screen with `---` on its own line.
