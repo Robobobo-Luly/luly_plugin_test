@@ -61,7 +61,7 @@ What `applyControls` (`controls-presets.ts`) emits for each preset / node type. 
 
 | Preset | Default | Recommended count | Block format |
 |---|---|---|---|
-| `academy` | on | 1 quiz per lesson, 2–3 questions | `quiz-text` (composite) or `question` (single) |
+| `academy` | on | 1 quiz per lesson, 2–3 questions | `quiz-text` (quiz beside text) or `question` (standalone) |
 | `academy-course` | on | same as academy | same |
 | `campaign-course` | on | same as academy | same |
 | `campaign-simple` | off | 0–1 (rare; only if the campaign is a quiz funnel) | `question` |
@@ -85,9 +85,16 @@ Quiz rules apply everywhere (writing-guidelines.md §6):
 
 ## Recommended block-format mix
 
-Story content (onboarding, lesson screens, campaign screens) — see `luly-fill/SKILL.md` for the consistency rule. Within one story arc, all narrative screens should use the same shape. Default to `image-richtext`; switch to `text` only when the topic doesn't lend itself to per-screen illustration.
+Story content (onboarding, lesson screens, campaign screens) — see `luly-fill/SKILL.md` for the consistency rule. Within one story arc, all narrative screens should use the same shape. Default to `media-text` (the preset that pairs a visual with text — it expands to a real `container` block); switch to `text` only when the topic doesn't lend itself to per-screen illustration. The retired monolithic `image-richtext` format is no longer emitted — use `media-text`.
 
 Functional screens (forms, quizzes) are exempt from the consistency rule.
+
+A screen can hold more than one block, and blocks can nest in **containers**. Beyond the `media-text` / `quiz-text` / `form-text` presets (which already build a two-pane `container`), the richer primitives are available when a layout calls for them — used sparingly:
+- `container` — a responsive row/column of blocks with per-child `flex` (e.g. a 3-pane feature row).
+- `section` — a full-bleed band that stacks blocks (e.g. a marketing landing hero or call-to-action band on a campaign).
+- `slider` — an in-page carousel of slides (e.g. testimonials, a step-through).
+
+Default screens stay simple (one `text` or one `media-text`). Reach for explicit containers/sections/sliders mainly on `campaign-simple` / `campaign-course` / `interactive-proposal` landings where layout variety earns its keep. See `luly-fill/SKILL.md` for the exact authoring syntax (`+++`, `as:` / `parent:`, `flex:`).
 
 ## Asset slots and where each logo goes
 

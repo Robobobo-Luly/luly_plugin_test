@@ -1,12 +1,22 @@
 import { existsSync, readFileSync, readdirSync } from 'fs';
 import { resolve, dirname, join } from 'path';
 import { REQUIRED_COLOR_TOKENS } from './themes';
+import { CONTAINER_FORMATS } from './types';
 
-const AUDIT_FIELDS = ['id', 'version', 'status', 'parentId', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy', 'publishedAt', 'publishedBy'];
-const NODE_TYPES = new Set(['flow', 'hub', 'course', 'lesson', 'screen']);
+// Identity/relationship/audit fields the backend recreates on import — they must
+// never appear in an exported template. Mirrors luly-app EXPORT_AUDIT_FIELDS
+// (now including the immutable nodeId / parentNodeId from PR #14).
+const AUDIT_FIELDS = ['id', 'nodeId', 'version', 'status', 'parentId', 'parentNodeId', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy', 'publishedAt', 'publishedBy'];
+const NODE_TYPES = new Set(['flow', 'hub', 'space', 'learning_path', 'course', 'lesson', 'screen']);
+// Formats the renderer recognizes. Includes the new container formats
+// (section / container / slider) AND the legacy monolithic composites
+// (image-richtext / quiz-text / form-text) — the plugin no longer EMITS the
+// latter, but flows authored elsewhere may still carry them.
 const BLOCK_FORMATS_KNOWN = new Set([
-  'image-richtext', 'image', 'video', 'quiz-text', 'question',
-  'form', 'email-form', 'layout', 'button', 'animation', 'text', 'form-text',
+  'text', 'image', 'video', 'animation', 'question', 'form', 'email-form', 'button',
+  'section', 'container', 'slider', 'layout',
+  // legacy composites (recognized for reading, not emitted by this plugin)
+  'image-richtext', 'quiz-text', 'form-text',
 ]);
 
 function red(s: string): string { return `\x1b[31m${s}\x1b[0m`; }
@@ -68,6 +78,38 @@ function checkBlock(block: unknown, ctx: string, counts: Counts): void {
   counts.block++;
 }
 
+/**
+ * Screen blocks are stored as a FLAT array; nesting is expressed via `parentSlug`
+ * (a child's parentSlug = its container block's slug) and order via `lexoRank`.
+ * Verify the flat list is internally consistent: ranks unique, and every
+ * parentSlug points at a container block's slug in the same screen.
+ */
+function checkBlockNesting(blocks: Record<string, unknown>[], ctx: string): void {
+  const containerSlugs = new Set<string>();
+  for (const b of blocks) {
+    const slug = b.slug;
+    const fmt = (b.body as Record<string, unknown> | undefined)?.format;
+    if (typeof slug === 'string' && typeof fmt === 'string' && CONTAINER_FORMATS.has(fmt)) {
+      containerSlugs.add(slug);
+    }
+  }
+  const ranks = new Set<string>();
+  for (const [i, b] of blocks.entries()) {
+    const lr = b.lexoRank;
+    if (typeof lr === 'string') {
+      need(!ranks.has(lr), `${ctx} block[${i}]: duplicate block lexoRank "${lr}" (sibling order would be ambiguous)`);
+      ranks.add(lr);
+    }
+    const ps = b.parentSlug;
+    if (ps !== undefined) {
+      need(
+        typeof ps === 'string' && containerSlugs.has(ps),
+        `${ctx} block[${i}]: parentSlug "${String(ps)}" does not match any container block slug in this screen`,
+      );
+    }
+  }
+}
+
 function checkScreen(screen: unknown, ctx: string, counts: Counts): void {
   need(isPlainObject(screen), `${ctx}: not an object`);
   need(screen.type === 'screen', `${ctx}: type must be "screen"`);
@@ -81,6 +123,7 @@ function checkScreen(screen: unknown, ctx: string, counts: Counts): void {
   for (const [i, b] of (screen.blocks as unknown[]).entries()) {
     checkBlock(b, `${ctx} block[${i}]`, counts);
   }
+  checkBlockNesting(screen.blocks as Record<string, unknown>[], ctx);
   // Control-graph audit: every screen must have at least one outgoing path.
   // Acceptable:
   //   (a) ≥1 control with requires_click=true whose conditionalActions contain

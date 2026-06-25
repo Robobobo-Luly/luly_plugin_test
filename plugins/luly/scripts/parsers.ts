@@ -14,7 +14,9 @@ import type {
   FormatProfile,
   Lesson,
   LessonScreen,
-  LessonBlock,
+  ScreenBlock,
+  ContainerBlock,
+  LeafBlock,
   OnboardingArtifact,
   FormField,
   FormFieldLink,
@@ -436,30 +438,15 @@ export function parseContent(md: string): { lessons: Lesson[]; onboarding: Onboa
     const info = parseScreenHeading(headingLine);
     if (!info) continue;
 
-    // Header lines (key: value or list intro `key:`) until blank line
-    const headerLines: string[] = [];
-    while (i < lines.length && lines[i].trim() !== '') {
-      headerLines.push(lines[i]);
-      i++;
-    }
-    // skip blank
-    while (i < lines.length && lines[i].trim() === '') i++;
-
-    // Body lines from here to end of this block
-    const bodyLines: string[] = [];
-    while (i < lines.length) {
-      bodyLines.push(lines[i]);
-      i++;
-    }
-    const body = bodyLines.join('\n').trim();
-
-    const headerFields = parseScreenHeader(headerLines);
-    const block = buildBlock(headerFields, body);
+    // Everything after the screen heading is the block region. A screen may hold
+    // multiple blocks separated by `+++`; nesting is via `as:` / `parent:`.
+    const rest = lines.slice(i).join('\n');
+    const blocks = parseScreenBlocks(rest);
 
     const screen: LessonScreen = {
       n: info.screenN,
       title: info.title,
-      blocks: [block],
+      blocks,
     };
 
     if (info.kind === 'onboarding') {
@@ -580,80 +567,231 @@ function stripValueQuotes(s: string): string {
   return s;
 }
 
-function buildBlock(hdr: Record<string, unknown>, body: string): LessonBlock {
-  const type = String(hdr.type ?? 'text');
-  switch (type) {
+// ============================================================================
+// Screen block parsing — a screen's block region → ScreenBlock tree
+//
+// A screen's blocks are written as one or more segments separated by a line
+// containing only `+++`. Each segment is a small YAML-ish header (key: value,
+// plus `choices:` / `fields:` lists) optionally followed by a blank line and a
+// Markdown body. Nesting mirrors the app's flat+parentSlug model:
+//   as:     local id for a container (children reference it)
+//   parent: local id of the container this block belongs to
+//   flex / slot / margin*: per-child layout when nested
+// Responsive "preset" types (media-text / quiz-text / form-text / quiz-media)
+// are sugar that expands to a `container` + two child leaves — the exact shape
+// the editor mints (luly-app blockFormats.RESPONSIVE_PRESETS).
+// ============================================================================
+
+type PresetChildFormat = 'image' | 'text' | 'question' | 'email-form';
+
+const PRESET_SUGAR: Record<string, { children: PresetChildFormat[]; flexes: number[] }> = {
+  'media-text':     { children: ['image', 'text'],      flexes: [3, 4] },
+  'image-text':     { children: ['image', 'text'],      flexes: [3, 4] },
+  'image-richtext': { children: ['image', 'text'],      flexes: [3, 4] },
+  'quiz-text':      { children: ['question', 'text'],   flexes: [3, 4] },
+  'form-text':      { children: ['email-form', 'text'], flexes: [3, 4] },
+  'quiz-media':     { children: ['question', 'image'],  flexes: [4, 3] },
+};
+
+// Layout the editor seeds a responsive-preset container with (RESPONSIVE_PRESET_LAYOUT).
+const PRESET_CONTAINER = { direction: 'row' as const, gap: 64, justify: 'start' as const, align: 'start' as const, directionMobile: 'column' as const, gapMobile: 20 };
+const ZERO_MARGINS = { marginTop: 0, marginBottom: 0, marginLeft: 0, marginRight: 0 };
+
+interface RawBlock {
+  id: string;
+  parentId?: string;
+  node: ScreenBlock;
+}
+
+export function parseScreenBlocks(rest: string): ScreenBlock[] {
+  const segments = rest.split(/^\+\+\+\s*$/m).filter((s) => s.trim());
+  let autoId = 0;
+  const raws: RawBlock[] = [];
+
+  for (const seg of segments) {
+    const { hdr, body } = parseSegment(seg);
+    const localId = typeof hdr.as === 'string' && hdr.as ? hdr.as : `__blk${autoId++}`;
+    const parentId = typeof hdr.parent === 'string' && hdr.parent ? hdr.parent : undefined;
+    const type = String(hdr.type ?? 'text');
+
+    if (PRESET_SUGAR[type]) {
+      autoId = pushPresetSugar(type, hdr, body, localId, parentId, raws, autoId);
+    } else {
+      raws.push({ id: localId, parentId, node: buildLeafOrContainer(type, hdr, body) });
+    }
+  }
+
+  // Assemble the tree. Roots keep document order; children append to their
+  // parent's `children` in encounter order.
+  const byId = new Map<string, RawBlock>();
+  for (const r of raws) byId.set(r.id, r);
+  const roots: ScreenBlock[] = [];
+  for (const r of raws) {
+    const parentRaw = r.parentId ? byId.get(r.parentId) : undefined;
+    if (parentRaw && isContainerNode(parentRaw.node)) {
+      parentRaw.node.children.push(r.node);
+    } else {
+      roots.push(r.node); // no/invalid parent → top-level block
+    }
+  }
+  if (roots.length === 0) roots.push({ format: 'text', content: '' });
+  return roots;
+}
+
+function isContainerNode(b: ScreenBlock): b is ContainerBlock {
+  return b.format === 'container' || b.format === 'section' || b.format === 'slider' || b.format === 'layout';
+}
+
+/** Split a single block segment into its header fields + Markdown body. */
+function parseSegment(seg: string): { hdr: Record<string, unknown>; body: string } {
+  const lines = seg.split('\n');
+  let i = 0;
+  while (i < lines.length && !lines[i].trim()) i++;
+  const firstNonBlank = lines[i] ?? '';
+  // A segment that doesn't open with a `key:` line is a bare text body.
+  if (!/^\s*[\w]+\s*:/.test(firstNonBlank)) {
+    return { hdr: {}, body: lines.slice(i).join('\n').trim() };
+  }
+  const headerLines: string[] = [];
+  while (i < lines.length && lines[i].trim() !== '') { headerLines.push(lines[i]); i++; }
+  while (i < lines.length && lines[i].trim() === '') i++;
+  const body = lines.slice(i).join('\n').trim();
+  return { hdr: parseScreenHeader(headerLines), body };
+}
+
+function pushPresetSugar(
+  type: string,
+  hdr: Record<string, unknown>,
+  body: string,
+  containerId: string,
+  parentId: string | undefined,
+  raws: RawBlock[],
+  autoId: number,
+): number {
+  const spec = PRESET_SUGAR[type];
+  const right = String(hdr.position ?? 'left') === 'right';
+  const formats = right ? [...spec.children].reverse() : spec.children;
+  const flexes = right ? [...spec.flexes].reverse() : spec.flexes;
+
+  const container: ContainerBlock = { format: 'container', children: [], ...PRESET_CONTAINER };
+  raws.push({ id: containerId, parentId, node: container });
+
+  formats.forEach((cf, idx) => {
+    const child = buildPresetChild(cf, hdr, body) as unknown as Record<string, unknown>;
+    Object.assign(child, { flex: flexes[idx], ...ZERO_MARGINS });
+    raws.push({ id: `__blk${autoId++}`, parentId: containerId, node: child as unknown as ScreenBlock });
+  });
+  return autoId;
+}
+
+function buildPresetChild(cf: PresetChildFormat, hdr: Record<string, unknown>, body: string): LeafBlock {
+  switch (cf) {
     case 'text':
       return { format: 'text', content: body };
-    case 'image-richtext': {
-      const desktopPos = (hdr.position as 'left' | 'right') ?? 'left';
-      // Mobile stack order — image-first by default. The screen's visual
-      // is the screen's identity; readers should see it before reading text
-      // on small viewports. Override only via explicit `mobile: bottom` in
-      // the header (rare — decorative-only visuals). This decouples mobile
-      // order from the desktop `position` choice.
-      const mobilePos: 'top' | 'bottom' = (hdr.mobile as 'top' | 'bottom') ?? 'top';
-      return {
-        format: 'image-richtext',
-        // Empty string → CMS falls back to flow.body.mediaPlaceholderUrl.
-        imageUrl: String(hdr.image ?? ''),
-        imagePosition: desktopPos,
-        imagePositionMobile: mobilePos,
-        content: body,
-        ...(hdr.caption ? { caption: String(hdr.caption) } : {}),
-      };
-    }
     case 'image':
-      return {
-        format: 'image',
-        url: String(hdr.url ?? ''),
-        alt: String(hdr.alt ?? hdr.caption ?? 'illustration'),
-        ...(hdr.caption ? { caption: String(hdr.caption) } : {}),
-      };
-    case 'video':
-      return {
-        format: 'video',
-        url: String(hdr.url ?? ''),
-        ...(hdr.poster ? { poster: String(hdr.poster) } : {}),
-        ...(hdr.caption ? { caption: String(hdr.caption) } : {}),
-      };
-    case 'quiz-text':
-      return {
-        format: 'quiz-text',
-        question: String(hdr.question ?? ''),
-        text: String(hdr.text ?? ''),
-        choices: parseChoices(hdr.choices),
-        correctAnswer: String(hdr.correct ?? ''),
-      };
+      return { format: 'image', url: String(hdr.image ?? hdr.url ?? ''), alt: String(hdr.alt ?? hdr.caption ?? 'illustration') };
     case 'question':
-      return {
-        format: 'question',
-        question: String(hdr.question ?? ''),
-        choices: parseChoices(hdr.choices),
-        correctAnswer: String(hdr.correct ?? ''),
-      };
-    case 'form':
+      return { format: 'question', question: String(hdr.question ?? ''), choices: parseChoices(hdr.choices), correctAnswer: String(hdr.correct ?? '') };
     case 'email-form':
       return {
-        format: type as 'form' | 'email-form',
+        format: 'email-form',
+        fields: parseFields(hdr.fields),
+        ...(hdr.submitLabel ? { submitLabel: String(hdr.submitLabel) } : {}),
+        ...(hdr.successContent ? { successContent: String(hdr.successContent) } : {}),
+      };
+  }
+}
+
+function num(v: unknown): number | undefined {
+  if (v === undefined || v === null || v === '') return undefined;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : undefined;
+}
+
+/** Attach per-child layout props (flex / slot / margins) from the header. */
+function withChildLayout<T extends Record<string, unknown>>(node: T, hdr: Record<string, unknown>): T {
+  const out = node as Record<string, unknown>;
+  const flex = num(hdr.flex);
+  if (flex !== undefined) out.flex = flex;
+  if (hdr.slot === 'left' || hdr.slot === 'right') out.slot = hdr.slot;
+  for (const m of ['marginTop', 'marginBottom', 'marginLeft', 'marginRight'] as const) {
+    const mv = num(hdr[m]);
+    if (mv !== undefined) out[m] = mv;
+  }
+  return node;
+}
+
+function buildLeafOrContainer(type: string, hdr: Record<string, unknown>, body: string): ScreenBlock {
+  let node: Record<string, unknown>;
+  switch (type) {
+    case 'text':
+      node = { format: 'text', content: body };
+      break;
+    case 'image':
+      node = { format: 'image', url: String(hdr.url ?? hdr.image ?? ''), alt: String(hdr.alt ?? hdr.caption ?? 'illustration') };
+      break;
+    case 'video':
+      node = { format: 'video', url: String(hdr.url ?? '') };
+      break;
+    case 'animation':
+      node = { format: 'animation', url: String(hdr.url ?? '') };
+      break;
+    case 'question':
+      node = { format: 'question', question: String(hdr.question ?? ''), choices: parseChoices(hdr.choices), correctAnswer: String(hdr.correct ?? '') };
+      break;
+    case 'form':
+    case 'email-form':
+      node = {
+        format: type,
         fields: parseFields(hdr.fields),
         ...(hdr.submitLabel ? { submitLabel: String(hdr.submitLabel) } : {}),
         ...(hdr.successMessage ? { successMessage: String(hdr.successMessage) } : {}),
+        ...(hdr.successContent ? { successContent: String(hdr.successContent) } : {}),
       };
-    case 'form-text':
-      return {
-        format: 'form-text',
-        content: body,
-        fields: parseFields(hdr.fields),
-        submitLabel: String(hdr.submitLabel ?? 'Submit'),
-        successContent: String(hdr.successContent ?? 'Thank you!'),
+      break;
+    case 'button':
+      node = { format: 'button', label: String(hdr.label ?? 'Continue'), ...(hdr.target ? { target: String(hdr.target) } : {}) };
+      break;
+    case 'container': {
+      const dir = hdr.layout === 'column' || hdr.direction === 'column' ? 'column' : (hdr.layout === 'row' || hdr.direction === 'row' ? 'row' : undefined);
+      node = {
+        format: 'container',
+        children: [],
+        ...(dir ? { direction: dir } : {}),
+        ...(num(hdr.gap) !== undefined ? { gap: num(hdr.gap) } : {}),
+        ...(hdr.justify ? { justify: hdr.justify } : {}),
+        ...(hdr.align ? { align: hdr.align } : {}),
+        ...(hdr.layoutMobile === 'row' || hdr.layoutMobile === 'column' ? { directionMobile: hdr.layoutMobile } : {}),
+        ...(num(hdr.gapMobile) !== undefined ? { gapMobile: num(hdr.gapMobile) } : {}),
       };
+      break;
+    }
+    case 'section':
+      node = {
+        format: 'section',
+        children: [],
+        ...(hdr.verticalAlign || hdr.valign ? { verticalAlign: hdr.verticalAlign ?? hdr.valign } : {}),
+        ...(hdr.horizontalAlign || hdr.halign ? { horizontalAlign: hdr.horizontalAlign ?? hdr.halign } : {}),
+        ...(hdr.minHeightMode ? { minHeightMode: hdr.minHeightMode } : {}),
+        ...(num(hdr.minHeight) !== undefined ? { minHeight: num(hdr.minHeight) } : {}),
+      };
+      break;
+    case 'slider': {
+      const slider: Record<string, unknown> = {};
+      for (const k of ['arrows', 'dots', 'swipe', 'loop', 'autoplay'] as const) {
+        if (hdr[k] !== undefined) slider[k] = hdr[k] === true || hdr[k] === 'true';
+      }
+      if (num(hdr.autoplayInterval) !== undefined) slider.autoplayInterval = num(hdr.autoplayInterval);
+      node = { format: 'slider', children: [], ...(Object.keys(slider).length > 0 ? { slider } : {}) };
+      break;
+    }
     case 'layout':
-      return { format: 'layout', ratio: String(hdr.ratio ?? '50:50') };
+      node = { format: 'layout', children: [], ratio: String(hdr.ratio ?? '50:50') };
+      break;
     default:
-      // Fallback: treat as text
-      return { format: 'text', content: body };
+      node = { format: 'text', content: body };
   }
+  return withChildLayout(node, hdr) as unknown as ScreenBlock;
 }
 
 function parseChoices(raw: unknown): QuizChoice[] {

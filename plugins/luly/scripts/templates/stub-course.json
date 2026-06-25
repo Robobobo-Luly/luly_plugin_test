@@ -313,25 +313,62 @@
           "blocks": [
             {
               "type": "block",
+              "slug": "22a72e09-11f7-48e2-821d-89b2786b4fe5",
               "body": {
-                "i18n": {
-                  "en": {
-                    "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Story title\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Enter story title (there can be multiple \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"stories in one lesson)\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional media block\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Add an image or illustration\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Text block\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Write the main explanation for the lesson, \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"keep paragraphs short and easy to read\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional helper text \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Focus on one idea per screen\"}]}]}]}]}"
+                "format": "container",
+                "layout": {
+                  "desktop": {
+                    "direction": "row",
+                    "gap": 64,
+                    "justify": "start",
+                    "align": "start"
+                  },
+                  "mobile": {
+                    "direction": "column",
+                    "gap": 20,
+                    "justify": "start",
+                    "align": "stretch"
                   }
-                },
-                "width": "100%",
-                "format": "image-richtext",
-                "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Story title\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Enter story title (there can be multiple \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"stories in one lesson)\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional media block\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Add an image or illustration\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Text block\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Write the main explanation for the lesson, \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"keep paragraphs short and easy to read\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional helper text \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Focus on one idea per screen\"}]}]}]}]}",
-                "imageUrl": "",
-                "mediaType": "image",
-                "objectFit": "cover",
-                "aspectRatio": "1/1",
-                "borderRadius": "8px",
-                "loadingStyle": "shimmer",
-                "imagePosition": "left",
-                "objectPosition": "center"
+                }
               },
               "lexoRank": "0|hzzzzz:"
+            },
+            {
+              "type": "block",
+              "slug": "538291a0-1bb8-419f-b5cb-2cb362c4cc68",
+              "parentSlug": "22a72e09-11f7-48e2-821d-89b2786b4fe5",
+              "body": {
+                "format": "image",
+                "url": "",
+                "alt": "Image",
+                "aspectRatio": "1/1",
+                "objectFit": "cover",
+                "objectPosition": "center",
+                "borderRadius": "8px",
+                "width": "100%",
+                "loadingStyle": "none",
+                "flex": 3,
+                "marginTop": 0,
+                "marginBottom": 0,
+                "marginLeft": 0,
+                "marginRight": 0
+              },
+              "lexoRank": "0|i00007:"
+            },
+            {
+              "type": "block",
+              "slug": "21cf1592-2746-44ac-b7fd-90c62464fda4",
+              "parentSlug": "22a72e09-11f7-48e2-821d-89b2786b4fe5",
+              "body": {
+                "format": "text",
+                "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Story title\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Enter story title (there can be multiple \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"stories in one lesson)\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional media block\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Add an image or illustration\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Text block\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Write the main explanation for the lesson, \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"keep paragraphs short and easy to read\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional helper text \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Focus on one idea per screen\"}]}]}]}]}",
+                "flex": 4,
+                "marginTop": 0,
+                "marginBottom": 0,
+                "marginLeft": 0,
+                "marginRight": 0
+              },
+              "lexoRank": "0|i0000f:"
             }
           ]
         },
@@ -482,25 +519,62 @@
           "blocks": [
             {
               "type": "block",
+              "slug": "d6fc1f96-bdfd-401c-9ede-03a8fd073655",
               "body": {
-                "i18n": {
-                  "en": {
-                    "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Add video title\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Review what happens in the video\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Video description \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Explain what users will learn or see in this video or state the reason why we need a video\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Extra tip\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Keep it concise: users should understand \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"the value before pressing play\"}]}]}]}]}"
+                "format": "container",
+                "layout": {
+                  "desktop": {
+                    "direction": "row",
+                    "gap": 64,
+                    "justify": "start",
+                    "align": "start"
+                  },
+                  "mobile": {
+                    "direction": "column",
+                    "gap": 20,
+                    "justify": "start",
+                    "align": "stretch"
                   }
-                },
-                "width": "100%",
-                "format": "image-richtext",
-                "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Add video title\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Review what happens in the video\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Video description \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Explain what users will learn or see in this video or state the reason why we need a video\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Extra tip\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Keep it concise: users should understand \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"the value before pressing play\"}]}]}]}]}",
-                "imageUrl": "",
-                "mediaType": "image",
-                "objectFit": "cover",
-                "aspectRatio": "1/1",
-                "borderRadius": "8px",
-                "loadingStyle": "shimmer",
-                "imagePosition": "left",
-                "objectPosition": "center"
+                }
               },
               "lexoRank": "0|hzzzzz:"
+            },
+            {
+              "type": "block",
+              "slug": "1f050faa-a71c-4d90-a113-76781fbacd95",
+              "parentSlug": "d6fc1f96-bdfd-401c-9ede-03a8fd073655",
+              "body": {
+                "format": "image",
+                "url": "",
+                "alt": "Image",
+                "aspectRatio": "1/1",
+                "objectFit": "cover",
+                "objectPosition": "center",
+                "borderRadius": "8px",
+                "width": "100%",
+                "loadingStyle": "none",
+                "flex": 3,
+                "marginTop": 0,
+                "marginBottom": 0,
+                "marginLeft": 0,
+                "marginRight": 0
+              },
+              "lexoRank": "0|i00007:"
+            },
+            {
+              "type": "block",
+              "slug": "c67c3666-6d36-4b16-a96d-062f8885da78",
+              "parentSlug": "d6fc1f96-bdfd-401c-9ede-03a8fd073655",
+              "body": {
+                "format": "text",
+                "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Add video title\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Review what happens in the video\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Video description \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Explain what users will learn or see in this video or state the reason why we need a video\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Extra tip\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Keep it concise: users should understand \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"the value before pressing play\"}]}]}]}]}",
+                "flex": 4,
+                "marginTop": 0,
+                "marginBottom": 0,
+                "marginLeft": 0,
+                "marginRight": 0
+              },
+              "lexoRank": "0|i0000f:"
             }
           ]
         },
@@ -651,13 +725,33 @@
           "blocks": [
             {
               "type": "block",
+              "slug": "67bfedb6-4c19-4d75-8b7a-d7c5e09bdbd5",
               "body": {
-                "i18n": {
-                  "en": {
-                    "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Question\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Write a clear question based \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"on the lesson\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"textStyle\",\"attrs\":{\"color\":null,\"fontFamily\":null,\"fontSize\":null,\"letterSpacing\":null,\"fontWeight\":\"600\"}},{\"type\":\"bold\"}],\"text\":\"Optional helper text\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Include one correct answer and 2–3 plausible alternatives\"}]}]}]}]}"
+                "format": "container",
+                "layout": {
+                  "desktop": {
+                    "direction": "row",
+                    "gap": 64,
+                    "justify": "start",
+                    "align": "start"
+                  },
+                  "mobile": {
+                    "direction": "column",
+                    "gap": 20,
+                    "justify": "start",
+                    "align": "stretch"
                   }
-                },
-                "format": "quiz-text",
+                }
+              },
+              "lexoRank": "0|hzzzzz:"
+            },
+            {
+              "type": "block",
+              "slug": "375059fa-53b1-4858-b740-7aefaf926218",
+              "parentSlug": "67bfedb6-4c19-4d75-8b7a-d7c5e09bdbd5",
+              "body": {
+                "format": "question",
+                "question_md": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Your question here\"}]}]}",
                 "choices": [
                   {
                     "id": "choice-d12fa6c0-904b-41a1-b2da-34ab910e20d9",
@@ -672,15 +766,32 @@
                     "text": "Answer C"
                   }
                 ],
-                "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Question\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Write a clear question based \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"on the lesson\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"textStyle\",\"attrs\":{\"color\":null,\"fontFamily\":null,\"fontSize\":null,\"letterSpacing\":null,\"fontWeight\":\"600\"}},{\"type\":\"bold\"}],\"text\":\"Optional helper text\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Include one correct answer and 2–3 plausible alternatives\"}]}]}]}]}",
-                "autoSubmit": false,
-                "question_md": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Your question here\"}]}]}",
-                "quizPosition": "left",
                 "correctAnswer": "choice-5a307573-fecd-45ae-a2a9-a19762edecd1",
+                "showCorrectAnswer": true,
+                "autoSubmit": false,
                 "shuffleChoices": false,
-                "showCorrectAnswer": true
+                "flex": 3,
+                "marginTop": 0,
+                "marginBottom": 0,
+                "marginLeft": 0,
+                "marginRight": 0
               },
-              "lexoRank": "0|hzzzzz:"
+              "lexoRank": "0|i00007:"
+            },
+            {
+              "type": "block",
+              "slug": "00c8c80c-1db5-40de-9f64-ca948c11a33c",
+              "parentSlug": "67bfedb6-4c19-4d75-8b7a-d7c5e09bdbd5",
+              "body": {
+                "format": "text",
+                "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Question\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Write a clear question based \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"on the lesson\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"textStyle\",\"attrs\":{\"color\":null,\"fontFamily\":null,\"fontSize\":null,\"letterSpacing\":null,\"fontWeight\":\"600\"}},{\"type\":\"bold\"}],\"text\":\"Optional helper text\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Include one correct answer and 2–3 plausible alternatives\"}]}]}]}]}",
+                "flex": 4,
+                "marginTop": 0,
+                "marginBottom": 0,
+                "marginLeft": 0,
+                "marginRight": 0
+              },
+              "lexoRank": "0|i0000f:"
             }
           ]
         }
@@ -876,25 +987,62 @@
           "blocks": [
             {
               "type": "block",
+              "slug": "a85258e4-0796-4b1c-a07d-a7589d7f56d4",
               "body": {
-                "i18n": {
-                  "en": {
-                    "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Story title\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Enter story title (there can be multiple \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"stories in one lesson)\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional media block\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Add an image or illustration\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Text block\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Write the main explanation for the lesson, \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"keep paragraphs short and easy to read\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional helper text \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Focus on one idea per screen\"}]}]}]}]}"
+                "format": "container",
+                "layout": {
+                  "desktop": {
+                    "direction": "row",
+                    "gap": 64,
+                    "justify": "start",
+                    "align": "start"
+                  },
+                  "mobile": {
+                    "direction": "column",
+                    "gap": 20,
+                    "justify": "start",
+                    "align": "stretch"
                   }
-                },
-                "width": "100%",
-                "format": "image-richtext",
-                "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Story title\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Enter story title (there can be multiple \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"stories in one lesson)\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional media block\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Add an image or illustration\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Text block\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Write the main explanation for the lesson, \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"keep paragraphs short and easy to read\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional helper text \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Focus on one idea per screen\"}]}]}]}]}",
-                "imageUrl": "",
-                "mediaType": "image",
-                "objectFit": "cover",
-                "aspectRatio": "1/1",
-                "borderRadius": "8px",
-                "loadingStyle": "shimmer",
-                "imagePosition": "left",
-                "objectPosition": "center"
+                }
               },
               "lexoRank": "0|hzzzzz:"
+            },
+            {
+              "type": "block",
+              "slug": "ae10a2b4-58c9-45c1-8add-81b60f3c92a5",
+              "parentSlug": "a85258e4-0796-4b1c-a07d-a7589d7f56d4",
+              "body": {
+                "format": "image",
+                "url": "",
+                "alt": "Image",
+                "aspectRatio": "1/1",
+                "objectFit": "cover",
+                "objectPosition": "center",
+                "borderRadius": "8px",
+                "width": "100%",
+                "loadingStyle": "none",
+                "flex": 3,
+                "marginTop": 0,
+                "marginBottom": 0,
+                "marginLeft": 0,
+                "marginRight": 0
+              },
+              "lexoRank": "0|i00007:"
+            },
+            {
+              "type": "block",
+              "slug": "502bb166-fe84-4546-b609-89b8f77094e9",
+              "parentSlug": "a85258e4-0796-4b1c-a07d-a7589d7f56d4",
+              "body": {
+                "format": "text",
+                "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Story title\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Enter story title (there can be multiple \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"stories in one lesson)\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional media block\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Add an image or illustration\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Text block\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Write the main explanation for the lesson, \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"keep paragraphs short and easy to read\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional helper text \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Focus on one idea per screen\"}]}]}]}]}",
+                "flex": 4,
+                "marginTop": 0,
+                "marginBottom": 0,
+                "marginLeft": 0,
+                "marginRight": 0
+              },
+              "lexoRank": "0|i0000f:"
             }
           ]
         },
@@ -1045,25 +1193,62 @@
           "blocks": [
             {
               "type": "block",
+              "slug": "94f6ba4d-7a4f-4092-8ef5-afb1a6b0fd5f",
               "body": {
-                "i18n": {
-                  "en": {
-                    "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Add video title\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Review what happens in the video\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Video description \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Explain what users will learn or see in this video or state the reason why we need a video\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Extra tip\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Keep it concise: users should understand \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"the value before pressing play\"}]}]}]}]}"
+                "format": "container",
+                "layout": {
+                  "desktop": {
+                    "direction": "row",
+                    "gap": 64,
+                    "justify": "start",
+                    "align": "start"
+                  },
+                  "mobile": {
+                    "direction": "column",
+                    "gap": 20,
+                    "justify": "start",
+                    "align": "stretch"
                   }
-                },
-                "width": "100%",
-                "format": "image-richtext",
-                "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Add video title\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Review what happens in the video\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Video description \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Explain what users will learn or see in this video or state the reason why we need a video\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Extra tip\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Keep it concise: users should understand \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"the value before pressing play\"}]}]}]}]}",
-                "imageUrl": "",
-                "mediaType": "image",
-                "objectFit": "cover",
-                "aspectRatio": "1/1",
-                "borderRadius": "8px",
-                "loadingStyle": "shimmer",
-                "imagePosition": "left",
-                "objectPosition": "center"
+                }
               },
               "lexoRank": "0|hzzzzz:"
+            },
+            {
+              "type": "block",
+              "slug": "9408f4a6-0554-40a2-9034-4c44266df07d",
+              "parentSlug": "94f6ba4d-7a4f-4092-8ef5-afb1a6b0fd5f",
+              "body": {
+                "format": "image",
+                "url": "",
+                "alt": "Image",
+                "aspectRatio": "1/1",
+                "objectFit": "cover",
+                "objectPosition": "center",
+                "borderRadius": "8px",
+                "width": "100%",
+                "loadingStyle": "none",
+                "flex": 3,
+                "marginTop": 0,
+                "marginBottom": 0,
+                "marginLeft": 0,
+                "marginRight": 0
+              },
+              "lexoRank": "0|i00007:"
+            },
+            {
+              "type": "block",
+              "slug": "2254eab6-b09a-4f55-86eb-152b37d93561",
+              "parentSlug": "94f6ba4d-7a4f-4092-8ef5-afb1a6b0fd5f",
+              "body": {
+                "format": "text",
+                "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Add video title\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Review what happens in the video\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Video description \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Explain what users will learn or see in this video or state the reason why we need a video\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Extra tip\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Keep it concise: users should understand \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"the value before pressing play\"}]}]}]}]}",
+                "flex": 4,
+                "marginTop": 0,
+                "marginBottom": 0,
+                "marginLeft": 0,
+                "marginRight": 0
+              },
+              "lexoRank": "0|i0000f:"
             }
           ]
         },
@@ -1214,13 +1399,33 @@
           "blocks": [
             {
               "type": "block",
+              "slug": "d8385c67-0854-4b8f-b7c4-986872230821",
               "body": {
-                "i18n": {
-                  "en": {
-                    "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Question\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Write a clear question based \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"on the lesson\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional helper text\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Include one correct answer and 2–3 plausible alternatives\"}]}]}]}]}"
+                "format": "container",
+                "layout": {
+                  "desktop": {
+                    "direction": "row",
+                    "gap": 64,
+                    "justify": "start",
+                    "align": "start"
+                  },
+                  "mobile": {
+                    "direction": "column",
+                    "gap": 20,
+                    "justify": "start",
+                    "align": "stretch"
                   }
-                },
-                "format": "quiz-text",
+                }
+              },
+              "lexoRank": "0|hzzzzz:"
+            },
+            {
+              "type": "block",
+              "slug": "196333a7-af90-4054-8b9c-427329e31e1e",
+              "parentSlug": "d8385c67-0854-4b8f-b7c4-986872230821",
+              "body": {
+                "format": "question",
+                "question_md": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Your question here\"}]}]}",
                 "choices": [
                   {
                     "id": "choice-d12fa6c0-904b-41a1-b2da-34ab910e20d9",
@@ -1235,15 +1440,32 @@
                     "text": "Answer C"
                   }
                 ],
-                "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Question\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Write a clear question based \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"on the lesson\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional helper text\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Include one correct answer and 2–3 plausible alternatives\"}]}]}]}]}",
-                "autoSubmit": false,
-                "question_md": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Your question here\"}]}]}",
-                "quizPosition": "left",
                 "correctAnswer": "choice-5a307573-fecd-45ae-a2a9-a19762edecd1",
+                "showCorrectAnswer": true,
+                "autoSubmit": false,
                 "shuffleChoices": false,
-                "showCorrectAnswer": true
+                "flex": 3,
+                "marginTop": 0,
+                "marginBottom": 0,
+                "marginLeft": 0,
+                "marginRight": 0
               },
-              "lexoRank": "0|hzzzzz:"
+              "lexoRank": "0|i00007:"
+            },
+            {
+              "type": "block",
+              "slug": "31e05e02-789a-473a-9795-a10729924281",
+              "parentSlug": "d8385c67-0854-4b8f-b7c4-986872230821",
+              "body": {
+                "format": "text",
+                "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Question\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Write a clear question based \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"on the lesson\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional helper text\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Include one correct answer and 2–3 plausible alternatives\"}]}]}]}]}",
+                "flex": 4,
+                "marginTop": 0,
+                "marginBottom": 0,
+                "marginLeft": 0,
+                "marginRight": 0
+              },
+              "lexoRank": "0|i0000f:"
             }
           ]
         }
@@ -1439,25 +1661,62 @@
           "blocks": [
             {
               "type": "block",
+              "slug": "8549d41a-c549-4628-885a-51db81eba9f6",
               "body": {
-                "i18n": {
-                  "en": {
-                    "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Story title\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Enter story title (there can be multiple \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"stories in one lesson)\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional media block\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Add an image or illustration\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Text block\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Write the main explanation for the lesson, \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"keep paragraphs short and easy to read\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional helper text \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Focus on one idea per screen\"},{\"type\":\"hardBreak\"}]}]}]}]}"
+                "format": "container",
+                "layout": {
+                  "desktop": {
+                    "direction": "row",
+                    "gap": 64,
+                    "justify": "start",
+                    "align": "start"
+                  },
+                  "mobile": {
+                    "direction": "column",
+                    "gap": 20,
+                    "justify": "start",
+                    "align": "stretch"
                   }
-                },
-                "width": "100%",
-                "format": "image-richtext",
-                "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Story title\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Enter story title (there can be multiple \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"stories in one lesson)\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional media block\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Add an image or illustration\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Text block\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Write the main explanation for the lesson, \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"keep paragraphs short and easy to read\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional helper text \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Focus on one idea per screen\"},{\"type\":\"hardBreak\"}]}]}]}]}",
-                "imageUrl": "",
-                "mediaType": "image",
-                "objectFit": "cover",
-                "aspectRatio": "1/1",
-                "borderRadius": "8px",
-                "loadingStyle": "shimmer",
-                "imagePosition": "left",
-                "objectPosition": "center"
+                }
               },
               "lexoRank": "0|hzzzzz:"
+            },
+            {
+              "type": "block",
+              "slug": "a3370b1f-c7a8-43d8-b85c-8300fb60442c",
+              "parentSlug": "8549d41a-c549-4628-885a-51db81eba9f6",
+              "body": {
+                "format": "image",
+                "url": "",
+                "alt": "Image",
+                "aspectRatio": "1/1",
+                "objectFit": "cover",
+                "objectPosition": "center",
+                "borderRadius": "8px",
+                "width": "100%",
+                "loadingStyle": "none",
+                "flex": 3,
+                "marginTop": 0,
+                "marginBottom": 0,
+                "marginLeft": 0,
+                "marginRight": 0
+              },
+              "lexoRank": "0|i00007:"
+            },
+            {
+              "type": "block",
+              "slug": "02bc016a-9a0d-4789-b4f5-1d4a52d500cc",
+              "parentSlug": "8549d41a-c549-4628-885a-51db81eba9f6",
+              "body": {
+                "format": "text",
+                "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Story title\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Enter story title (there can be multiple \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"stories in one lesson)\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional media block\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Add an image or illustration\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Text block\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Write the main explanation for the lesson, \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"keep paragraphs short and easy to read\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional helper text \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Focus on one idea per screen\"},{\"type\":\"hardBreak\"}]}]}]}]}",
+                "flex": 4,
+                "marginTop": 0,
+                "marginBottom": 0,
+                "marginLeft": 0,
+                "marginRight": 0
+              },
+              "lexoRank": "0|i0000f:"
             }
           ]
         },
@@ -1608,25 +1867,62 @@
           "blocks": [
             {
               "type": "block",
+              "slug": "d819142e-0ba4-4718-a987-6e5cc8b9c4cb",
               "body": {
-                "i18n": {
-                  "en": {
-                    "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Add video title\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Review what happens in the video\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Video description \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Explain what users will learn or see in this video or state the reason why we need a video\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Extra tip\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Keep it concise: users should understand \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"the value before pressing play\"}]}]}]}]}"
+                "format": "container",
+                "layout": {
+                  "desktop": {
+                    "direction": "row",
+                    "gap": 64,
+                    "justify": "start",
+                    "align": "start"
+                  },
+                  "mobile": {
+                    "direction": "column",
+                    "gap": 20,
+                    "justify": "start",
+                    "align": "stretch"
                   }
-                },
-                "width": "100%",
-                "format": "image-richtext",
-                "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Add video title\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Review what happens in the video\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Video description \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Explain what users will learn or see in this video or state the reason why we need a video\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Extra tip\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Keep it concise: users should understand \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"the value before pressing play\"}]}]}]}]}",
-                "imageUrl": "",
-                "mediaType": "image",
-                "objectFit": "cover",
-                "aspectRatio": "1/1",
-                "borderRadius": "8px",
-                "loadingStyle": "shimmer",
-                "imagePosition": "left",
-                "objectPosition": "center"
+                }
               },
               "lexoRank": "0|hzzzzz:"
+            },
+            {
+              "type": "block",
+              "slug": "34c737c1-adb4-42cf-9416-225bb81797a2",
+              "parentSlug": "d819142e-0ba4-4718-a987-6e5cc8b9c4cb",
+              "body": {
+                "format": "image",
+                "url": "",
+                "alt": "Image",
+                "aspectRatio": "1/1",
+                "objectFit": "cover",
+                "objectPosition": "center",
+                "borderRadius": "8px",
+                "width": "100%",
+                "loadingStyle": "none",
+                "flex": 3,
+                "marginTop": 0,
+                "marginBottom": 0,
+                "marginLeft": 0,
+                "marginRight": 0
+              },
+              "lexoRank": "0|i00007:"
+            },
+            {
+              "type": "block",
+              "slug": "e8a87d9e-383c-4919-9aa3-d35332957041",
+              "parentSlug": "d819142e-0ba4-4718-a987-6e5cc8b9c4cb",
+              "body": {
+                "format": "text",
+                "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Add video title\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Review what happens in the video\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Video description \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Explain what users will learn or see in this video or state the reason why we need a video\"}]}]}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Extra tip\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Keep it concise: users should understand \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"the value before pressing play\"}]}]}]}]}",
+                "flex": 4,
+                "marginTop": 0,
+                "marginBottom": 0,
+                "marginLeft": 0,
+                "marginRight": 0
+              },
+              "lexoRank": "0|i0000f:"
             }
           ]
         },
@@ -1777,13 +2073,33 @@
           "blocks": [
             {
               "type": "block",
+              "slug": "9ea5a7c9-c5b1-4ecf-939c-519cde81e978",
               "body": {
-                "i18n": {
-                  "en": {
-                    "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Question\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Write a clear question based \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"on the lesson\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional helper text\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Include one correct answer and 2–3 plausible alternatives\"}]}]}]}]}"
+                "format": "container",
+                "layout": {
+                  "desktop": {
+                    "direction": "row",
+                    "gap": 64,
+                    "justify": "start",
+                    "align": "start"
+                  },
+                  "mobile": {
+                    "direction": "column",
+                    "gap": 20,
+                    "justify": "start",
+                    "align": "stretch"
                   }
-                },
-                "format": "quiz-text",
+                }
+              },
+              "lexoRank": "0|hzzzzz:"
+            },
+            {
+              "type": "block",
+              "slug": "a070d057-4780-4af8-9826-c3ad0ad3ac47",
+              "parentSlug": "9ea5a7c9-c5b1-4ecf-939c-519cde81e978",
+              "body": {
+                "format": "question",
+                "question_md": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Your question here\"}]}]}",
                 "choices": [
                   {
                     "id": "choice-d12fa6c0-904b-41a1-b2da-34ab910e20d9",
@@ -1798,15 +2114,32 @@
                     "text": "Answer C"
                   }
                 ],
-                "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Question\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Write a clear question based \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"on the lesson\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional helper text\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Include one correct answer and 2–3 plausible alternatives\"}]}]}]}]}",
-                "autoSubmit": false,
-                "question_md": "{\"type\":\"doc\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Your question here\"}]}]}",
-                "quizPosition": "left",
                 "correctAnswer": "choice-5a307573-fecd-45ae-a2a9-a19762edecd1",
+                "showCorrectAnswer": true,
+                "autoSubmit": false,
                 "shuffleChoices": false,
-                "showCorrectAnswer": true
+                "flex": 3,
+                "marginTop": 0,
+                "marginBottom": 0,
+                "marginLeft": 0,
+                "marginRight": 0
               },
-              "lexoRank": "0|hzzzzz:"
+              "lexoRank": "0|i00007:"
+            },
+            {
+              "type": "block",
+              "slug": "414487a8-eaa0-425c-b4e2-4b361f5dc79d",
+              "parentSlug": "9ea5a7c9-c5b1-4ecf-939c-519cde81e978",
+              "body": {
+                "format": "text",
+                "content": "{\"type\":\"doc\",\"content\":[{\"type\":\"heading\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null,\"level\":1},\"content\":[{\"type\":\"text\",\"text\":\"Question\"}]},{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"text\":\"Write a clear question based \"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"on the lesson\"}]},{\"type\":\"bulletList\",\"attrs\":{\"data-bullet-style\":\"check\"},\"content\":[{\"type\":\"listItem\",\"content\":[{\"type\":\"paragraph\",\"attrs\":{\"lineHeight\":null,\"textAlign\":null},\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"bold\"}],\"text\":\"Optional helper text\"},{\"type\":\"hardBreak\"},{\"type\":\"text\",\"text\":\"Include one correct answer and 2–3 plausible alternatives\"}]}]}]}]}",
+                "flex": 4,
+                "marginTop": 0,
+                "marginBottom": 0,
+                "marginLeft": 0,
+                "marginRight": 0
+              },
+              "lexoRank": "0|i0000f:"
             }
           ]
         }

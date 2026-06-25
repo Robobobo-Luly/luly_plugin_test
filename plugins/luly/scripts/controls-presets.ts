@@ -1,5 +1,5 @@
 import type { Preset } from './presets';
-import type { Plan } from './types';
+import type { Lesson, LessonScreen } from './types';
 
 export type GuardName =
   | 'isFirstScreen' | 'isLastScreen' | 'isNotFirstScreen' | 'isNotLastScreen'
@@ -119,6 +119,27 @@ function courseControls(): Control[] {
   ];
 }
 
+/**
+ * Course control for SIMPLE-shape courses (campaign-simple / waitlist /
+ * interactive-proposal). The course is a wrapper with no landing screen, so the
+ * only control is an invisible auto-nav: descend into the first lesson on entry,
+ * return to the hub when coming back from a child. Mirrors luly-app
+ * COURSE_CONTROL_CONFIGS.simple (controlConfig.ts) and the canonical
+ * Basic_Campaign template. Without this the course has no navigation action and
+ * fails the validator's container-control check.
+ */
+function simpleCourseControls(): Control[] {
+  return [{
+    id: 'ctrl.course.auto',
+    position: 'bottomLeft',
+    requires_click: false,
+    conditionalActions: [
+      { guard: { name: 'cameFromChild' }, do: [{ type: 'goto', body: { target: 'parent' } }] },
+      { do: [{ type: 'goto', body: { target: 'first_child' } }] },
+    ],
+  }];
+}
+
 function lessonControls(): Control[] {
   return [{
     id: 'ctrl.lesson.auto',
@@ -130,11 +151,16 @@ function lessonControls(): Control[] {
   }];
 }
 
-function lessonScreenControls(): Control[] {
-  // Top-right exit is always the default close-icon → parent. The renderer
-  // hard-enforces icon shape on topRight regardless of what we send, so
-  // there's no point trying to override label/variant from here.
-  return [
+export function lessonScreenControls(opts: { isFirst: boolean; isLast: boolean }): Control[] {
+  // Position is BAKED at generation time — we do NOT use the runtime `isLastScreen`
+  // guard for the Next action. The guard misfired in older setups (the first
+  // screen finishing the lesson), and the plugin knows each screen's position
+  // here, so emit the exact action per position. `finishLesson` lands ONLY on the
+  // real last screen of the lesson.
+  const { isFirst, isLast } = opts;
+  const controls: Control[] = [
+    // Top-right exit is always the default close-icon → parent. The renderer
+    // hard-enforces icon shape on topRight regardless of what we send.
     {
       id: 'ctrl.screen.header-back',
       position: 'topRight',
@@ -142,32 +168,35 @@ function lessonScreenControls(): Control[] {
       style: { variant: 'close-icon' },
       conditionalActions: [{ do: [{ type: 'goto', body: { target: 'parent' } }] }],
     },
-    {
+  ];
+
+  // Previous — omitted entirely on the first screen (no previous sibling).
+  if (!isFirst) {
+    controls.push({
       id: 'ctrl.screen.prev',
       label: 'Previous',
       position: 'bottomLeft',
       requires_click: true,
-      // Hide entirely on the first screen of a lesson — no previous to go to,
-      // and falling through to parent feels misleading visually.
-      is_visible: { name: 'isNotFirstScreen' },
       conditionalActions: [
         { do: [{ type: 'goto', body: { target: 'previous_sibling' } }] },
       ],
-    },
-    {
-      id: 'ctrl.screen.next',
-      label: 'Next',
-      position: 'bottomRight',
-      requires_click: true,
-      conditionalActions: [
-        { guard: { name: 'isLastScreen' }, do: [
-          { type: 'finishLesson' },
-          { type: 'goto', body: { target: 'parent_next_sibling' } },
-        ]},
-        { do: [{ type: 'goto', body: { target: 'next_sibling' } }] },
-      ],
-    },
-  ];
+    });
+  }
+
+  // Next — finish the lesson only on the last screen; otherwise advance.
+  controls.push({
+    id: 'ctrl.screen.next',
+    label: 'Next',
+    position: 'bottomRight',
+    requires_click: true,
+    conditionalActions: [
+      { do: isLast
+        ? [{ type: 'finishLesson' }, { type: 'goto', body: { target: 'parent_next_sibling' } }]
+        : [{ type: 'goto', body: { target: 'next_sibling' } }] },
+    ],
+  });
+
+  return controls;
 }
 
 function onboardingScreenControls(opts: { isFirst: boolean; isLast: boolean; multiScreen: boolean }): Control[] {
@@ -281,43 +310,64 @@ function campaignScreenControls(): Control[] {
 // Apply controls per preset
 // ============================================================================
 
-export function applyControls(productPreset: Preset, plan: Plan): ControlsArtifact {
+// Simple-shape presets: a single wrapper lesson, linear screens, no course
+// landing. Mirrors SIMPLE_COURSE_PRESETS in assemble.ts.
+const SIMPLE_PRESETS: ReadonlySet<Preset> = new Set<Preset>([
+  'campaign-simple', 'waitlist', 'interactive-proposal',
+]);
+
+/**
+ * Build the per-node control map. Driven by the ACTUAL content (lessons +
+ * onboarding screens) — not the plan — so positions and map keys
+ * (`lesson-N.screen-M`, `onboarding-N`) match exactly what buildScreenNode looks
+ * up even when fill split a screen.
+ */
+export function applyControls(
+  productPreset: Preset,
+  content: { lessons: Lesson[]; onboarding: LessonScreen[] },
+): ControlsArtifact {
   const controls: Record<string, Control[]> = {};
 
-  const lessonShape =
-    productPreset === 'academy' ||
-    productPreset === 'academy-course' ||
-    productPreset === 'campaign-course';
-  const hasHub = productPreset === 'academy';
-  const hasCourse =
-    productPreset === 'academy' ||
-    productPreset === 'academy-course' ||
-    productPreset === 'campaign-course';
+  const isSimple = SIMPLE_PRESETS.has(productPreset);
+  // Learning-shape lessons are course sections with story screens; simple-shape
+  // lessons are linear-campaign wrappers (screens use campaignScreenControls).
+  const lessonShape = !isSimple;
+  // A flow with a hub is built for every preset except academy-course
+  // (course-only output, no flow/hub).
+  const hasHub = productPreset !== 'academy-course';
 
-  // Onboarding (sibling of hub) — applied whenever the plan has an onboarding section,
-  // regardless of preset. The skill only proposes onboarding for academy, but the
-  // applier is agnostic.
-  const onboardingScreens = plan.onboarding ?? [];
-  const multiScreen = onboardingScreens.length > 1;
+  // Onboarding (siblings of the hub) — position-aware.
+  const onboardingScreens = content.onboarding ?? [];
+  const obMulti = onboardingScreens.length > 1;
   for (let i = 0; i < onboardingScreens.length; i++) {
     const screen = onboardingScreens[i];
     controls[`onboarding-${screen.n}`] = onboardingScreenControls({
       isFirst: i === 0,
       isLast: i === onboardingScreens.length - 1,
-      multiScreen,
+      multiScreen: obMulti,
     });
   }
 
+  // Hub: every hub-bearing flow needs the contentClicked→clicked_content nav so a
+  // course card opens its course (canonical: all flows get it, not just academy).
   if (hasHub) controls['hub'] = hubControls();
-  if (hasCourse) controls['course'] = courseControls();
 
-  for (const lesson of plan.lessons) {
-    if (lessonShape) {
-      controls[`lesson-${lesson.n}`] = lessonControls();
-    }
-    for (const screen of lesson.screens) {
+  // Course: every preset has a course node. Learning courses get click/Back/Learn;
+  // simple courses get the invisible auto-nav (entry + return). Both carry a
+  // navigation action, so the validator's container-control check passes.
+  controls['course'] = isSimple ? simpleCourseControls() : courseControls();
+
+  for (const lesson of content.lessons) {
+    // Every lesson — learning section OR simple wrapper — gets the auto-nav.
+    controls[`lesson-${lesson.n}`] = lessonControls();
+
+    const screens = lesson.screens;
+    for (let i = 0; i < screens.length; i++) {
+      const screen = screens[i];
       const path = `lesson-${lesson.n}.screen-${screen.n}`;
-      controls[path] = lessonShape ? lessonScreenControls() : campaignScreenControls();
+      controls[path] = lessonShape
+        ? lessonScreenControls({ isFirst: i === 0, isLast: i === screens.length - 1 })
+        : campaignScreenControls();
     }
   }
 

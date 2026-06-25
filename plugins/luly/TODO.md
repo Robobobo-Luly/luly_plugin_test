@@ -83,8 +83,7 @@ A final agent runs after fill (and after the non-section-content agent) and vali
 ## PHASE 2 — Cleanup
 
 ### 2.1 Clean dead code
-- `block-validation.ts:loadFormatProfile()` reads `format-profile.json` and throws "run /luly-format first" — that stage was collapsed in v0.2. Delete the function and any call sites.
-- `allowedFormats(fp)` is exported from `block-validation.ts` but never called by `assemble.ts`. Either wire it back as the actual gate, or remove.
+- [x] `block-validation.ts` removed entirely in v0.5.0 — it had no call sites (its referenced `validate-lesson.ts` / `validate-onboarding.ts` never existed), `loadFormatProfile()` read a `format-profile.json` stage collapsed in v0.2, and it was the only place still typing the retired monolithic block formats. The single live validator is `validate-flow.ts` (run by `assemble.ts`).
 - Audit `scripts/` for any other v0.1-era functions unreachable from `bin/luly`.
 
 ### 2.2 README cleanup

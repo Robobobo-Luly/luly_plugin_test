@@ -4,22 +4,23 @@ import { spawnSync } from 'child_process';
 import { v4 as uuidv4 } from 'uuid';
 import { LexoRank } from 'lexorank';
 import { PRESETS } from './presets';
-import { applyControls } from './controls-presets';
+import { applyControls, lessonScreenControls } from './controls-presets';
 import { markdownToTipTapString } from './markdown-to-tiptap';
 import { parseIntake, parsePlan, parseTheme, parseContent, parseMeta, MetaArtifact } from './parsers';
+import { isContainerBlock } from './types';
 import type {
   BlockExport,
   Brief,
   Control,
   FormatProfile,
   Lesson,
-  LessonBlock,
   LessonScreen,
   NodeExport,
   OnboardingArtifact,
   OverridesArtifact,
   Plan,
   ProductType,
+  ScreenBlock,
   ThemeArtifact,
 } from './types';
 
@@ -52,36 +53,85 @@ function ranksFor(count: number): string[] {
 }
 
 // ----------------------------------------------------------------------------
-// Block defaults per format (matches what real templates carry)
+// Block defaults per format — mirrors luly-app getSampleContentForFormat
+// (src/services/content/edit/sampleContentCreatorService.ts) so generated blocks
+// carry the same body the CMS editor would mint for that format.
 // ----------------------------------------------------------------------------
+
+// Stored as a string on form bodies (the renderer parses it as TipTap JSON).
+const DEFAULT_FORM_SUCCESS_CONTENT =
+  '{"type":"doc","content":[{"type":"heading","attrs":{"level":2,"textAlign":null},"content":[{"type":"text","text":"Thank you!"}]},{"type":"paragraph","content":[{"type":"text","text":"Your submission has been received."}]}]}';
 
 function defaultBlockBody(format: string): Record<string, unknown> {
   switch (format) {
-    case 'image-richtext':
-      return { mediaType: 'image', aspectRatio: '1/1', objectFit: 'cover', borderRadius: '8px' };
     case 'image':
-      return { objectFit: 'cover', borderRadius: '8px' };
-    case 'quiz-text':
-      return { autoSubmit: false, shuffleChoices: false, showCorrectAnswer: true };
+      return { url: '', alt: 'Image', aspectRatio: '1/1', objectFit: 'cover', objectPosition: 'center', borderRadius: '8px', width: '100%', loadingStyle: 'none' };
+    case 'video':
+      return { mediaType: 'video', url: '', autoplay: false, loop: false, muted: true, controls: true, aspectRatio: '1/1', objectFit: 'cover', objectPosition: 'center', borderRadius: '8px', width: '100%', loadingStyle: 'none' };
+    case 'animation':
+      return { mediaType: 'animation', url: '', autoplay: true, loop: true, speed: 1, aspectRatio: '1/1', objectFit: 'cover', objectPosition: 'center', borderRadius: '8px', width: '100%', loadingStyle: 'none' };
+    case 'question':
+      return { showCorrectAnswer: true, autoSubmit: false, shuffleChoices: false };
     case 'form':
     case 'email-form':
-      return { formPosition: 'center', postSubmitAction: 'message' };
-    case 'form-text':
       return {
-        formPosition: 'center',
+        submitLabel: 'Submit',
+        submitConfig: { endpoint: '/api/forms/submit', method: 'POST', includeLocale: true, storeResponse: false },
+        successMessage: 'Thank you!',
+        successContent: DEFAULT_FORM_SUCCESS_CONTENT,
         postSubmitAction: 'message',
-        submitConfig: { method: 'POST', endpoint: '/api/forms/submit', includeLocale: true, storeResponse: false },
       };
+    case 'container':
+      return { layout: { desktop: { direction: 'row', gap: 32, justify: 'start', align: 'stretch' }, mobile: { direction: 'column', gap: 16, justify: 'start', align: 'stretch' } } };
+    case 'slider':
+      return { slider: { arrows: false, dots: true, swipe: true, loop: true, autoplay: false, autoplayInterval: 5000, arrowStyleName: 'primary', arrowSize: 44, dotStyle: {} } };
+    case 'section':
+      return {
+        verticalAlign: 'center', horizontalAlign: 'left', minHeightMode: 'auto',
+        paddingTop: { desktop: 88, mobile: 48 }, paddingBottom: { desktop: 88, mobile: 48 },
+        paddingLeft: { desktop: 0, mobile: 0 }, paddingRight: { desktop: 0, mobile: 0 },
+        marginTop: 0, marginBottom: 0, marginLeft: 0, marginRight: 0,
+      };
+    case 'layout':
+      return { ratio: '50:50' };
+    case 'text':
+    case 'button':
     default:
       return {};
   }
 }
 
+/** Merge authored container knobs over the default per-viewport layout. */
+function buildContainerLayout(block: Extract<ScreenBlock, { format: 'container' }>): Record<string, unknown> {
+  const desktop: Record<string, unknown> = { direction: 'row', gap: 32, justify: 'start', align: 'stretch' };
+  const mobile: Record<string, unknown> = { direction: 'column', gap: 16, justify: 'start', align: 'stretch' };
+  if (block.direction) desktop.direction = block.direction;
+  if (block.gap !== undefined) desktop.gap = block.gap;
+  if (block.justify) desktop.justify = block.justify;
+  if (block.align) desktop.align = block.align;
+  if (block.directionMobile) mobile.direction = block.directionMobile;
+  if (block.gapMobile !== undefined) mobile.gap = block.gapMobile;
+  return { desktop, mobile };
+}
+
+/** Default control for a `button` block — a visible Next-style nav button. */
+function buttonControl(label: string, target?: string): Record<string, unknown> {
+  return {
+    id: uuidv4(),
+    label: label || 'Continue',
+    position: 'bottomCenter',
+    requires_click: true,
+    conditionalActions: [{ do: [{ type: 'goto', body: { target: target || 'next_sibling' } }] }],
+  };
+}
+
+const CHILD_MARGIN_KEYS = ['marginTop', 'marginBottom', 'marginLeft', 'marginRight'] as const;
+
 // ----------------------------------------------------------------------------
-// Block compile — stage-4 LessonBlock → wire-format block
+// Block compile — ScreenBlock → wire-format block (single node, no children)
 // ----------------------------------------------------------------------------
 
-function compileBlock(block: LessonBlock, rank: string): BlockExport {
+function compileBlock(block: ScreenBlock, rank: string): BlockExport {
   const body: Record<string, unknown> = {
     format: block.format,
     ...defaultBlockBody(block.format),
@@ -91,37 +141,15 @@ function compileBlock(block: LessonBlock, rank: string): BlockExport {
     case 'text':
       body.content = markdownToTipTapString(block.content);
       break;
-    case 'image-richtext':
-      body.imageUrl = block.imageUrl;
-      body.imagePosition = block.imagePosition;
-      if (block.imagePositionMobile) body.imagePositionMobile = block.imagePositionMobile;
-      body.content = markdownToTipTapString(block.content);
-      if (block.caption) body.caption = block.caption;
-      break;
     case 'image':
-      body.url = block.url;
-      body.alt = block.alt;
-      if (block.caption) body.caption = block.caption;
+      if (block.url !== undefined) body.url = block.url;
+      if (block.alt) body.alt = block.alt;
       break;
     case 'video':
-      body.url = block.url;
-      if (block.poster) body.poster = block.poster;
-      if (block.caption) body.caption = block.caption;
-      break;
-    case 'quiz-text':
-      // 'quiz-text' is the composite (text + quiz) renderer. Only emit when the
-      // agent supplied non-empty body text via the `text` field. The agent
-      // should pick the `question` format instead for pure quiz screens.
-      body.question_md = markdownToTipTapString(block.question);
-      body.choices = block.choices;
-      body.correctAnswer = block.correctAnswer;
-      if ((block as { text?: string }).text) {
-        body.content = markdownToTipTapString((block as { text: string }).text);
-      }
+    case 'animation':
+      if (block.url !== undefined) body.url = block.url;
       break;
     case 'question':
-      // Pure quiz block (no surrounding text panel). Same multi-choice shape
-      // as quiz-text minus body.content.
       body.question_md = markdownToTipTapString(block.question);
       body.choices = block.choices;
       body.correctAnswer = block.correctAnswer;
@@ -131,24 +159,83 @@ function compileBlock(block: LessonBlock, rank: string): BlockExport {
       body.fields = block.fields;
       if (block.submitLabel) body.submitLabel = block.submitLabel;
       if (block.successMessage) body.successMessage = block.successMessage;
+      if (block.successContent) body.successContent = markdownToTipTapString(block.successContent);
       break;
-    case 'form-text':
-      body.content = markdownToTipTapString(block.content);
-      body.fields = block.fields;
-      body.submitLabel = block.submitLabel;
-      body.successContent = markdownToTipTapString(block.successContent);
+    case 'button':
+      // body stays {} — the button's action lives on the block's controls.
+      break;
+    case 'container':
+      body.layout = buildContainerLayout(block);
+      break;
+    case 'section':
+      if (block.background) body.background = block.background;
+      if (block.verticalAlign) body.verticalAlign = block.verticalAlign;
+      if (block.horizontalAlign) body.horizontalAlign = block.horizontalAlign;
+      if (block.minHeightMode) body.minHeightMode = block.minHeightMode;
+      if (block.minHeight !== undefined) body.minHeight = block.minHeight;
+      break;
+    case 'slider':
+      if (block.slider) body.slider = { ...(body.slider as Record<string, unknown>), ...block.slider };
       break;
     case 'layout':
-      body.ratio = block.ratio;
+      if (block.ratio) body.ratio = block.ratio;
       break;
   }
 
-  return {
+  // Per-child layout props (set when this block is nested in a container).
+  if (block.flex !== undefined) body.flex = block.flex;
+  if (block.slot !== undefined) body.slot = block.slot;
+  for (const m of CHILD_MARGIN_KEYS) {
+    if (block[m] !== undefined) body[m] = block[m];
+  }
+
+  const out: BlockExport = {
     type: 'block',
     slug: uuidv4(),
     body: body as Record<string, unknown> & { format: string },
     lexoRank: rank,
   };
+
+  if (block.format === 'button') {
+    out.controls = [buttonControl(block.label, block.target)];
+  }
+
+  return out;
+}
+
+// ----------------------------------------------------------------------------
+// Screen block tree → flat block list (luly-app screen wire format)
+//
+// luly-app stores a screen's blocks as a FLAT array; nesting is expressed via
+// `parentSlug` (child → container slug) and order via `lexoRank`. We pre-order
+// DFS the ScreenBlock tree, assigning one monotonically ascending LexoRank to
+// every block. Pre-order guarantees a node's next sibling outranks the node AND
+// all its descendants, so sibling order within every parent is preserved after
+// the importer's global lexoRank sort + parentSlug grouping.
+// ----------------------------------------------------------------------------
+
+function makeRankGen(): () => string {
+  let r: LexoRank | null = null;
+  return () => {
+    r = r === null ? LexoRank.middle() : r.genNext();
+    return r.toString();
+  };
+}
+
+function flattenBlocks(
+  blocks: ScreenBlock[],
+  parentSlug: string | undefined,
+  nextRank: () => string,
+  out: BlockExport[],
+): void {
+  for (const block of blocks) {
+    const compiled = compileBlock(block, nextRank());
+    if (parentSlug) compiled.parentSlug = parentSlug;
+    out.push(compiled);
+    if (isContainerBlock(block) && block.children.length > 0) {
+      flattenBlocks(block.children, compiled.slug, nextRank, out);
+    }
+  }
 }
 
 // ----------------------------------------------------------------------------
@@ -217,9 +304,12 @@ function buildScreenNode(
     blocks: [],
   };
 
-  const blockRanks = ranksFor(screen.blocks.length);
-  screen.blocks.forEach((block, blockIdx) => {
-    const compiled = compileBlock(block, blockRanks[blockIdx]);
+  // Flatten the screen's block tree into the wire format's flat array (nesting
+  // via parentSlug + ascending lexoRank). Block-level style overrides are keyed
+  // by position in the flattened list.
+  const flat: BlockExport[] = [];
+  flattenBlocks(screen.blocks, undefined, makeRankGen(), flat);
+  flat.forEach((compiled, blockIdx) => {
     const overridePath = `${pathKey}.block-${blockIdx}`;
     const blockOverride = inputs.overrides?.blocks?.[overridePath];
     if (blockOverride) {
@@ -380,17 +470,44 @@ function loadStubTemplate(): NodeExport {
  * this just prevents repeated stubs (built from the same fixture) from sharing
  * node slugs or control ids.
  */
+function freshControlIds(controls: unknown): void {
+  if (!Array.isArray(controls)) return;
+  for (const c of controls) {
+    if (c && typeof c === 'object' && 'id' in (c as Record<string, unknown>)) {
+      (c as Record<string, unknown>).id = uuidv4();
+    }
+  }
+}
+
 function reslug(node: unknown): void {
   if (!node || typeof node !== 'object') return;
   if (Array.isArray(node)) { node.forEach(reslug); return; }
   const obj = node as Record<string, unknown>;
-  if (typeof obj.type === 'string' && ['course', 'lesson', 'screen', 'block'].includes(obj.type)) {
+  if (typeof obj.type === 'string' && ['course', 'lesson', 'screen'].includes(obj.type)) {
     obj.slug = uuidv4();
   }
-  if (Array.isArray(obj.controls)) {
-    for (const c of obj.controls) {
-      if (c && typeof c === 'object' && 'id' in (c as Record<string, unknown>)) {
-        (c as Record<string, unknown>).id = uuidv4();
+  freshControlIds(obj.controls);
+  // Blocks live in a flat `blocks[]` and nest via `parentSlug` (child → container
+  // slug). Reslug each block AND rewrite parentSlug through the same old→new map
+  // so container nesting survives the clone — symmetric with the importer's
+  // remapSlugs.
+  if (Array.isArray(obj.blocks)) {
+    const map = new Map<string, string>();
+    for (const b of obj.blocks) {
+      if (b && typeof b === 'object') {
+        const blk = b as Record<string, unknown>;
+        const fresh = uuidv4();
+        if (typeof blk.slug === 'string') map.set(blk.slug, fresh);
+        blk.slug = fresh;
+      }
+    }
+    for (const b of obj.blocks) {
+      if (b && typeof b === 'object') {
+        const blk = b as Record<string, unknown>;
+        if (typeof blk.parentSlug === 'string' && map.has(blk.parentSlug)) {
+          blk.parentSlug = map.get(blk.parentSlug);
+        }
+        freshControlIds(blk.controls);
       }
     }
   }
@@ -431,8 +548,13 @@ function buildStubCourse(
   // Backfill placeholder titles (the user renames them when authoring).
   (node.children ?? []).forEach((lesson, li) => {
     if (typeof lesson.title !== 'string' || !lesson.title.trim()) lesson.title = `Lesson ${li + 1}`;
-    (lesson.children ?? []).forEach((screen, si) => {
+    const screens = lesson.children ?? [];
+    screens.forEach((screen, si) => {
       if (typeof screen.title !== 'string' || !screen.title.trim()) screen.title = `Screen ${si + 1}`;
+      // Re-bake screen nav so finishLesson lands ONLY on the last screen (the
+      // bundled fixture carried the old isLastScreen-guard form). Uses the same
+      // builder as authored content; reslug() below mints fresh control ids.
+      screen.controls = lessonScreenControls({ isFirst: si === 0, isLast: si === screens.length - 1 });
     });
   });
   reslug(node);
@@ -895,8 +1017,13 @@ async function main(): Promise<void> {
     }
   }
 
-  // Compute controls inline (replaces the old apply-controls + controls.json stage)
-  const controlsArtifact = applyControls(productType.preset, plan);
+  // Compute controls inline (replaces the old apply-controls + controls.json stage).
+  // Driven by the ACTUAL content (lessons + onboarding screens) so control-map keys
+  // and screen positions (first/last → finishLesson) match what gets assembled.
+  const controlsArtifact = applyControls(productType.preset, {
+    lessons,
+    onboarding: onboarding?.screens ?? [],
+  });
 
   const isCourseOnly = productType.preset === 'academy-course';
 

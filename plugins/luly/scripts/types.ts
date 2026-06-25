@@ -96,17 +96,40 @@ export interface FormatProfile {
   locales: string[];
 }
 
+/**
+ * Block formats the plugin EMITS. Mirrors the luly-app editor's current palette
+ * (src/services/util/blockFormats.ts). The legacy monolithic composites
+ * (`image-richtext`, `quiz-text`, `form-text`) are intentionally NOT here — the
+ * editor no longer mints them; the canonical replacement is a `container` block
+ * with two child leaves (see the preset sugar in parsers.ts). They still render
+ * for old content, so the validator keeps recognizing them — but generation is
+ * forward-only.
+ *
+ * Container formats hold child blocks (nested in the screen's flat block list via
+ * `parentSlug`): `section`, `container`, `slider`, `layout` (`layout` is legacy —
+ * recognized but `container` is preferred).
+ */
 export type BlockFormat =
+  // leaves
   | 'text'
-  | 'image-richtext'
   | 'image'
   | 'video'
-  | 'quiz-text'
+  | 'animation'
   | 'question'
   | 'form'
   | 'email-form'
-  | 'form-text'
+  | 'button'
+  // containers
+  | 'section'
+  | 'container'
+  | 'slider'
   | 'layout';
+
+/** Formats that hold child blocks. Mirrors luly-app CONTAINER_FORMATS. */
+export const CONTAINER_FORMATS: ReadonlySet<string> = new Set(['section', 'container', 'slider', 'layout']);
+export function isContainerFormat(format?: string): boolean {
+  return !!format && CONTAINER_FORMATS.has(format);
+}
 
 export type FormFieldType = 'text' | 'email' | 'url' | 'tel' | 'number' | 'textarea' | 'checkbox';
 
@@ -132,21 +155,56 @@ export interface QuizChoice {
   text: string;
 }
 
-export type LessonBlock =
+/**
+ * Layout props a block carries when it sits INSIDE a container. The assembler
+ * copies these onto the child's emitted body. Mirrors the editor: container
+ * children get a `flex`; legacy `layout` children get a `slot`; preset children
+ * get zeroed margins so the container gap is the only spacing.
+ */
+export interface ChildLayout {
+  flex?: number;                  // container row sizing (default renderer = 1)
+  slot?: 'left' | 'right';        // legacy `layout` block slot
+  marginTop?: number;
+  marginBottom?: number;
+  marginLeft?: number;
+  marginRight?: number;
+}
+
+/** Leaf blocks render content directly (no children). */
+export type LeafBlock = ChildLayout & (
   | { format: 'text'; content: string }
-  | { format: 'image-richtext'; imageUrl: string; imagePosition: 'left' | 'right'; imagePositionMobile?: 'top' | 'bottom'; content: string; caption?: string }
-  | { format: 'image'; url: string; alt: string; caption?: string }
-  | { format: 'video'; url: string; poster?: string; caption?: string }
-  | { format: 'quiz-text'; question: string; choices: QuizChoice[]; correctAnswer: string; text?: string }
+  | { format: 'image'; url?: string; alt?: string }
+  | { format: 'video'; url?: string }
+  | { format: 'animation'; url?: string }
   | { format: 'question'; question: string; choices: QuizChoice[]; correctAnswer: string }
-  | { format: 'form' | 'email-form'; fields: FormField[]; submitLabel?: string; successMessage?: string }
-  | { format: 'form-text'; content: string; fields: FormField[]; submitLabel: string; successContent: string }
-  | { format: 'layout'; ratio: string };
+  | { format: 'form' | 'email-form'; fields: FormField[]; submitLabel?: string; successMessage?: string; successContent?: string }
+  | { format: 'button'; label: string; target?: string }
+);
+
+/** Container blocks hold an ordered list of child blocks. */
+export type ContainerBlock = ChildLayout & {
+  children: ScreenBlock[];
+} & (
+  | { format: 'container'; direction?: 'row' | 'column'; gap?: number; justify?: 'start' | 'center' | 'end' | 'between'; align?: 'start' | 'center' | 'end' | 'stretch'; directionMobile?: 'row' | 'column'; gapMobile?: number }
+  | { format: 'section'; background?: Record<string, unknown>; verticalAlign?: 'start' | 'center' | 'end'; horizontalAlign?: 'left' | 'center' | 'right'; minHeightMode?: 'auto' | 'viewport' | 'custom'; minHeight?: number }
+  | { format: 'slider'; slider?: Record<string, unknown> }
+  | { format: 'layout'; ratio?: string }
+);
+
+/** A block in a screen — a leaf or a container holding more blocks (any depth). */
+export type ScreenBlock = LeafBlock | ContainerBlock;
+
+/** @deprecated alias kept for back-compat with older imports. Use ScreenBlock. */
+export type LessonBlock = ScreenBlock;
+
+export function isContainerBlock(b: ScreenBlock): b is ContainerBlock {
+  return CONTAINER_FORMATS.has(b.format);
+}
 
 export interface LessonScreen {
   n: number;
   title: string;
-  blocks: LessonBlock[];
+  blocks: ScreenBlock[];
 }
 
 export interface Lesson {
@@ -195,6 +253,13 @@ export type { TipTapDoc, TipTapNode, TipTapText, TipTapMark } from './markdown-t
 export interface BlockExport {
   type: 'block';
   slug?: string;
+  /**
+   * Set on a block nested inside a container. References the parent container
+   * block's `slug`. The importer resolves it to the parent's parentNodeId so
+   * section/container/slider nesting survives import (see luly-app
+   * MappingService.parseBlocksFromScreen).
+   */
+  parentSlug?: string;
   body: Record<string, unknown> & { format: string };
   lexoRank: string;
   controls?: unknown[];
